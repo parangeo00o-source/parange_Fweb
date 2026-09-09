@@ -1,0 +1,685 @@
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#app {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+/* Dice field */
+:root {
+  font-family: 'Avenir Next', 'Helvetica Neue', sans-serif;
+  color: #1d2028;
+  background: #ffffff;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { min-height: 100%; }
+body { margin: 0; overflow: hidden; background: #ffffff; }
+
+#app {
+  width: 100%;
+  max-width: none;
+  min-height: 100svh;
+  border: 0;
+  display: block;
+  text-align: initial;
+}
+
+.stage {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 3.5vh 24px;
+  /* The grid owns the only perspective context. Nested perspective matrices
+     cause WebKit to repeatedly re-rasterise nearby 3D layers while rolling. */
+  perspective: none;
+  background: #ffffff;
+}
+
+.dice-grid {
+  display: grid;
+  grid-template-columns: repeat(8, var(--dice-size));
+  grid-auto-rows: var(--dice-size);
+  gap: clamp(4px, 0.48vw, 7px);
+  padding: clamp(12px, 1.25vw, 18px);
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  perspective: 1150px;
+  transform-style: preserve-3d;
+  --dice-size: clamp(48px, min(8.8vw, 11vh), 92px);
+}
+
+/* Full-page destination view, tinted with the color of the selected die. */
+.color-screen {
+  --screen-color: #a98ae8;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: rgba(255,255,255,.9);
+  background: radial-gradient(ellipse 45% 42% at 27% 18%, color-mix(in srgb, var(--screen-color), white 44%), transparent 72%), linear-gradient(135deg, color-mix(in srgb, var(--screen-color), white 10%), var(--screen-color) 48%, color-mix(in srgb, var(--screen-color), black 44%));
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.035);
+  transition: opacity 360ms ease, transform 460ms cubic-bezier(.2,.8,.2,1);
+}
+
+.color-screen::before {
+  content: '';
+  position: absolute;
+  width: min(62vw, 760px);
+  aspect-ratio: 1;
+  border-radius: 28%;
+  border: 1px solid rgba(255,255,255,.24);
+  background: linear-gradient(145deg, rgba(255,255,255,.26), rgba(255,255,255,0) 38%, rgba(0,0,0,.16));
+  box-shadow: inset 18px 18px 38px rgba(255,255,255,.14), inset -22px -24px 42px rgba(0,0,0,.2);
+  transform: rotate(-15deg) translateY(8%);
+}
+
+.color-screen.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.color-screen-label {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-size: clamp(32px, 6vw, 88px);
+  font-weight: 700;
+  letter-spacing: -.06em;
+  text-shadow: 0 3px 14px rgba(0,0,0,.22);
+}
+
+.color-screen-close {
+  position: absolute;
+  z-index: 2;
+  top: clamp(20px, 3vw, 42px);
+  right: clamp(20px, 3vw, 42px);
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255,255,255,.48);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(0,0,0,.12);
+  font: 300 32px/36px system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.color-screen-close:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.dice {
+  position: relative;
+  width: var(--dice-size);
+  height: var(--dice-size);
+  --cube-radius: clamp(5px, 9%, 9px);
+  --cube-inset: clamp(3px, 0.75vw, 8px);
+  --face-bleed: 0px;
+  --edge-skin: 1.5px;
+  --edge-width: 1.5px;
+  transform-style: preserve-3d;
+  /* Keep each cube on a stable compositor layer. Switching layer ownership
+     while a nearby cube spins can briefly expose the white page beneath. */
+  will-change: transform;
+  transform-origin: center center;
+  z-index: 0;
+}
+
+.dice.is-animating { z-index: 3; }
+
+.dice::before {
+  content: none;
+}
+
+.dice-face {
+  position: absolute;
+  /* Structural planes always meet edge-to-edge. This opaque coloured backing
+     fills the volume beneath a rounded visible surface, so no white page can
+     show through and no face needs to be enlarged past the cube silhouette. */
+  inset: 0;
+  overflow: visible;
+  border-radius: 0;
+  color: var(--mark-color);
+  /* The backing is a shallow, colour-matched bevel—not a dark square behind
+     the face—so the rounded rim reads as part of the same dice material. */
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--dice-color), white 30%),
+    var(--dice-color) 52%,
+    color-mix(in srgb, var(--dice-color), black 34%));
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-origin: 50% 50%;
+}
+
+.dice-surface {
+  position: absolute;
+  inset: var(--edge-skin);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: var(--edge-width) solid;
+  border-color:
+    color-mix(in srgb, var(--dice-color), white 38%)
+    color-mix(in srgb, var(--dice-color), black 16%)
+    color-mix(in srgb, var(--dice-color), black 46%)
+    color-mix(in srgb, var(--dice-color), white 12%);
+  border-radius: max(2px, calc(var(--cube-radius) - var(--edge-skin)));
+  color: var(--mark-color);
+  background: radial-gradient(ellipse 42% 28% at 15% 12%, rgba(255,255,255,.52) 0%, rgba(255,255,255,.1) 35%, transparent 71%), linear-gradient(135deg, color-mix(in srgb, var(--dice-color), white 30%) 0%, color-mix(in srgb, var(--dice-color), white 4%) 34%, var(--dice-color) 57%, color-mix(in srgb, var(--dice-color), black 42%) 100%);
+  background-clip: padding-box;
+}
+
+.dice-surface > .pips,
+.dice-surface > .symbol {
+  transform: none;
+}
+
+.dice-cube {
+  position: absolute;
+  inset: var(--cube-inset);
+  border-radius: var(--cube-radius);
+  /* Opaque colour fallback for the tiny interval in which a GPU culls an
+     edge-on face. It prevents the white page from flashing through the cube. */
+  background: color-mix(in srgb, var(--dice-color), black 16%);
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transform: translate3d(0, 0, 0);
+  /* Face width and depth use the same value, preserving a true cube proportion.
+     The faces bleed sideways only; their centre planes stay at the cube edge. */
+  --half-size: calc((var(--dice-size) - var(--cube-inset) - var(--cube-inset)) / 2);
+}
+
+.dice-cube::before,
+.dice-cube::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: var(--cube-radius);
+  pointer-events: none;
+}
+
+.dice-cube::before { display: none; }
+
+.dice-cube::after {
+  display: none;
+}
+
+.dice-front { transform: translate3d(0, 0, var(--half-size)); }
+.dice-back { transform: rotateY(180deg) translate3d(0, 0, var(--half-size)); }
+.dice-top { transform: rotateX(90deg) translate3d(0, 0, var(--half-size)); }
+.dice-bottom { transform: rotateX(-90deg) translate3d(0, 0, var(--half-size)); }
+.dice-side { transform: rotateY(90deg) translate3d(0, 0, var(--half-size)); }
+.dice-left { transform: rotateY(-90deg) translate3d(0, 0, var(--half-size)); }
+
+.dice-back .dice-surface,
+.dice-top .dice-surface,
+.dice-bottom .dice-surface,
+.dice-side .dice-surface,
+.dice-left .dice-surface {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--dice-color), white 19%), var(--dice-color) 47%, color-mix(in srgb, var(--dice-color), black 28%));
+  box-shadow: inset 0 2px 5px rgba(255,255,255,.18), inset -4px -5px 7px rgba(0,0,0,.24);
+}
+
+/* Different lighting on each plane gives the cube a readable, solid silhouette. */
+.dice-top .dice-surface { box-shadow: inset 0 4px 8px rgba(255,255,255,.44), inset -5px -6px 9px rgba(0,0,0,.17); }
+.dice-side .dice-surface { box-shadow: inset 0 2px 5px rgba(255,255,255,.14), inset -7px -5px 10px rgba(0,0,0,.4); }
+.dice-left .dice-surface { box-shadow: inset 0 2px 5px rgba(255,255,255,.14), inset -7px -6px 10px rgba(0,0,0,.38); }
+
+.dice-back .dice-surface > *,
+.dice-bottom .dice-surface > *,
+.dice-side .dice-surface > *,
+.dice-left .dice-surface > * {
+  opacity: .72;
+  transform: scale(.82);
+}
+
+.dice-top .dice-surface > * {
+  opacity: .82;
+  transform: scale(.88);
+}
+
+.dice { cursor: default; }
+.dice-nav { cursor: pointer; }
+.dice-nav:hover .dice-front .dice-surface {
+  /* Avoid a filter layer during 3D motion; the border provides the same small
+     hover cue without forcing a separate texture to be composited. */
+  border-color: color-mix(in srgb, var(--dice-color), white 44%);
+}
+.dice:focus-visible { outline: 3px solid rgba(72, 44, 140, 0.6); outline-offset: 4px; border-radius: 12px; }
+
+.dice-front .dice-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 31% 19% at 15% 12%, rgba(255,255,255,.9), transparent 66%), linear-gradient(125deg, rgba(255, 255, 255, 0.4), transparent 29%, transparent 68%, rgba(0, 0, 0, 0.2));
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.dice-front .dice-surface::after {
+  content: '';
+  position: absolute;
+  inset: 5% 9% auto 7%;
+  height: 11%;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgba(255,255,255,.52), rgba(255,255,255,0));
+  transform: rotate(-25deg);
+  opacity: .5;
+  pointer-events: none;
+}
+
+.dice-matte .dice-surface { background: radial-gradient(ellipse 75% 58% at 23% 16%, rgba(255,255,255,.12), transparent 58%), linear-gradient(142deg, color-mix(in srgb, var(--dice-color), white 13%), var(--dice-color) 53%, color-mix(in srgb, var(--dice-color), black 31%)); box-shadow: inset 0 1px 3px rgba(255,255,255,.15), inset -4px -5px 8px rgba(0,0,0,.31); }
+.dice-matte .dice-front .dice-surface::before { opacity: .22; }
+.dice-matte .dice-front .dice-surface::after { opacity: .12; }
+
+.dice-gloss .dice-surface { background: radial-gradient(ellipse 40% 22% at 17% 10%, rgba(255,255,255,.84), transparent 61%), linear-gradient(145deg, color-mix(in srgb, var(--dice-color), white 27%), var(--dice-color) 48%, color-mix(in srgb, var(--dice-color), black 35%)); box-shadow: inset 0 4px 10px rgba(255,255,255,.48), inset -5px -6px 10px rgba(0,0,0,.36); }
+.dice-gloss .dice-front .dice-surface::before { opacity: 1; background: radial-gradient(ellipse 30% 20% at 14% 11%, rgba(255,255,255,1), transparent 63%), linear-gradient(120deg, rgba(255,255,255,.78), transparent 22%, transparent 49%, rgba(255,255,255,.16)); }
+.dice-gloss .dice-front .dice-surface::after { opacity: .9; inset: 8% 12% auto 9%; height: 7%; background: linear-gradient(90deg, rgba(255,255,255,.92), rgba(255,255,255,.08)); }
+
+.dice-gel .dice-surface { background: radial-gradient(ellipse 58% 44% at 24% 20%, rgba(255,255,255,.7), transparent 59%), linear-gradient(135deg, rgba(255,255,255,.48), color-mix(in srgb, var(--dice-color), white 46%) 27%, color-mix(in srgb, var(--dice-color), white 10%) 68%, color-mix(in srgb, var(--dice-color), black 17%)), var(--dice-color); box-shadow: inset 0 3px 10px rgba(255,255,255,.6), inset -4px -5px 10px rgba(21,19,40,.2); opacity: 1; }
+.dice-gel .dice-front .dice-surface::before { opacity: .84; }
+.dice-gel .dice-front .dice-surface::after { opacity: .64; }
+
+.dice-pearl .dice-surface { background: radial-gradient(ellipse at 22% 18%, rgba(255,255,255,.55), transparent 27%), linear-gradient(118deg, color-mix(in srgb, var(--dice-color), white 45%) 0%, color-mix(in srgb, var(--dice-color), #f7b5dc 36%) 30%, color-mix(in srgb, var(--dice-color), #b6c4ff 42%) 58%, color-mix(in srgb, var(--dice-color), #ffe7aa 18%) 76%, color-mix(in srgb, var(--dice-color), black 20%) 100%); box-shadow: inset 0 3px 7px rgba(255,255,255,.64), inset -4px -5px 8px rgba(0,0,0,.24); }
+.dice-pearl .dice-front .dice-surface::before { opacity: .82; background: linear-gradient(120deg, rgba(255,255,255,.84), transparent 30%, rgba(255,180,239,.34) 59%, rgba(178,199,255,.2) 77%, transparent); }
+
+/* Separate top and side planes remain visibly lighter/darker than the front face. */
+.dice.dice-matte .dice-top .dice-surface,
+.dice.dice-gloss .dice-top .dice-surface,
+.dice.dice-gel .dice-top .dice-surface,
+.dice.dice-pearl .dice-top .dice-surface { background: linear-gradient(145deg, color-mix(in srgb, var(--dice-color), white 38%), color-mix(in srgb, var(--dice-color), white 10%) 58%, var(--dice-color)); }
+.dice.dice-matte .dice-side .dice-surface,
+.dice.dice-gloss .dice-side .dice-surface,
+.dice.dice-gel .dice-side .dice-surface,
+.dice.dice-pearl .dice-side .dice-surface { background: linear-gradient(115deg, color-mix(in srgb, var(--dice-color), white 2%), color-mix(in srgb, var(--dice-color), black 31%) 76%); }
+.dice.dice-matte .dice-left .dice-surface,
+.dice.dice-gloss .dice-left .dice-surface,
+.dice.dice-gel .dice-left .dice-surface,
+.dice.dice-pearl .dice-left .dice-surface { background: linear-gradient(145deg, color-mix(in srgb, var(--dice-color), white 8%), color-mix(in srgb, var(--dice-color), black 28%)); }
+
+/* Keep a continuous coloured skin while rolling. Per-face inset shadows can
+   otherwise read as dark cracks at the cube's joins. */
+.dice.dice-matte .dice-surface,
+.dice.dice-gloss .dice-surface,
+.dice.dice-gel .dice-surface,
+.dice.dice-pearl .dice-surface,
+.dice-back .dice-surface,
+.dice-top .dice-surface,
+.dice-bottom .dice-surface,
+.dice-side .dice-surface,
+.dice-left .dice-surface { box-shadow: none; }
+
+/* Large outer box-shadows on six rotating planes caused compositor flashing.
+   The opaque backing plane and the rounded border above now form the bevel. */
+
+.pips { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); width: 64%; height: 64%; align-items: center; justify-items: center; }
+.pip { width: clamp(5px, 1vw, 10px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 29% 22%, rgba(255,255,255,.98) 0 9%, rgba(255,255,255,.46) 18%, transparent 33%), radial-gradient(circle at 50% 54%, color-mix(in srgb, currentColor, white 10%), color-mix(in srgb, currentColor, black 48%)); box-shadow: inset 1px 1px 2px rgba(255,255,255,.56), inset -1px -2px 2px rgba(0,0,0,.42), 0 1px 1px rgba(255,255,255,.22), 1px 2px 3px rgba(0,0,0,.3); }
+.pips-1 .pip:nth-child(1) { grid-area: 2 / 2; }
+.pips-2 .pip:nth-child(1) { grid-area: 1 / 1; }
+.pips-2 .pip:nth-child(2) { grid-area: 3 / 3; }
+.pips-3 .pip:nth-child(1) { grid-area: 1 / 1; }
+.pips-3 .pip:nth-child(2) { grid-area: 2 / 2; }
+.pips-3 .pip:nth-child(3) { grid-area: 3 / 3; }
+.pips-4 .pip:nth-child(1) { grid-area: 1 / 1; }
+.pips-4 .pip:nth-child(2) { grid-area: 1 / 3; }
+.pips-4 .pip:nth-child(3) { grid-area: 3 / 1; }
+.pips-4 .pip:nth-child(4) { grid-area: 3 / 3; }
+.pips-5 .pip:nth-child(1) { grid-area: 1 / 1; }
+.pips-5 .pip:nth-child(2) { grid-area: 1 / 3; }
+.pips-5 .pip:nth-child(3) { grid-area: 2 / 2; }
+.pips-5 .pip:nth-child(4) { grid-area: 3 / 1; }
+.pips-5 .pip:nth-child(5) { grid-area: 3 / 3; }
+.pips-6 .pip:nth-child(1) { grid-area: 1 / 1; }
+.pips-6 .pip:nth-child(2) { grid-area: 1 / 3; }
+.pips-6 .pip:nth-child(3) { grid-area: 2 / 1; }
+.pips-6 .pip:nth-child(4) { grid-area: 2 / 3; }
+.pips-6 .pip:nth-child(5) { grid-area: 3 / 1; }
+.pips-6 .pip:nth-child(6) { grid-area: 3 / 3; }
+
+.symbol { position: relative; z-index: 1; font-weight: 700; font-size: clamp(18px, 3.2vw, 39px); line-height: 1; color: var(--mark-color); text-shadow: -1px -1px 1px color-mix(in srgb, var(--mark-color), white 46%), 1px 2px 1px color-mix(in srgb, var(--mark-color), black 58%), 0 2px 3px rgba(0,0,0,.24); }
+.symbol-heart { font-size: clamp(21px, 3.9vw, 46px); }
+.symbol-clover { font-size: clamp(23px, 3.8vw, 43px); }
+.symbol-star { font-size: clamp(24px, 4vw, 46px); }
+.symbol-paw {
+  width: clamp(25px, 4.1vw, 47px);
+  height: clamp(25px, 4.1vw, 47px);
+  display: block;
+  color: var(--mark-color);
+  text-shadow: none;
+}
+.symbol-paw i,
+.symbol-paw b {
+  position: absolute;
+  display: block;
+  background: radial-gradient(ellipse at 31% 24%, rgba(255,255,255,.66), transparent 22%), currentColor;
+  box-shadow: inset -1px -2px 2px rgba(0,0,0,.22), 1px 2px 2px rgba(0,0,0,.23);
+}
+.symbol-paw i {
+  top: 8%;
+  width: 23%;
+  height: 29%;
+  border-radius: 50%;
+}
+.symbol-paw i:nth-child(1) { left: 6%; top: 17%; transform: rotate(-18deg); }
+.symbol-paw i:nth-child(2) { left: 29%; top: 4%; }
+.symbol-paw i:nth-child(3) { left: 52%; top: 4%; }
+.symbol-paw i:nth-child(4) { right: 6%; top: 17%; width: 22%; height: 27%; transform: rotate(18deg); }
+.symbol-paw b {
+  left: 20%;
+  top: 45%;
+  width: 61%;
+  height: 47%;
+  border-radius: 52% 52% 46% 46% / 42% 42% 58% 58%;
+  background: radial-gradient(ellipse at 31% 24%, rgba(255,255,255,.66), transparent 22%), currentColor;
+}
+.symbol-arrow { font-size: clamp(27px, 4vw, 46px); font-weight: 400; }
+.symbol-double { font-size: clamp(10px, 1.6vw, 18px); letter-spacing: -2px; }
+
+@media (max-width: 620px) {
+  .stage { padding: 2.5vh 10px; }
+  .dice-grid { grid-template-columns: repeat(6, var(--dice-size)); --dice-size: min(14.5vw, calc((95svh - 48px) / 8)); gap: 4px; padding: 10px; border-radius: 11px; }
+  .dice { --cube-radius: clamp(4px, 9%, 7px); --cube-inset: clamp(2px, 0.7vw, 4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dice { transition: none; }
+}

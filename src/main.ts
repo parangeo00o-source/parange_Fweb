@@ -1,0 +1,422 @@
+import './style.css'
+
+type SymbolType = 'pip' | 'letter' | 'heart' | 'clover' | 'arrow' | 'double' | 'star' | 'paw'
+type Destination = { route: string; label: string }
+type Dice = { id: string; color: string; markColor: string; texture: string; symbol: SymbolType; value: number | string; tilt: number; rounding: string; navigable: boolean } & Destination
+
+const destinations: Destination[] = [
+  { route: '#about', label: 'About' },
+  { route: '#products', label: 'Products' },
+  { route: '#work', label: 'Work' },
+  { route: '#contact', label: 'Contact' },
+]
+
+// Fixed row order sampled from the reference: lavender, pale pink, charcoal,
+// mustard, olive, mint, wine, navy, cream, teal, and a few saturated accents.
+// This deliberately avoids local colour-clustering or runtime randomisation.
+const shuffledColors = [
+  '#A692DD', '#D7B8D3', '#302B2A', '#E2D553', '#8B7C20', '#B4D7C6', '#AC71A7', '#EAE7E1',
+  '#626A7E', '#713323', '#5C50C6', '#4B3F36', '#8B1431', '#C58EAD', '#D6CAE8', '#41334D',
+  '#A98CE4', '#D49CCA', '#CB8ECC', '#D6A1D0', '#C997D0', '#AC71BD', '#EEEBE7', '#79609B',
+  '#8A1630', '#193341', '#A9CDBD', '#6E2BDC', '#35333A', '#286A35', '#DED6EB', '#A76BC2',
+  '#8B1A2D', '#D4D163', '#235B71', '#581B3A', '#8A182A', '#AD765C', '#E8E5E1', '#4B61BB',
+  '#29373C', '#116C64', '#095951', '#D3D2E4', '#E9D244', '#D0178E', '#F0EEE9', '#948DD5',
+]
+
+const lightMarkColors = ['#fff8e9', '#f2f8ff', '#ffdff0', '#e2fff0', '#fff1c7']
+const darkMarkColors = ['#211b42', '#183e54', '#5a1d42', '#274938', '#59420f']
+const luminance = (color: string) => {
+  const channels = color.match(/[\da-f]{2}/gi)?.map((channel) => Number.parseInt(channel, 16) / 255) ?? [0, 0, 0]
+  const [red, green, blue] = channels.map((channel) => channel <= 0.04045 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4))
+  return red * 0.2126 + green * 0.7152 + blue * 0.0722
+}
+const markColorFor = (diceColor: string, index: number) => {
+  const palette = luminance(diceColor) < 0.28 ? lightMarkColors : darkMarkColors
+  return palette[(index * 3 + 1) % palette.length]
+}
+
+const symbols: Array<{ type: SymbolType; value: number | string }> = [
+  { type: 'pip', value: 4 }, { type: 'letter', value: '' }, { type: 'heart', value: '♥' }, { type: 'pip', value: 6 },
+  { type: 'letter', value: '' }, { type: 'double', value: '' }, { type: 'clover', value: '✣' }, { type: 'arrow', value: '↗' },
+  { type: 'letter', value: '' }, { type: 'pip', value: 3 }, { type: 'letter', value: '' }, { type: 'heart', value: '♥' },
+  { type: 'pip', value: 5 }, { type: 'letter', value: '' }, { type: 'clover', value: '✣' }, { type: 'arrow', value: '⌁' },
+  { type: 'letter', value: '' }, { type: 'pip', value: 2 },
+]
+
+// The reference is primarily polished acrylic, with only occasional satin,
+// translucent, and pearlescent pieces for variation.
+const textureNames = ['gloss', 'gloss', 'gel', 'gloss', 'pearl', 'matte']
+// Kept as shared profiles for every face of one die, so the soft cube silhouette
+// stays continuous while the amount of roundness varies across the grid.
+const roundingProfiles = [
+  '7px 8px 7px 8px', '8px 7px 9px 7px', '8px 9px 7px 9px',
+  '9px 8px 10px 7px', '7px 10px 8px 9px', '10px 8px 9px 10px',
+  '7px 9px 7px 9px', '9px 7px 10px 8px',
+]
+const seededShuffle = <T,>(items: T[], seed: number) => {
+  const shuffled = [...items]
+  let state = seed
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    state = (state * 1664525 + 1013904223) >>> 0
+    const swapIndex = state % (index + 1)
+    ;[shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]]
+  }
+  return shuffled
+}
+
+// Exactly seven former text dice carry the PARANGE letters. Their locations and
+// letter order are shuffled once, while all remaining text slots become icons.
+const letterDiceCandidates = Array.from({ length: 48 }, (_, index) => index).filter((index) => {
+  const symbol = symbols[(index * 7 + 3) % symbols.length]
+  return symbol.type === 'letter' || symbol.type === 'double'
+})
+const selectedLetterDice = seededShuffle(letterDiceCandidates, 241).slice(0, 7)
+const parangeLetters = seededShuffle(['P', 'A', 'R', 'A', 'N', 'G', 'E'], 709)
+const parangeLetterByDice = new Map(selectedLetterDice.map((index, letterIndex) => [index, parangeLetters[letterIndex]]))
+const graphicSymbols: Array<{ type: Extract<SymbolType, 'heart' | 'clover' | 'star' | 'paw'>; value: string }> = [
+  { type: 'heart', value: '♥' },
+  { type: 'paw', value: '🐾' },
+  { type: 'star', value: '✦' },
+  { type: 'clover', value: '☘' },
+]
+const dice: Dice[] = Array.from({ length: 48 }, (_, index) => {
+  const symbol = symbols[(index * 7 + 3) % symbols.length]
+  const destination = destinations[index % destinations.length]
+  const isTextSlot = symbol.type === 'letter' || symbol.type === 'double'
+  const replacement = isTextSlot && !parangeLetterByDice.has(index)
+    ? graphicSymbols[(index * 5 + 2) % graphicSymbols.length]
+    : null
+  const diceSymbol = replacement?.type ?? (isTextSlot ? 'letter' : symbol.type)
+  const value = replacement?.value ?? parangeLetterByDice.get(index) ?? symbol.value
+  const navigable = parangeLetterByDice.has(index)
+  return { id: `dice_${String(index + 1).padStart(2, '0')}`, color: shuffledColors[index], markColor: markColorFor(shuffledColors[index], index), texture: textureNames[(index * 5 + 1) % textureNames.length], symbol: diceSymbol, value, tilt: ((index * 17) % 9) - 4, rounding: roundingProfiles[(index * 3 + 1) % roundingProfiles.length], navigable, ...destination }
+})
+
+const renderPips = (count: number) => Array.from({ length: count }, () => '<i class="pip"></i>').join('')
+const renderPaw = () => `<span class="symbol symbol-paw" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></span>`
+const renderSymbol = (item: Dice) => item.symbol === 'pip'
+  ? `<span class="pips pips-${item.value}">${renderPips(Number(item.value))}</span>`
+  : item.symbol === 'paw'
+    ? renderPaw()
+    : `<span class="symbol symbol-${item.symbol}">${item.value}</span>`
+const renderFace = (face: string, item: Dice) => `<div class="dice-face ${face}"><div class="dice-surface">${renderSymbol(item)}</div></div>`
+
+document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+  <main class="stage">
+    <div class="dice-grid" aria-label="Interactive dice grid">
+      ${dice.map((item, index) => `<div class="dice dice-${item.texture}${item.navigable ? ' dice-nav' : ''}" data-index="${index}"${item.navigable ? ` data-route="${item.route}" role="button" tabindex="0" aria-label="이동: ${item.label} 페이지"` : ''} style="--dice-color: ${item.color}; --mark-color: ${item.markColor}; --tilt: ${item.tilt}deg; --cube-radius: ${item.rounding}"><div class="dice-cube">${renderFace('dice-front', item)}${renderFace('dice-back', item)}${renderFace('dice-top', item)}${renderFace('dice-bottom', item)}${renderFace('dice-side', item)}${renderFace('dice-left', item)}</div></div>`).join('')}
+    </div>
+  </main>
+  <section class="color-screen" aria-hidden="true">
+    <button class="color-screen-close" type="button" aria-label="주사위 화면으로 돌아가기">×</button>
+    <p class="color-screen-label"></p>
+  </section>
+`
+
+const diceElements = [...document.querySelectorAll<HTMLElement>('.dice')]
+const colorScreen = document.querySelector<HTMLElement>('.color-screen')!
+const colorScreenLabel = document.querySelector<HTMLElement>('.color-screen-label')!
+const colorScreenClose = document.querySelector<HTMLButtonElement>('.color-screen-close')!
+let frame = 0
+let lastPointer: { x: number; y: number } | null = null
+let pendingRoll = { x: 0, y: 0 }
+let lastRollVector = { x: 1, y: 0 }
+let lastRollStartedAt = 0
+let idleRollTimer: number | null = null
+let pointerDown: { x: number; y: number; element: HTMLElement } | null = null
+let navigating = false
+let colorScreenOpen = false
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
+type DiceState = {
+  rollX: number; rollY: number; targetRollX: number; targetRollY: number
+  pushX: number; pushY: number; targetPushX: number; targetPushY: number
+  rollDirectionX: number; rollDirectionY: number; isReturning: boolean; hovered: boolean; lastRollAt: number; clickStartedAt: number | null; clickScale: number; clickSpin: number
+}
+const diceStates = new Map<HTMLElement, DiceState>(diceElements.map((element) => [element, {
+  rollX: 0,
+  rollY: 0,
+  targetRollX: 0,
+  targetRollY: 0,
+  pushX: 0,
+  pushY: 0,
+  targetPushX: 0,
+  targetPushY: 0,
+  rollDirectionX: 0,
+  rollDirectionY: 0,
+  isReturning: false,
+  hovered: false,
+  lastRollAt: 0,
+  clickStartedAt: null,
+  clickScale: 1,
+  clickSpin: 0,
+}]))
+
+type DiceCenter = { x: number; y: number; size: number }
+const diceCenters = new Map<HTMLElement, DiceCenter>()
+const measureDiceCenters = () => {
+  // Centers do not change while a cube rotates around its own origin.
+  diceElements.forEach((element) => {
+    const bounds = element.getBoundingClientRect()
+    diceCenters.set(element, { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2, size: element.offsetWidth })
+  })
+}
+
+const renderTransform = (element: HTMLElement, now: number) => {
+  const state = diceStates.get(element)
+  if (!state) return false
+  if (state.clickStartedAt !== null) {
+    const progress = clamp((now - state.clickStartedAt) / 440, 0, 1)
+    if (progress < 0.22) {
+      state.clickScale = 1 - 0.14 * (progress / 0.22)
+    } else {
+      const rebound = (progress - 0.22) / 0.78
+      state.clickScale = 0.86 + 0.14 * rebound + 0.075 * Math.sin(Math.PI * rebound)
+    }
+    state.clickSpin = 360 * (1 - Math.pow(1 - progress, 3))
+  }
+  // Keep every animated value on the same element and in one transform string.
+  // This prevents the cursor tilt from being overwritten by click feedback.
+  const scale = state.clickScale * (state.hovered && state.clickStartedAt === null ? 1.06 : 1)
+  // Keep the resting grid fully aligned. Only dice selected by cursor motion
+  // receive a rotation value, avoiding a whole-grid movement on first entry.
+  // Perspective is defined once on the grid. Keeping it out of each changing
+  // transform prevents nested 3D compositor layers from flashing on WebKit.
+  element.style.transform = `translate3d(${state.pushX}px, ${state.pushY}px, 0) rotateX(${state.rollX}deg) rotateY(${state.rollY}deg) rotateZ(${state.clickSpin}deg) scale(${scale})`
+  const isAnimating = Math.abs(state.targetRollX - state.rollX) > 0.05 || Math.abs(state.targetRollY - state.rollY) > 0.05 || Math.abs(state.targetPushX - state.pushX) > 0.05 || Math.abs(state.targetPushY - state.pushY) > 0.05 || state.clickStartedAt !== null || (state.lastRollAt > 0 && now - state.lastRollAt < 460)
+  element.classList.toggle('is-animating', isAnimating)
+  return isAnimating
+}
+
+let previousFrameTime = performance.now()
+const continueToFullTurn = (value: number, direction: number) => {
+  if (direction > 0) return Math.ceil(value / 360) * 360
+  if (direction < 0) return Math.floor(value / 360) * 360
+  return 0
+}
+
+const updateDice = () => {
+  const now = performance.now()
+  const delta = Math.min(now - previousFrameTime, 40)
+  previousFrameTime = now
+  let animationActive = false
+  diceElements.forEach((element) => {
+    const state = diceStates.get(element)
+    if (!state) return
+    if (state.lastRollAt && now - state.lastRollAt >= 460 && !state.isReturning) {
+      // Complete the turn in its current direction rather than unwinding backward.
+      state.targetRollX = continueToFullTurn(state.targetRollX, state.rollDirectionX)
+      state.targetRollY = continueToFullTurn(state.targetRollY, state.rollDirectionY)
+      state.isReturning = true
+    }
+    if (!state.lastRollAt) {
+      state.targetPushX = 0
+      state.targetPushY = 0
+    }
+    // Cursor rolls remain responsive; the return-to-rest portion is deliberately softer.
+    const smoothing = 1 - Math.exp(-delta / (state.isReturning ? 420 : 190))
+    state.rollX += (state.targetRollX - state.rollX) * smoothing
+    state.rollY += (state.targetRollY - state.rollY) * smoothing
+    state.pushX += (state.targetPushX - state.pushX) * smoothing
+    state.pushY += (state.targetPushY - state.pushY) * smoothing
+    if (Math.abs(state.targetRollX - state.rollX) <= 0.05 && Math.abs(state.targetRollY - state.rollY) <= 0.05) {
+      state.rollX = state.targetRollX %= 360
+      state.rollY = state.targetRollY %= 360
+      if (state.lastRollAt && now - state.lastRollAt >= 460) {
+        state.lastRollAt = 0
+        state.isReturning = false
+      }
+    }
+    if (renderTransform(element, now)) animationActive = true
+  })
+  frame = 0
+  if (animationActive) scheduleUpdate()
+}
+
+const scheduleUpdate = () => {
+  if (!frame) frame = requestAnimationFrame(updateDice)
+}
+
+const startCursorRoll = (x: number, y: number, cursorX: number, cursorY: number) => {
+  const movementDistance = Math.hypot(x, y)
+  if (movementDistance < 0.1) return false
+  const nearbyDice = diceElements
+    .map((element) => {
+      const center = diceCenters.get(element)
+      return { element, center, distance: center ? Math.hypot(cursorX - center.x, cursorY - center.y) : Infinity }
+    })
+    .sort((first, second) => first.distance - second.distance)
+  if (!nearbyDice.length || nearbyDice[0].distance > 180) return false
+
+  const localCount = nearbyDice.filter((item) => item.distance < 180).length
+  const selectedDice = nearbyDice.slice(0, Math.min(5, Math.max(2, localCount)))
+  selectedDice.forEach(({ element }) => {
+    const state = diceStates.get(element)
+    if (!state) return
+    state.targetPushX = 0
+    state.targetPushY = 0
+  })
+
+  selectedDice.forEach(({ element, center, distance }) => {
+    const state = diceStates.get(element)
+    if (!state || !center) return
+    const proximity = clamp(1 - distance / 180, 0, 1)
+    // A horizontal cursor movement rolls the cube around Y; vertical movement around X.
+    const rollAmount = 180 + 120 * proximity * proximity
+    // Do not stack unlimited full turns during fast pointer movement. A bounded
+    // queue keeps every cube readable and avoids compositor flashes.
+    const maxQueuedTurn = 540
+    const nextRollX = state.targetRollX + (y / movementDistance) * rollAmount
+    const nextRollY = state.targetRollY - (x / movementDistance) * rollAmount
+    state.targetRollX = state.rollX + clamp(nextRollX - state.rollX, -maxQueuedTurn, maxQueuedTurn)
+    state.targetRollY = state.rollY + clamp(nextRollY - state.rollY, -maxQueuedTurn, maxQueuedTurn)
+    state.isReturning = false
+    if (Math.abs(y) > 0.1) state.rollDirectionX = Math.sign(y)
+    if (Math.abs(x) > 0.1) state.rollDirectionY = -Math.sign(x)
+    state.lastRollAt = performance.now()
+  })
+  scheduleUpdate()
+  return true
+}
+
+const clearIdleRoll = () => {
+  if (idleRollTimer !== null) window.clearTimeout(idleRollTimer)
+  idleRollTimer = null
+}
+
+const scheduleIdleRoll = () => {
+  clearIdleRoll()
+  idleRollTimer = window.setTimeout(() => {
+    if (!lastPointer) return
+    if (startCursorRoll(lastRollVector.x, lastRollVector.y, lastPointer.x, lastPointer.y)) {
+      lastRollStartedAt = performance.now()
+      scheduleIdleRoll()
+    }
+  }, 720)
+}
+
+const handleMouseMove = (event: MouseEvent) => {
+  if (!lastPointer) {
+    lastPointer = { x: event.clientX, y: event.clientY }
+    scheduleIdleRoll()
+    return
+  }
+  const movementX = event.clientX - lastPointer.x
+  const movementY = event.clientY - lastPointer.y
+  pendingRoll.x += movementX
+  pendingRoll.y += movementY
+  if (Math.hypot(movementX, movementY) > 0.1) lastRollVector = { x: movementX, y: movementY }
+  lastPointer = { x: event.clientX, y: event.clientY }
+
+  const distance = Math.hypot(pendingRoll.x, pendingRoll.y)
+  const now = performance.now()
+  if (distance >= 28 && now - lastRollStartedAt >= 360) {
+    if (startCursorRoll(pendingRoll.x, pendingRoll.y, event.clientX, event.clientY)) {
+      pendingRoll = { x: 0, y: 0 }
+      lastRollStartedAt = now
+    }
+  }
+  scheduleIdleRoll()
+}
+
+window.addEventListener('mousemove', handleMouseMove)
+window.addEventListener('mouseleave', () => {
+  lastPointer = null
+  pendingRoll = { x: 0, y: 0 }
+  clearIdleRoll()
+})
+window.addEventListener('resize', () => {
+  measureDiceCenters()
+  scheduleUpdate()
+})
+
+const openColorScreen = (destination: Dice) => {
+  colorScreen.style.setProperty('--screen-color', destination.color)
+  colorScreenLabel.textContent = destination.label
+  colorScreen.classList.add('is-open')
+  colorScreen.setAttribute('aria-hidden', 'false')
+  colorScreenOpen = true
+  colorScreenClose.focus()
+}
+
+const closeColorScreen = (restoreHistory = false) => {
+  if (!colorScreenOpen) return
+  colorScreen.classList.remove('is-open')
+  colorScreen.setAttribute('aria-hidden', 'true')
+  colorScreenOpen = false
+  document.title = 'Dice Field'
+  if (restoreHistory && history.state?.diceId) history.back()
+}
+
+colorScreenClose.addEventListener('click', () => closeColorScreen(true))
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeColorScreen(true)
+})
+window.addEventListener('popstate', () => closeColorScreen())
+
+const navigateTo = (element: HTMLElement) => {
+  if (navigating) return
+  const destination = dice[Number(element.dataset.index)]
+  const state = diceStates.get(element)
+  if (!destination?.navigable || !state) return
+  navigating = true
+  element.classList.add('is-animating')
+  state.clickStartedAt = performance.now()
+  scheduleUpdate()
+
+  window.setTimeout(() => {
+    // This is SPA-style navigation: consumers can listen for this event to render
+    // the matching view without forcing a full page reload.
+    history.pushState({ diceId: destination.id }, '', destination.route)
+    window.dispatchEvent(new CustomEvent('dice:navigate', { detail: destination }))
+    document.title = `${destination.label} | Dice Field`
+    openColorScreen(destination)
+    state.clickStartedAt = null
+    state.clickScale = 1
+    state.clickSpin = 0
+    navigating = false
+    scheduleUpdate()
+  }, 440)
+}
+
+measureDiceCenters()
+
+diceElements.forEach((element) => {
+  element.addEventListener('pointerenter', () => {
+    const state = diceStates.get(element)
+    const diceData = dice[Number(element.dataset.index)]
+    if (!state || !diceData?.navigable) return
+    state.hovered = true
+    scheduleUpdate()
+  })
+  element.addEventListener('pointerleave', () => {
+    const state = diceStates.get(element)
+    if (!state) return
+    state.hovered = false
+    scheduleUpdate()
+  })
+  element.addEventListener('pointerdown', (event) => {
+    const diceData = dice[Number(element.dataset.index)]
+    if (event.button !== 0 || !diceData?.navigable) return
+    pointerDown = { x: event.clientX, y: event.clientY, element }
+    element.setPointerCapture(event.pointerId)
+  })
+  element.addEventListener('pointerup', (event) => {
+    const diceData = dice[Number(element.dataset.index)]
+    if (!diceData?.navigable) return
+    if (!pointerDown || pointerDown.element !== element) return
+    const distance = Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y)
+    if (distance <= 8) navigateTo(element)
+    pointerDown = null
+  })
+  element.addEventListener('pointercancel', () => { pointerDown = null })
+  element.addEventListener('keydown', (event) => {
+    const diceData = dice[Number(element.dataset.index)]
+    if (!diceData?.navigable) return
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      navigateTo(element)
+    }
+  })
+})
+
+scheduleUpdate()
