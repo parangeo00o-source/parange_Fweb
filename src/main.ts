@@ -1,6 +1,11 @@
 import './style.css'
+import { createCameraCapture } from './camera-capture'
+import { createBalloonExperience } from './balloon'
+import { createBluefishExperience } from './bluefish'
+import { createLemonadeExperience } from './lemonade'
+import { createWaterTouchExperience } from './water-touch'
 
-type SymbolType = 'pip' | 'letter' | 'heart' | 'clover' | 'arrow' | 'double' | 'star' | 'paw'
+type SymbolType = 'pip' | 'letter' | 'heart' | 'clover' | 'arrow' | 'double' | 'star' | 'paw' | 'lemon' | 'droplet' | 'balloon'
 type Destination = { route: string; label: string }
 type Dice = { id: string; color: string; markColor: string; texture: string; symbol: SymbolType; value: number | string; tilt: number; rounding: string; navigable: boolean } & Destination
 
@@ -73,6 +78,13 @@ const letterDiceCandidates = Array.from({ length: 48 }, (_, index) => index).fil
 const selectedLetterDice = seededShuffle(letterDiceCandidates, 241).slice(0, 7)
 const parangeLetters = seededShuffle(['P', 'A', 'R', 'A', 'N', 'G', 'E'], 709)
 const parangeLetterByDice = new Map(selectedLetterDice.map((index, letterIndex) => [index, parangeLetters[letterIndex]]))
+// Keep Lemonade on its original shuffled die, and place a separate E die at
+// column 2, row 3 for its own destination.
+const originalEIndex = [...parangeLetterByDice.entries()].find(([, letter]) => letter === 'E')?.[0]
+const bluefishDiceIndex = [...parangeLetterByDice.entries()].find(([, letter]) => letter === 'P')?.[0]
+const lemonadeDiceIndex = originalEIndex ?? 25
+if (originalEIndex !== undefined) parangeLetterByDice.delete(originalEIndex)
+parangeLetterByDice.set(17, 'E')
 const graphicSymbols: Array<{ type: Extract<SymbolType, 'heart' | 'clover' | 'star' | 'paw'>; value: string }> = [
   { type: 'heart', value: '♥' },
   { type: 'paw', value: '🐾' },
@@ -81,23 +93,45 @@ const graphicSymbols: Array<{ type: Extract<SymbolType, 'heart' | 'clover' | 'st
 ]
 const dice: Dice[] = Array.from({ length: 48 }, (_, index) => {
   const symbol = symbols[(index * 7 + 3) % symbols.length]
-  const destination = destinations[index % destinations.length]
+  const destination = index === 47
+    ? { route: '#watertouch', label: 'WaterTouch' }
+    : index === 39
+      ? { route: '#balloon', label: 'Balloon' }
+    : index === bluefishDiceIndex
+      ? { route: '#bluefish', label: 'Bluefish' }
+    : index === lemonadeDiceIndex
+    ? { route: '#lemonade', label: 'Lemonade' }
+    : index === 17
+      ? { route: '#e', label: 'E' }
+    : destinations[index % destinations.length]
   const isTextSlot = symbol.type === 'letter' || symbol.type === 'double'
   const replacement = isTextSlot && !parangeLetterByDice.has(index)
     ? graphicSymbols[(index * 5 + 2) % graphicSymbols.length]
     : null
-  const diceSymbol = replacement?.type ?? (isTextSlot ? 'letter' : symbol.type)
+  const isWaterTouchDie = index === 47
+  const isBalloonDie = index === 39
+  const isLemonadeDie = index === lemonadeDiceIndex
+  const diceSymbol = isWaterTouchDie ? 'droplet' : isBalloonDie ? 'balloon' : isLemonadeDie ? 'lemon' : replacement?.type ?? (isTextSlot ? 'letter' : symbol.type)
   const value = replacement?.value ?? parangeLetterByDice.get(index) ?? symbol.value
-  const navigable = parangeLetterByDice.has(index)
+  const navigable = parangeLetterByDice.has(index) || isLemonadeDie || isWaterTouchDie || isBalloonDie || index === bluefishDiceIndex
   return { id: `dice_${String(index + 1).padStart(2, '0')}`, color: shuffledColors[index], markColor: markColorFor(shuffledColors[index], index), texture: textureNames[(index * 5 + 1) % textureNames.length], symbol: diceSymbol, value, tilt: ((index * 17) % 9) - 4, rounding: roundingProfiles[(index * 3 + 1) % roundingProfiles.length], navigable, ...destination }
 })
 
 const renderPips = (count: number) => Array.from({ length: count }, () => '<i class="pip"></i>').join('')
 const renderPaw = () => `<span class="symbol symbol-paw" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></span>`
+const renderLemon = () => `<span class="dice-icon dice-icon-lemon" aria-hidden="true"><svg viewBox="0 0 64 64"><ellipse cx="29" cy="35" rx="20" ry="16" fill="currentColor"/><path d="M41 20c2-8 8-11 14-9-1 7-6 11-14 11v-2Z" fill="currentColor"/></svg></span>`
+const renderDroplet = () => `<span class="dice-icon dice-icon-droplet" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M32 6C25 18 14 28 14 40c0 10 8 18 18 18s18-8 18-18C50 28 39 18 32 6Z" fill="currentColor"/></svg></span>`
+const renderBalloon = () => `<span class="dice-icon dice-icon-balloon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="27" rx="18" ry="21" fill="currentColor"/><path d="M26 46h12l-6 8-6-8Z" fill="currentColor"/><path d="M32 54c-5 3 5 5 0 9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M25 18c-4 4-5 9-4 12" stroke="rgba(255,255,255,.58)" stroke-width="3.5" stroke-linecap="round"/></svg></span>`
 const renderSymbol = (item: Dice) => item.symbol === 'pip'
   ? `<span class="pips pips-${item.value}">${renderPips(Number(item.value))}</span>`
   : item.symbol === 'paw'
     ? renderPaw()
+    : item.symbol === 'lemon'
+      ? renderLemon()
+      : item.symbol === 'droplet'
+        ? renderDroplet()
+        : item.symbol === 'balloon'
+          ? renderBalloon()
     : `<span class="symbol symbol-${item.symbol}">${item.value}</span>`
 const renderFace = (face: string, item: Dice) => `<div class="dice-face ${face}"><div class="dice-surface">${renderSymbol(item)}</div></div>`
 
@@ -117,6 +151,13 @@ const diceElements = [...document.querySelectorAll<HTMLElement>('.dice')]
 const colorScreen = document.querySelector<HTMLElement>('.color-screen')!
 const colorScreenLabel = document.querySelector<HTMLElement>('.color-screen-label')!
 const colorScreenClose = document.querySelector<HTMLButtonElement>('.color-screen-close')!
+const lemonadeExperience = createLemonadeExperience()
+const waterTouchExperience = createWaterTouchExperience()
+const balloonExperience = createBalloonExperience()
+const bluefishExperience = createBluefishExperience()
+const cameraCapture = createCameraCapture()
+cameraCapture.setRecordingStreamSource(() => lemonadeExperience.getRecordingStream() ?? waterTouchExperience.getRecordingStream())
+cameraCapture.setPhotoCanvasSource(() => lemonadeExperience.getRecordingCanvas() ?? waterTouchExperience.getRecordingCanvas())
 let frame = 0
 let lastPointer: { x: number; y: number } | null = null
 let pendingRoll = { x: 0, y: 0 }
@@ -330,6 +371,26 @@ window.addEventListener('resize', () => {
 })
 
 const openColorScreen = (destination: Dice) => {
+  if (destination.label === 'Lemonade') {
+    colorScreenOpen = true
+    lemonadeExperience.open()
+    return
+  }
+  if (destination.label === 'WaterTouch') {
+    colorScreenOpen = true
+    waterTouchExperience.open()
+    return
+  }
+  if (destination.label === 'Balloon') {
+    colorScreenOpen = true
+    balloonExperience.open()
+    return
+  }
+  if (destination.label === 'Bluefish') {
+    colorScreenOpen = true
+    bluefishExperience.open()
+    return
+  }
   colorScreen.style.setProperty('--screen-color', destination.color)
   colorScreenLabel.textContent = destination.label
   colorScreen.classList.add('is-open')
@@ -340,6 +401,10 @@ const openColorScreen = (destination: Dice) => {
 
 const closeColorScreen = (restoreHistory = false) => {
   if (!colorScreenOpen) return
+  lemonadeExperience.close()
+  waterTouchExperience.close()
+  balloonExperience.close()
+  bluefishExperience.close()
   colorScreen.classList.remove('is-open')
   colorScreen.setAttribute('aria-hidden', 'true')
   colorScreenOpen = false
