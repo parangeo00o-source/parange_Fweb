@@ -2,6 +2,7 @@ import './style.css'
 import { createCameraCapture } from './camera-capture'
 import { createBalloonExperience } from './balloon'
 import { createBluefishExperience } from './bluefish'
+import { createElephantDrawingExperience } from './elephant-drawing'
 import { createLemonadeExperience } from './lemonade'
 import { createWaterTouchExperience } from './water-touch'
 
@@ -93,7 +94,10 @@ const graphicSymbols: Array<{ type: Extract<SymbolType, 'heart' | 'clover' | 'st
 ]
 const dice: Dice[] = Array.from({ length: 48 }, (_, index) => {
   const symbol = symbols[(index * 7 + 3) % symbols.length]
-  const destination = index === 47
+  const isElephantDrawingDie = parangeLetterByDice.get(index) === 'A'
+  const destination = isElephantDrawingDie
+    ? { route: '#elephant-drawing', label: 'Elephant Drawing' }
+    : index === 47
     ? { route: '#watertouch', label: 'WaterTouch' }
     : index === 39
       ? { route: '#balloon', label: 'Balloon' }
@@ -155,15 +159,17 @@ const lemonadeExperience = createLemonadeExperience()
 const waterTouchExperience = createWaterTouchExperience()
 const balloonExperience = createBalloonExperience()
 const bluefishExperience = createBluefishExperience()
+const elephantDrawingExperience = createElephantDrawingExperience()
 const cameraCapture = createCameraCapture()
-cameraCapture.setRecordingStreamSource(() => lemonadeExperience.getRecordingStream() ?? waterTouchExperience.getRecordingStream() ?? bluefishExperience.getRecordingStream())
-cameraCapture.setPhotoCanvasSource(() => lemonadeExperience.getRecordingCanvas() ?? waterTouchExperience.getRecordingCanvas() ?? bluefishExperience.getRecordingCanvas())
+cameraCapture.setRecordingStreamSource(() => lemonadeExperience.getRecordingStream() ?? waterTouchExperience.getRecordingStream() ?? bluefishExperience.getRecordingStream() ?? elephantDrawingExperience.getRecordingStream())
+cameraCapture.setPhotoCanvasSource(() => lemonadeExperience.getRecordingCanvas() ?? waterTouchExperience.getRecordingCanvas() ?? bluefishExperience.getRecordingCanvas() ?? elephantDrawingExperience.getRecordingCanvas())
 let frame = 0
 let lastPointer: { x: number; y: number } | null = null
 let pendingRoll = { x: 0, y: 0 }
 let lastRollVector = { x: 1, y: 0 }
 let lastRollStartedAt = 0
 let idleRollTimer: number | null = null
+let hoveredDie: HTMLElement | null = null
 let pointerDown: { x: number; y: number; element: HTMLElement } | null = null
 let navigating = false
 let colorScreenOpen = false
@@ -191,14 +197,17 @@ const diceStates = new Map<HTMLElement, DiceState>(diceElements.map((element) =>
   clickScale: 1,
   clickSpin: 0,
 }]))
+// Only dice with a pending visual change are advanced on each animation frame.
+// Keeping the resting cubes out of the frame loop avoids needless paint work.
+const activeDice = new Set<HTMLElement>()
 
-type DiceCenter = { x: number; y: number; size: number }
+type DiceCenter = { x: number; y: number }
 const diceCenters = new Map<HTMLElement, DiceCenter>()
 const measureDiceCenters = () => {
   // Centers do not change while a cube rotates around its own origin.
   diceElements.forEach((element) => {
     const bounds = element.getBoundingClientRect()
-    diceCenters.set(element, { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2, size: element.offsetWidth })
+    diceCenters.set(element, { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 })
   })
 }
 
@@ -240,7 +249,7 @@ const updateDice = () => {
   const delta = Math.min(now - previousFrameTime, 40)
   previousFrameTime = now
   let animationActive = false
-  diceElements.forEach((element) => {
+  activeDice.forEach((element) => {
     const state = diceStates.get(element)
     if (!state) return
     if (state.lastRollAt && now - state.lastRollAt >= 460 && !state.isReturning) {
@@ -268,6 +277,7 @@ const updateDice = () => {
       }
     }
     if (renderTransform(element, now)) animationActive = true
+    else activeDice.delete(element)
   })
   frame = 0
   if (animationActive) scheduleUpdate()
@@ -275,6 +285,11 @@ const updateDice = () => {
 
 const scheduleUpdate = () => {
   if (!frame) frame = requestAnimationFrame(updateDice)
+}
+
+const activateDice = (element: HTMLElement) => {
+  activeDice.add(element)
+  scheduleUpdate()
 }
 
 const startCursorRoll = (x: number, y: number, cursorX: number, cursorY: number) => {
@@ -286,21 +301,18 @@ const startCursorRoll = (x: number, y: number, cursorX: number, cursorY: number)
       return { element, center, distance: center ? Math.hypot(cursorX - center.x, cursorY - center.y) : Infinity }
     })
     .sort((first, second) => first.distance - second.distance)
-  if (!nearbyDice.length || nearbyDice[0].distance > 180) return false
+  if (!nearbyDice.length) return false
 
-  const localCount = nearbyDice.filter((item) => item.distance < 180).length
-  const selectedDice = nearbyDice.slice(0, Math.min(5, Math.max(2, localCount)))
-  selectedDice.forEach(({ element }) => {
-    const state = diceStates.get(element)
-    if (!state) return
-    state.targetPushX = 0
-    state.targetPushY = 0
-  })
-
+  const influenceRadius = 180
+  const localCount = nearbyDice.filter((item) => item.distance < influenceRadius).length
+  const selectedCount = Math.min(localCount, 3 + Math.floor(Math.random() * 4))
+  const selectedDice = nearbyDice.slice(0, selectedCount)
   selectedDice.forEach(({ element, center, distance }) => {
     const state = diceStates.get(element)
     if (!state || !center) return
-    const proximity = clamp(1 - distance / 180, 0, 1)
+    state.targetPushX = 0
+    state.targetPushY = 0
+    const proximity = clamp(1 - distance / influenceRadius, 0, 1)
     // A horizontal cursor movement rolls the cube around Y; vertical movement around X.
     const rollAmount = 180 + 120 * proximity * proximity
     // Do not stack unlimited full turns during fast pointer movement. A bounded
@@ -314,6 +326,7 @@ const startCursorRoll = (x: number, y: number, cursorX: number, cursorY: number)
     if (Math.abs(y) > 0.1) state.rollDirectionX = Math.sign(y)
     if (Math.abs(x) > 0.1) state.rollDirectionY = -Math.sign(x)
     state.lastRollAt = performance.now()
+    activeDice.add(element)
   })
   scheduleUpdate()
   return true
@@ -327,30 +340,42 @@ const clearIdleRoll = () => {
 const scheduleIdleRoll = () => {
   clearIdleRoll()
   idleRollTimer = window.setTimeout(() => {
-    if (!lastPointer) return
+    // Continuous motion is permitted only while the pointer is directly over a die.
+    const dieAtPointer = lastPointer && document.elementFromPoint(lastPointer.x, lastPointer.y)?.closest<HTMLElement>('.dice')
+    if (!lastPointer || !hoveredDie || dieAtPointer !== hoveredDie) {
+      hoveredDie = null
+      return
+    }
     if (startCursorRoll(lastRollVector.x, lastRollVector.y, lastPointer.x, lastPointer.y)) {
       lastRollStartedAt = performance.now()
       scheduleIdleRoll()
     }
-  }, 720)
+  }, 280)
 }
 
 const handleMouseMove = (event: MouseEvent) => {
   if (!lastPointer) {
     lastPointer = { x: event.clientX, y: event.clientY }
-    scheduleIdleRoll()
     return
   }
   const movementX = event.clientX - lastPointer.x
   const movementY = event.clientY - lastPointer.y
+  lastPointer = { x: event.clientX, y: event.clientY }
+  const activeDie = event.target instanceof Element ? event.target.closest<HTMLElement>('.dice') : null
+  if (!activeDie) {
+    pendingRoll = { x: 0, y: 0 }
+    hoveredDie = null
+    clearIdleRoll()
+    return
+  }
+  hoveredDie = activeDie
   pendingRoll.x += movementX
   pendingRoll.y += movementY
   if (Math.hypot(movementX, movementY) > 0.1) lastRollVector = { x: movementX, y: movementY }
-  lastPointer = { x: event.clientX, y: event.clientY }
 
   const distance = Math.hypot(pendingRoll.x, pendingRoll.y)
   const now = performance.now()
-  if (distance >= 28 && now - lastRollStartedAt >= 360) {
+  if (distance >= 12 && now - lastRollStartedAt >= 140) {
     if (startCursorRoll(pendingRoll.x, pendingRoll.y, event.clientX, event.clientY)) {
       pendingRoll = { x: 0, y: 0 }
       lastRollStartedAt = now
@@ -363,11 +388,22 @@ window.addEventListener('mousemove', handleMouseMove)
 window.addEventListener('mouseleave', () => {
   lastPointer = null
   pendingRoll = { x: 0, y: 0 }
+  hoveredDie = null
   clearIdleRoll()
 })
 window.addEventListener('resize', () => {
   measureDiceCenters()
   scheduleUpdate()
+})
+window.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearIdleRoll()
+    if (frame) cancelAnimationFrame(frame)
+    frame = 0
+    return
+  }
+  if (activeDice.size) scheduleUpdate()
+  if (hoveredDie) scheduleIdleRoll()
 })
 
 const openColorScreen = (destination: Dice) => {
@@ -391,6 +427,11 @@ const openColorScreen = (destination: Dice) => {
     bluefishExperience.open()
     return
   }
+  if (destination.label === 'Elephant Drawing') {
+    colorScreenOpen = true
+    elephantDrawingExperience.open()
+    return
+  }
   colorScreen.style.setProperty('--screen-color', destination.color)
   colorScreenLabel.textContent = destination.label
   colorScreen.classList.add('is-open')
@@ -405,6 +446,7 @@ const closeColorScreen = (restoreHistory = false) => {
   waterTouchExperience.close()
   balloonExperience.close()
   bluefishExperience.close()
+  elephantDrawingExperience.close()
   colorScreen.classList.remove('is-open')
   colorScreen.setAttribute('aria-hidden', 'true')
   colorScreenOpen = false
@@ -426,7 +468,7 @@ const navigateTo = (element: HTMLElement) => {
   navigating = true
   element.classList.add('is-animating')
   state.clickStartedAt = performance.now()
-  scheduleUpdate()
+  activateDice(element)
 
   window.setTimeout(() => {
     // This is SPA-style navigation: consumers can listen for this event to render
@@ -439,25 +481,36 @@ const navigateTo = (element: HTMLElement) => {
     state.clickScale = 1
     state.clickSpin = 0
     navigating = false
-    scheduleUpdate()
+    activateDice(element)
   }, 440)
 }
 
 measureDiceCenters()
 
 diceElements.forEach((element) => {
-  element.addEventListener('pointerenter', () => {
+  element.addEventListener('pointerenter', (event) => {
     const state = diceStates.get(element)
+    if (!state) return
+    if (event.pointerType === 'mouse') {
+      hoveredDie = element
+      lastPointer = { x: event.clientX, y: event.clientY }
+      scheduleIdleRoll()
+    }
     const diceData = dice[Number(element.dataset.index)]
-    if (!state || !diceData?.navigable) return
+    if (!diceData?.navigable) return
     state.hovered = true
-    scheduleUpdate()
+    activateDice(element)
   })
   element.addEventListener('pointerleave', () => {
     const state = diceStates.get(element)
     if (!state) return
     state.hovered = false
-    scheduleUpdate()
+    if (hoveredDie === element) {
+      hoveredDie = null
+      pendingRoll = { x: 0, y: 0 }
+      clearIdleRoll()
+    }
+    activateDice(element)
   })
   element.addEventListener('pointerdown', (event) => {
     const diceData = dice[Number(element.dataset.index)]

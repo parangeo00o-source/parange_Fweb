@@ -125,7 +125,7 @@ export const createCameraCapture = () => {
       let stream: MediaStream | null = null
       let isDisplayCapture = false
       if (navigator.mediaDevices?.getDisplayMedia) {
-        showMessage('공유 창에서 현재 Lemonade 탭을 선택해 주세요')
+        showMessage('공유 창에서 현재 탭을 선택해 주세요')
         stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false })
         isDisplayCapture = true
       } else {
