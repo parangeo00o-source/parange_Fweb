@@ -1,0 +1,81 @@
+.planet-join-primary {
+  position: absolute; z-index: 3; bottom: max(28px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 28px; min-width: 226px; padding: 15px 21px;
+  border: 1px solid #d75c22; border-radius: 100px; background: #ff822f; color: #fffbea;
+  box-shadow: 0 5px 0 #ce612e, 0 12px 28px #46655025, inset 0 1px 0 #ffffff70;
+  font: 800 18px/1.2 'Avenir Next', system-ui, sans-serif; cursor: pointer;
+  transition: background .2s, opacity .2s;
+}
+.planet-join-primary:hover { background: #f77523; }
+.planet-join-primary:disabled { opacity: .4; cursor: default; }
+.planet-join-icon { width: 27px; height: 27px; border: 1px solid #fff7df80; border-radius: 50%; font: 400 24px/24px system-ui; }
+.planet-join-arrow { margin-left: auto; font-size: 24px; font-weight: 400; }
+.planet-resident-card small { display: block; margin-top: 5px; color: #42688c; font-size: 9px; }
+.planet-studio {
+  position: absolute; z-index: 8; inset: 0; display: flex; flex-direction: column; align-items: center;
+  padding: clamp(24px, 4vh, 48px) clamp(18px, 5vw, 80px) 22px;
+  overflow: auto; color: #154573; background: #f4f3e9f5; backdrop-filter: blur(15px);
+  visibility: hidden; opacity: 0; transition: opacity .22s, visibility .22s;
+}
+.planet-studio.is-open { visibility: visible; opacity: 1; }
+.planet-studio [hidden], .planet-arrival-caption[hidden] { display: none !important; }
+.planet-studio-heading { align-self: flex-start; margin: 0 0 24px; }
+.planet-studio-heading .planet-card-index { color: #d77335; font-size: 10px; letter-spacing: .14em; }
+.planet-studio-heading h2 { margin: 12px 0 10px; color: #164777; font: 800 clamp(24px, 3.3vw, 44px)/1.2 'Avenir Next', system-ui, sans-serif; letter-spacing: -.07em; }
+.planet-studio-heading h2 br { display: none; }
+.planet-studio-heading em { font-style: normal; color: #e9803c; }
+.planet-studio-heading p { font-size: 12px; color: #71828b; }
+.planet-studio-close { position: absolute; z-index: 5; right: clamp(18px, 4vw, 55px); top: 30px; width: 42px; height: 42px; border: 1px solid #15457345; border-radius: 50%; color: #154573; background: #fffdf580; font: 300 29px/34px system-ui; cursor: pointer; }
+.planet-studio-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; width: 100%; max-width: 1280px; min-height: 240px; flex: 1; max-height: 580px; }
+.planet-studio-panels > section { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border-radius: 20px; border: 1px solid #25516c26; background: #fffdf8; box-shadow: 0 10px 35px #19436807; }
+.planet-studio-panels header { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px; gap: 10px; font: 700 10px/1.2 ui-monospace, monospace; letter-spacing: .07em; }
+.planet-studio-panels header b { font-size: 8px; color: #76918d; font-weight: 500; }
+.planet-studio-panels header i { display: inline-block; width: 5px; height: 5px; margin-right: 5px; border-radius: 50%; background: #e58345; }
+.planet-studio-panels footer { padding: 14px 12px; color: #79908f; text-align: center; font-size: 11px; letter-spacing: -.03em; }
+.planet-camera-viewport { position: relative; min-height: 200px; flex: 1; overflow: hidden; margin: 0 10px; border-radius: 12px; background: #183f4e; }
+.planet-camera-viewport .planet-camera, .planet-captured { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.planet-camera-viewport .planet-camera { transform: scaleX(-1); }
+.planet-camera-frame { position: absolute; z-index: 1; inset: 8% 16%; border: 1px solid #f4eedc50; border-radius: 40% 40% 25% 25%; pointer-events: none; }
+.planet-camera-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; color: #d4e3da; background: radial-gradient(ellipse, #37606a, #254a58); }
+.planet-camera-empty > span { font: 300 58px/1 system-ui; color: #a4c5bb; }
+.planet-camera-empty p { font-size: 12px; }
+.planet-camera-retry, .planet-studio-retry { padding: 9px 15px; border: 1px solid currentColor; border-radius: 30px; color: inherit; background: transparent; cursor: pointer; font: 700 12px/1.2 system-ui; }
+.planet-countdown { position: absolute; z-index: 3; inset: 0; display: grid; place-items: center; background: #14304220; color: #fff8de; text-shadow: 0 8px 35px #052d4850; font: 700 clamp(80px, 12vw, 155px)/1 system-ui; }
+.planet-reference-drop { position: relative; display: flex; align-items: center; justify-content: center; flex: 1; min-height: 200px; margin: 0 10px; padding: 18px; overflow: hidden; border: 1.5px dashed #7fada58c; border-radius: 12px; background: #eaf0e7; color: #275d65; cursor: pointer; transition: background .2s, border-color .2s; }
+.planet-reference-drop:hover, .planet-reference-drop.is-dragging { background: #dcebdc; border-color: #e68943; }
+.planet-reference-drop:disabled { cursor: default; }
+.planet-reference-placeholder { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.planet-reference-placeholder i { display: grid; place-items: center; width: 75px; height: 75px; margin-bottom: 14px; border: 1px solid #b9ccc0; border-radius: 50%; color: #5d9183; font: 200 56px/1 system-ui; font-style: normal; }
+.planet-reference-placeholder strong { font-size: 17px; letter-spacing: -.04em; }
+.planet-reference-placeholder > span { color: #6b8884; font-size: 12px; }
+.planet-reference-placeholder small { color: #97a9a0; font-size: 10px; }
+.planet-reference-image { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: contain; padding: 16px; }
+.planet-reference-change { position: absolute; bottom: 16px; right: 16px; padding: 9px 13px; border: 1px solid #66897940; border-radius: 30px; color: #2c675b; background: #fffdf4eb; font-size: 11px; }
+.planet-studio-status { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 25px 0 8px; color: #d47635; text-align: center; font-size: 14px; font-weight: 700; letter-spacing: -.03em; }
+.planet-status-dot { width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: #df8646; box-shadow: 0 0 0 5px #e39a4f14; }
+.planet-studio-privacy { color: #9aa49c; font-size: 10px; text-align: center; }
+.planet-building { position: absolute; z-index: 4; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: #f4f3e9f2; backdrop-filter: blur(18px); }
+.planet-building h3 { margin: 0; color: #234f6e; font-size: 32px; line-height: 1.4; letter-spacing: -.07em; text-align: center; }
+.planet-building p { color: #8c9688; font-size: 13px; text-align: center; }
+.planet-building-orbit { display: grid; place-items: center; width: 108px; height: 108px; border: 1px dashed #6b9c8270; border-radius: 50%; animation: planet-resident-spin 9s linear infinite; }
+.planet-building-orbit span { display: grid; place-items: center; width: 73px; height: 73px; border-radius: 50%; background: #ef9855; color: #fff6df; font-size: 36px; box-shadow: inset -7px -9px 0 #bd653324; }
+.planet-arrival-caption { position: absolute; z-index: 3; top: 16%; left: 50%; width: 90%; transform: translateX(-50%); text-align: center; pointer-events: none; }
+.planet-arrival-caption h2 { margin: 12px 0; color: #204c72; font-size: clamp(24px, 3vw, 37px); letter-spacing: -.06em; font-weight: 800; }
+.planet-arrival-caption p { color: #658b83; font-size: 13px; }
+.planet-screen.is-presenting .planet-spot-card, .planet-screen.is-presenting .planet-resident-card, .planet-screen.is-presenting .planet-join-primary, .planet-screen.is-presenting .planet-guide { visibility: hidden; }
+.planet-screen.is-night .planet-arrival-caption h2, .planet-screen.is-night .planet-arrival-caption p { color: #e3ebde; }
+@keyframes planet-resident-spin { to { transform: rotate(360deg); } }
+@media (max-width: 720px) {
+  .planet-join-primary { bottom: max(22px, env(safe-area-inset-bottom)); min-width: 195px; padding: 12px 17px; font-size: 16px; }
+  .planet-resident-card { bottom: 96px; width: 176px; }.planet-resident-card small { font-size: 8px; }
+  .planet-studio { padding: 24px 12px 20px; }.planet-studio-heading { padding-left: 8px; margin-bottom: 20px; }.planet-studio-heading h2 br { display: initial; }
+  .planet-studio-heading p { font-size: 10px; }.planet-studio-panels { gap: 8px; min-height: 275px; max-height: 52svh; }
+  .planet-studio-panels header { padding: 12px 9px; font-size: 8px; }.planet-studio-panels header b { display: none; }
+  .planet-camera-viewport, .planet-reference-drop { margin: 0 5px; min-height: 160px; }.planet-studio-panels footer { font-size: 8px; min-height: 46px; padding: 9px 5px; }
+  .planet-reference-placeholder i { width: 50px; height: 50px; font-size: 38px; margin-bottom: 4px; }.planet-reference-placeholder strong { font-size: 12px; }
+  .planet-reference-placeholder > span { font-size: 10px; line-height: 1.5; }.planet-reference-placeholder small { display: none; }
+  .planet-reference-drop { padding: 10px; }.planet-reference-change { right: 5px; bottom: 7px; font-size: 9px; padding: 7px; }
+  .planet-studio-status { flex-wrap: wrap; font-size: 12px; padding-top: 22px; }.planet-studio-privacy { font-size: 9px; }
+  .planet-camera-empty p { font-size: 9px; }.planet-camera-retry { padding: 7px; font-size: 10px; }.planet-camera-empty > span { font-size: 40px; }
+}
+@media (prefers-reduced-motion: reduce) { .planet-building-orbit { animation: none; } }

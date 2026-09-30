@@ -3,24 +3,56 @@ import { FaceLandmarker, FilesetResolver, HandLandmarker } from '@mediapipe/task
 type Point = { x: number; y: number }
 type Fish = { x: number; y: number; vx: number; vy: number; size: number; phase: number; follow: number; variant: number; roamX: number; roamY: number; eating: boolean; breatheAt: number }
 type Bubble = { x: number; y: number; vx: number; vy: number; radius: number; life: number; color: string }
+type SpriteFrame = { image: HTMLCanvasElement; x: number; y: number; cellWidth: number; cellHeight: number }
 
 const stitchColors = ['#e6505d', '#f2bd37', '#65a95e', '#3d79c9', '#c65b93']
 const isolatedSpriteIndices = [0, 1, 2, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14]
-// Reference-inspired neon fish palette. Each grade shifts the existing detailed
-// texture instead of covering it with a single flat tint.
-const fishColorGrades = [
-  'hue-rotate(205deg) saturate(1.48) brightness(1.05)', // electric blue
-  'hue-rotate(175deg) saturate(1.36) brightness(1.08)', // cyan
-  'hue-rotate(332deg) saturate(1.5) brightness(1.04)',  // coral red
-  'hue-rotate(22deg) saturate(1.5) brightness(1.08)',   // golden orange
-  'hue-rotate(82deg) saturate(1.42) brightness(1.08)',  // lime green
-  'hue-rotate(286deg) saturate(1.35) brightness(1.08)', // violet pink
-  'hue-rotate(244deg) saturate(1.32) brightness(1.04)', // deep blue
-  'saturate(.72) brightness(1.26) contrast(.94)',       // translucent pearl
+// The colour treatment is calculated on sprite pixels once, rather than through
+// CSS `filter`. This keeps the intended palette identical across browsers.
+type FishColorGrade = { hue: number; saturation: number; brightness: number; contrast: number }
+const fishColorGrades: FishColorGrade[] = [
+  { hue: 205, saturation: 1.48, brightness: 1.05, contrast: 1.12 }, // electric blue
+  { hue: 175, saturation: 1.36, brightness: 1.08, contrast: 1.12 }, // cyan
+  { hue: 332, saturation: 1.5, brightness: 1.04, contrast: 1.12 },  // coral red
+  { hue: 22, saturation: 1.5, brightness: 1.08, contrast: 1.12 },   // golden orange
+  { hue: 82, saturation: 1.42, brightness: 1.08, contrast: 1.12 },  // lime green
+  { hue: 286, saturation: 1.35, brightness: 1.08, contrast: 1.12 }, // violet pink
+  { hue: 244, saturation: 1.32, brightness: 1.04, contrast: 1.12 }, // deep blue
+  { hue: 0, saturation: .72, brightness: 1.26, contrast: .94 },     // translucent pearl
 ]
 const fishBubbleColors = ['#d8f8ff', '#a7eaff', '#f6fbff', '#d9cbff']
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
 const length = (x: number, y: number) => Math.hypot(x, y)
+
+const gradeSpritePixels = (context: CanvasRenderingContext2D, width: number, height: number, grade: FishColorGrade) => {
+  const pixels = context.getImageData(0, 0, width, height)
+  const data = pixels.data
+  const radians = grade.hue * Math.PI / 180
+  const cosine = Math.cos(radians), sine = Math.sin(radians)
+  // CSS hue-rotate matrix coefficients, applied directly to sRGB pixel values.
+  const hueMatrix = [
+    .213 + cosine * .787 - sine * .213, .715 - cosine * .715 - sine * .715, .072 - cosine * .072 + sine * .928,
+    .213 - cosine * .213 + sine * .143, .715 + cosine * .285 + sine * .14, .072 - cosine * .072 - sine * .283,
+    .213 - cosine * .213 - sine * .787, .715 - cosine * .715 + sine * .715, .072 + cosine * .928 + sine * .072,
+  ]
+  for (let index = 0; index < data.length; index += 4) {
+    if (!data[index + 3]) continue
+    let red = data[index] / 255
+    let green = data[index + 1] / 255
+    let blue = data[index + 2] / 255
+    red = (red - .5) * grade.contrast + .5
+    green = (green - .5) * grade.contrast + .5
+    blue = (blue - .5) * grade.contrast + .5
+    const luminance = red * .213 + green * .715 + blue * .072
+    red = (luminance + (red - luminance) * grade.saturation) * grade.brightness
+    green = (luminance + (green - luminance) * grade.saturation) * grade.brightness
+    blue = (luminance + (blue - luminance) * grade.saturation) * grade.brightness
+    data[index] = clamp(hueMatrix[0] * red + hueMatrix[1] * green + hueMatrix[2] * blue, 0, 1) * 255
+    data[index + 1] = clamp(hueMatrix[3] * red + hueMatrix[4] * green + hueMatrix[5] * blue, 0, 1) * 255
+    data[index + 2] = clamp(hueMatrix[6] * red + hueMatrix[7] * green + hueMatrix[8] * blue, 0, 1) * 255
+  }
+  context.putImageData(pixels, 0, 0)
+}
 
 export const createBluefishExperience = () => {
   const screen = document.createElement('section')
@@ -46,7 +78,7 @@ export const createBluefishExperience = () => {
   const fishSprites = new Image()
   const spriteCanvas = document.createElement('canvas')
   const spriteContext = spriteCanvas.getContext('2d')!
-  const spriteFrames: HTMLCanvasElement[] = []
+  const spriteFrames: SpriteFrame[] = []
   const tintedSpriteFrames = new Map<number, HTMLCanvasElement>()
   let spritesReady = false
   fishSprites.addEventListener('load', () => {
@@ -61,11 +93,27 @@ export const createBluefishExperience = () => {
         const right = Math.floor((column + 1) * spriteCanvas.width / 4)
         const top = Math.floor(row * spriteCanvas.height / 4)
         const bottom = Math.floor((row + 1) * spriteCanvas.height / 4)
+        const cellWidth = right - left, cellHeight = bottom - top
+        const cell = document.createElement('canvas')
+        cell.width = cellWidth; cell.height = cellHeight
+        const cellContext = cell.getContext('2d', { willReadFrequently: true })!
+        cellContext.drawImage(spriteCanvas, left, top, cellWidth, cellHeight, 0, 0, cellWidth, cellHeight)
+        const alpha = cellContext.getImageData(0, 0, cellWidth, cellHeight).data
+        let minX = cellWidth, minY = cellHeight, maxX = -1, maxY = -1
+        for (let pixel = 0; pixel < alpha.length; pixel += 4) {
+          if (!alpha[pixel + 3]) continue
+          const x = (pixel / 4) % cellWidth, y = Math.floor(pixel / 4 / cellWidth)
+          minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y)
+        }
+        // Cache only the visible silhouette plus a small safety edge. The draw
+        // coordinates below retain the exact original cell placement and scale.
+        const padding = 2
+        minX = Math.max(0, minX - padding); minY = Math.max(0, minY - padding)
+        maxX = Math.min(cellWidth - 1, maxX + padding); maxY = Math.min(cellHeight - 1, maxY + padding)
         const frame = document.createElement('canvas')
-        frame.width = right - left
-        frame.height = bottom - top
-        frame.getContext('2d')!.drawImage(spriteCanvas, left, top, frame.width, frame.height, 0, 0, frame.width, frame.height)
-        spriteFrames.push(frame)
+        frame.width = Math.max(1, maxX - minX + 1); frame.height = Math.max(1, maxY - minY + 1)
+        frame.getContext('2d')!.drawImage(cell, minX, minY, frame.width, frame.height, 0, 0, frame.width, frame.height)
+        spriteFrames.push({ image: frame, x: minX, y: minY, cellWidth, cellHeight })
       }
     }
     spritesReady = true
@@ -84,6 +132,7 @@ export const createBluefishExperience = () => {
   let lastFaceVideoTime = -1
   let lastRecordingCompositionAt = 0
   let lastBubbleAt = 0
+  let lastFishBubbleScanAt = 0
   let pointer: Point | null = null
   let pointerTarget: Point | null = null
   let pointing = false
@@ -111,6 +160,7 @@ export const createBluefishExperience = () => {
     canvas.width = width; canvas.height = height
     canvasWidth = window.innerWidth; canvasHeight = window.innerHeight
     context.setTransform(ratio, 0, 0, ratio, 0, 0)
+    context.imageSmoothingEnabled = true
   }
   const composeRecording = () => {
     const width = Math.max(1, Math.round(canvasWidth))
@@ -157,7 +207,7 @@ export const createBluefishExperience = () => {
     pointing = indexReach > foldedReach * 1.18 && reach > 35
   }
   const inferFace = (now: number) => {
-    if (!faceLandmarker || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || now - lastFaceInferenceAt < 100 || video.currentTime === lastFaceVideoTime) return
+    if (!faceLandmarker || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || now - lastFaceInferenceAt < 125 || video.currentTime === lastFaceVideoTime) return
     lastFaceInferenceAt = now; lastFaceVideoTime = video.currentTime
     const landmarks = faceLandmarker.detectForVideo(video, now).faceLandmarks[0]
     if (!landmarks) { mouthPoint = null; mouthOpen = false; return }
@@ -189,6 +239,10 @@ export const createBluefishExperience = () => {
     if (bubbles.length > 72) bubbles.splice(0, bubbles.length - 72)
   }
   const spawnFishBubbles = (now: number) => {
+    // Breathing is intentionally slow; sampling at 12 fps avoids a 65-item
+    // scan on every render frame without changing the visible cadence.
+    if (now - lastFishBubbleScanAt < 83) return
+    lastFishBubbleScanAt = now
     for (const item of fish) {
       if (item.eating || now < item.breatheAt) continue
       item.breatheAt = now + 1250 + Math.random() * 1900
@@ -217,6 +271,19 @@ export const createBluefishExperience = () => {
     } else pointer = null
     const hasFinger = pointer !== null
     const ringRadius = clamp(Math.min(canvasWidth, canvasHeight) * .2, 78, 170)
+    // The idle flock only reacts to neighbours within 118px. A tiny spatial
+    // grid therefore produces the same local behaviour without comparing every
+    // fish against all 64 others every animation frame.
+    const neighbourCell = 118
+    const neighbourBuckets = new Map<string, Fish[]>()
+    if (!hasFinger) {
+      for (const item of fish) {
+        const key = `${Math.floor(item.x / neighbourCell)}:${Math.floor(item.y / neighbourCell)}`
+        const bucket = neighbourBuckets.get(key)
+        if (bucket) bucket.push(item)
+        else neighbourBuckets.set(key, [item])
+      }
+    }
     if (pointer) {
       // Constrain the ring centre so even a fingertip near an edge keeps the
       // whole school inside the live frame.
@@ -277,12 +344,17 @@ export const createBluefishExperience = () => {
         continue
       }
       let alignX = 0; let alignY = 0; let centerX = 0; let centerY = 0; let separateX = 0; let separateY = 0; let neighbors = 0
-      for (let otherIndex = 0; otherIndex < fish.length; otherIndex += 1) {
-        if (otherIndex === index) continue
-        const other = fish[otherIndex]; const dx = other.x - item.x; const dy = other.y - item.y; const distance = length(dx, dy)
-        if (distance > 118) continue
-        alignX += other.vx; alignY += other.vy; centerX += other.x; centerY += other.y; neighbors += 1
-        if (distance < 26 && distance > .001) { separateX -= dx / distance * (26 - distance); separateY -= dy / distance * (26 - distance) }
+      const bucketX = Math.floor(item.x / neighbourCell), bucketY = Math.floor(item.y / neighbourCell)
+      for (let y = bucketY - 1; y <= bucketY + 1; y += 1) for (let x = bucketX - 1; x <= bucketX + 1; x += 1) {
+        const nearby = neighbourBuckets.get(`${x}:${y}`)
+        if (!nearby) continue
+        for (const other of nearby) {
+          if (other === item) continue
+          const dx = other.x - item.x; const dy = other.y - item.y; const distance = length(dx, dy)
+          if (distance > neighbourCell) continue
+          alignX += other.vx; alignY += other.vy; centerX += other.x; centerY += other.y; neighbors += 1
+          if (distance < 26 && distance > .001) { separateX -= dx / distance * (26 - distance); separateY -= dy / distance * (26 - distance) }
+        }
       }
       if (neighbors) {
         alignX = alignX / neighbors - item.vx; alignY = alignY / neighbors - item.vy
@@ -333,27 +405,31 @@ export const createBluefishExperience = () => {
   }
   const drawDetailedFish = (item: Fish) => {
     if (!spritesReady || !spriteFrames.length) return
-    const angle = Math.atan2(item.vy, item.vx)
+    const mostlyHorizontal = Math.abs(item.vx) > Math.abs(item.vy) * 1.6
+    const angle = mostlyHorizontal ? 0 : Math.atan2(item.vy, item.vx)
     const spriteIndex = isolatedSpriteIndices[item.variant % isolatedSpriteIndices.length]
-    const width = item.size * 4.55
-    const height = item.size * 3.55
+    const width = item.size * 4.1
+    const height = item.size * 3.2
     let frame = tintedSpriteFrames.get(item.variant)
+    const source = spriteFrames[spriteIndex]
     if (!frame) {
-      const source = spriteFrames[spriteIndex]
       frame = document.createElement('canvas')
-      frame.width = source.width; frame.height = source.height
+      frame.width = source.image.width; frame.height = source.image.height
       const frameContext = frame.getContext('2d')!
       const grade = fishColorGrades[item.variant % fishColorGrades.length]
-      frameContext.filter = `contrast(1.12) saturate(1.23) brightness(.88) ${grade}`
-      frameContext.drawImage(source, 0, 0)
+      frameContext.drawImage(source.image, 0, 0)
+      gradeSpritePixels(frameContext, frame.width, frame.height, grade)
       tintedSpriteFrames.set(item.variant, frame)
     }
     context.save()
     context.translate(item.x, item.y)
     context.rotate(angle)
+    // The source sprites face right with their bellies at the bottom. Mirroring
+    // leftward horizontal motion preserves that natural upright orientation.
+    if (mostlyHorizontal && item.vx < 0) context.scale(-1, 1)
     context.globalAlpha = .98
-    context.imageSmoothingEnabled = true
-    context.drawImage(frame, -width / 2, -height / 2, width, height)
+    const scaleX = width / source.cellWidth, scaleY = height / source.cellHeight
+    context.drawImage(frame, -width / 2 + source.x * scaleX, -height / 2 + source.y * scaleY, frame.width * scaleX, frame.height * scaleY)
     context.restore()
   }
   const draw = (delta: number, now: number) => {
@@ -404,7 +480,7 @@ export const createBluefishExperience = () => {
       outputStream?.getTracks().forEach((track) => track.stop()); outputStream = null
       tintedSpriteFrames.clear(); lastRecordingCompositionAt = 0
       if (guideTimer !== null) window.clearTimeout(guideTimer); guideTimer = null; guide.classList.remove('is-visible')
-      pointer = null; pointerTarget = null; pointing = false; mouthPoint = null; mouthOpen = false; lastBiteAt = 0; bubbles.splice(0); startButton.disabled = false; startButton.textContent = '카메라 켜기'; startButton.classList.remove('is-hidden'); status.classList.remove('is-hidden')
+      pointer = null; pointerTarget = null; pointing = false; mouthPoint = null; mouthOpen = false; lastBiteAt = 0; lastFishBubbleScanAt = 0; bubbles.splice(0); startButton.disabled = false; startButton.textContent = '카메라 켜기'; startButton.classList.remove('is-hidden'); status.classList.remove('is-hidden')
     },
     getRecordingStream: () => {
       if (!open || !recordingCanvas.captureStream) return null

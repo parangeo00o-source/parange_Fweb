@@ -1,12 +1,19 @@
 import './style.css'
+import { createAngelDevilExperience } from './angel-devil'
 import { createCameraCapture } from './camera-capture'
 import { createBalloonExperience } from './balloon'
+import { createBirdImpactExperience } from './bird-impact'
 import { createBluefishExperience } from './bluefish'
 import { createElephantDrawingExperience } from './elephant-drawing'
+import { createFramingBlueprintExperience } from './framing-blueprint'
 import { createLemonadeExperience } from './lemonade'
+import { createParangePlanetExperience } from './parange-planet'
+import { createRubberHumanExperience } from './rubber-human'
+import { createShampooExperience } from './shampoo'
+import { createToothGemExperience } from './tooth-gem'
 import { createWaterTouchExperience } from './water-touch'
 
-type SymbolType = 'pip' | 'letter' | 'heart' | 'clover' | 'arrow' | 'double' | 'star' | 'paw' | 'lemon' | 'droplet' | 'balloon'
+type SymbolType = 'pip' | 'letter' | 'heart' | 'clover' | 'arrow' | 'double' | 'star' | 'paw' | 'lemon' | 'droplet' | 'balloon' | 'shampoo'
 type Destination = { route: string; label: string }
 type Dice = { id: string; color: string; markColor: string; texture: string; symbol: SymbolType; value: number | string; tilt: number; rounding: string; navigable: boolean } & Destination
 
@@ -94,8 +101,16 @@ const graphicSymbols: Array<{ type: Extract<SymbolType, 'heart' | 'clover' | 'st
 ]
 const dice: Dice[] = Array.from({ length: 48 }, (_, index) => {
   const symbol = symbols[(index * 7 + 3) % symbols.length]
-  const isElephantDrawingDie = parangeLetterByDice.get(index) === 'A'
-  const destination = isElephantDrawingDie
+  // The upper A is the tooth-jewel camera entry; retain the lower A's
+  // existing drawing-board destination.
+  const isToothGemDie = index === 4
+  const isElephantDrawingDie = parangeLetterByDice.get(index) === 'A' && !isToothGemDie
+  const isFramingBlueprintDie = parangeLetterByDice.get(index) === 'R'
+  const destination = isToothGemDie
+    ? { route: '#tooth-gem', label: 'Tooth Gem' }
+    : isFramingBlueprintDie
+    ? { route: '#framing-blueprint', label: 'Framing Blueprint' }
+    : isElephantDrawingDie
     ? { route: '#elephant-drawing', label: 'Elephant Drawing' }
     : index === 47
     ? { route: '#watertouch', label: 'WaterTouch' }
@@ -106,19 +121,33 @@ const dice: Dice[] = Array.from({ length: 48 }, (_, index) => {
     : index === lemonadeDiceIndex
     ? { route: '#lemonade', label: 'Lemonade' }
     : index === 17
-      ? { route: '#e', label: 'E' }
+      ? { route: '#e', label: 'PARANGE PLANET' }
     : destinations[index % destinations.length]
   const isTextSlot = symbol.type === 'letter' || symbol.type === 'double'
   const replacement = isTextSlot && !parangeLetterByDice.has(index)
     ? graphicSymbols[(index * 5 + 2) % graphicSymbols.length]
     : null
   const isWaterTouchDie = index === 47
+  // G is reserved for the glass-bird camera experience.
+  const isBirdImpactDie = parangeLetterByDice.get(index) === 'G'
+  // The N in the shuffled PARANGE set is the entry to the wink duel. Resolve
+  // it from its letter instead of freezing a position in the shuffled grid.
+  const isAngelDevilDie = parangeLetterByDice.get(index) === 'N'
   const isBalloonDie = index === 39
   const isLemonadeDie = index === lemonadeDiceIndex
-  const diceSymbol = isWaterTouchDie ? 'droplet' : isBalloonDie ? 'balloon' : isLemonadeDie ? 'lemon' : replacement?.type ?? (isTextSlot ? 'letter' : symbol.type)
+  // The first die is the entry point for Shampoo.
+  const isShampooDie = index === 0
+  // The upper-right die is the entry point for the new camera experiment.
+  const isRubberHumanDie = index === 7
+  const rubberHumanDestination = { route: '#rubber-human', label: '고무 인간' }
+  const shampooDestination = { route: '#shampoo', label: 'Shampoo' }
+  const angelDevilDestination = { route: '#angel-devil', label: 'Heaven vs Hell' }
+  const birdImpactDestination = { route: '#bird-impact', label: 'Glass Bird' }
+  const resolvedDestination = isBirdImpactDie ? birdImpactDestination : isAngelDevilDie ? angelDevilDestination : isShampooDie ? shampooDestination : isRubberHumanDie ? rubberHumanDestination : destination
+  const diceSymbol = isShampooDie ? 'shampoo' : isWaterTouchDie ? 'droplet' : isBalloonDie ? 'balloon' : isLemonadeDie ? 'lemon' : replacement?.type ?? (isTextSlot ? 'letter' : symbol.type)
   const value = replacement?.value ?? parangeLetterByDice.get(index) ?? symbol.value
-  const navigable = parangeLetterByDice.has(index) || isLemonadeDie || isWaterTouchDie || isBalloonDie || index === bluefishDiceIndex
-  return { id: `dice_${String(index + 1).padStart(2, '0')}`, color: shuffledColors[index], markColor: markColorFor(shuffledColors[index], index), texture: textureNames[(index * 5 + 1) % textureNames.length], symbol: diceSymbol, value, tilt: ((index * 17) % 9) - 4, rounding: roundingProfiles[(index * 3 + 1) % roundingProfiles.length], navigable, ...destination }
+  const navigable = parangeLetterByDice.has(index) || isBirdImpactDie || isAngelDevilDie || isToothGemDie || isLemonadeDie || isWaterTouchDie || isBalloonDie || isRubberHumanDie || isShampooDie || index === bluefishDiceIndex
+  return { id: `dice_${String(index + 1).padStart(2, '0')}`, color: shuffledColors[index], markColor: markColorFor(shuffledColors[index], index), texture: textureNames[(index * 5 + 1) % textureNames.length], symbol: diceSymbol, value, tilt: ((index * 17) % 9) - 4, rounding: roundingProfiles[(index * 3 + 1) % roundingProfiles.length], navigable, ...resolvedDestination }
 })
 
 const renderPips = (count: number) => Array.from({ length: count }, () => '<i class="pip"></i>').join('')
@@ -126,6 +155,7 @@ const renderPaw = () => `<span class="symbol symbol-paw" aria-hidden="true"><i><
 const renderLemon = () => `<span class="dice-icon dice-icon-lemon" aria-hidden="true"><svg viewBox="0 0 64 64"><ellipse cx="29" cy="35" rx="20" ry="16" fill="currentColor"/><path d="M41 20c2-8 8-11 14-9-1 7-6 11-14 11v-2Z" fill="currentColor"/></svg></span>`
 const renderDroplet = () => `<span class="dice-icon dice-icon-droplet" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M32 6C25 18 14 28 14 40c0 10 8 18 18 18s18-8 18-18C50 28 39 18 32 6Z" fill="currentColor"/></svg></span>`
 const renderBalloon = () => `<span class="dice-icon dice-icon-balloon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="27" rx="18" ry="21" fill="currentColor"/><path d="M26 46h12l-6 8-6-8Z" fill="currentColor"/><path d="M32 54c-5 3 5 5 0 9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M25 18c-4 4-5 9-4 12" stroke="rgba(255,255,255,.58)" stroke-width="3.5" stroke-linecap="round"/></svg></span>`
+const renderShampoo = () => `<span class="dice-icon dice-icon-shampoo" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="27" cy="36" r="17" fill="currentColor"/><circle cx="43" cy="19" r="9" fill="currentColor"/><path d="M17 31c2-5 6-8 10-8" fill="none" stroke="rgba(255,255,255,.72)" stroke-width="3.2" stroke-linecap="round"/><path d="M39 17c1.1-2.2 2.8-3.6 4.9-4.1" fill="none" stroke="rgba(255,255,255,.68)" stroke-width="2.2" stroke-linecap="round"/></svg></span>`
 const renderSymbol = (item: Dice) => item.symbol === 'pip'
   ? `<span class="pips pips-${item.value}">${renderPips(Number(item.value))}</span>`
   : item.symbol === 'paw'
@@ -136,6 +166,8 @@ const renderSymbol = (item: Dice) => item.symbol === 'pip'
         ? renderDroplet()
         : item.symbol === 'balloon'
           ? renderBalloon()
+          : item.symbol === 'shampoo'
+            ? renderShampoo()
     : `<span class="symbol symbol-${item.symbol}">${item.value}</span>`
 const renderFace = (face: string, item: Dice) => `<div class="dice-face ${face}"><div class="dice-surface">${renderSymbol(item)}</div></div>`
 
@@ -145,6 +177,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       ${dice.map((item, index) => `<div class="dice dice-${item.texture}${item.navigable ? ' dice-nav' : ''}" data-index="${index}"${item.navigable ? ` data-route="${item.route}" role="button" tabindex="0" aria-label="이동: ${item.label} 페이지"` : ''} style="--dice-color: ${item.color}; --mark-color: ${item.markColor}; --tilt: ${item.tilt}deg; --cube-radius: ${item.rounding}"><div class="dice-cube">${renderFace('dice-front', item)}${renderFace('dice-back', item)}${renderFace('dice-top', item)}${renderFace('dice-bottom', item)}${renderFace('dice-side', item)}${renderFace('dice-left', item)}</div></div>`).join('')}
     </div>
   </main>
+  <div class="cat-cursor" aria-hidden="true"><img src="/black-cat-cursor-optimized.png" alt=""></div>
   <section class="color-screen" aria-hidden="true">
     <button class="color-screen-close" type="button" aria-label="주사위 화면으로 돌아가기">×</button>
     <p class="color-screen-label"></p>
@@ -155,14 +188,22 @@ const diceElements = [...document.querySelectorAll<HTMLElement>('.dice')]
 const colorScreen = document.querySelector<HTMLElement>('.color-screen')!
 const colorScreenLabel = document.querySelector<HTMLElement>('.color-screen-label')!
 const colorScreenClose = document.querySelector<HTMLButtonElement>('.color-screen-close')!
+const catCursor = document.querySelector<HTMLElement>('.cat-cursor')!
 const lemonadeExperience = createLemonadeExperience()
+const parangePlanetExperience = createParangePlanetExperience()
 const waterTouchExperience = createWaterTouchExperience()
 const balloonExperience = createBalloonExperience()
+const birdImpactExperience = createBirdImpactExperience()
 const bluefishExperience = createBluefishExperience()
 const elephantDrawingExperience = createElephantDrawingExperience()
+const framingBlueprintExperience = createFramingBlueprintExperience()
+const rubberHumanExperience = createRubberHumanExperience()
+const shampooExperience = createShampooExperience()
+const toothGemExperience = createToothGemExperience()
+const angelDevilExperience = createAngelDevilExperience()
 const cameraCapture = createCameraCapture()
-cameraCapture.setRecordingStreamSource(() => lemonadeExperience.getRecordingStream() ?? waterTouchExperience.getRecordingStream() ?? bluefishExperience.getRecordingStream() ?? elephantDrawingExperience.getRecordingStream())
-cameraCapture.setPhotoCanvasSource(() => lemonadeExperience.getRecordingCanvas() ?? waterTouchExperience.getRecordingCanvas() ?? bluefishExperience.getRecordingCanvas() ?? elephantDrawingExperience.getRecordingCanvas())
+cameraCapture.setRecordingStreamSource(() => birdImpactExperience.getRecordingStream() ?? lemonadeExperience.getRecordingStream() ?? waterTouchExperience.getRecordingStream() ?? bluefishExperience.getRecordingStream() ?? elephantDrawingExperience.getRecordingStream() ?? framingBlueprintExperience.getRecordingStream() ?? rubberHumanExperience.getRecordingStream() ?? shampooExperience.getRecordingStream() ?? toothGemExperience.getRecordingStream() ?? angelDevilExperience.getRecordingStream())
+cameraCapture.setPhotoCanvasSource(() => birdImpactExperience.getRecordingCanvas() ?? lemonadeExperience.getRecordingCanvas() ?? waterTouchExperience.getRecordingCanvas() ?? bluefishExperience.getRecordingCanvas() ?? elephantDrawingExperience.getRecordingCanvas() ?? framingBlueprintExperience.getRecordingCanvas() ?? rubberHumanExperience.getRecordingCanvas() ?? shampooExperience.getRecordingCanvas() ?? toothGemExperience.getRecordingCanvas() ?? angelDevilExperience.getRecordingCanvas())
 let frame = 0
 let lastPointer: { x: number; y: number } | null = null
 let pendingRoll = { x: 0, y: 0 }
@@ -173,6 +214,38 @@ let hoveredDie: HTMLElement | null = null
 let pointerDown: { x: number; y: number; element: HTMLElement } | null = null
 let navigating = false
 let colorScreenOpen = false
+const finePointer = window.matchMedia('(pointer: fine)')
+let catCursorFrame = 0
+let pendingCatCursor: { x: number; y: number } | null = null
+const hideCatCursor = () => {
+  if (catCursorFrame) cancelAnimationFrame(catCursorFrame)
+  catCursorFrame = 0
+  pendingCatCursor = null
+  catCursor.classList.remove('is-visible')
+}
+const renderCatCursor = () => {
+  catCursorFrame = 0
+  if (!pendingCatCursor || colorScreenOpen) return
+  const { x, y } = pendingCatCursor
+  pendingCatCursor = null
+  // Anchor the pointer near the leading front paw so the cat reads as the
+  // cursor, rather than as a sticker offset from it.
+  catCursor.style.transform = `translate3d(${x - 16}px, ${y - 58}px, 0)`
+  catCursor.classList.add('is-visible')
+}
+const moveCatCursor = (event: PointerEvent) => {
+  if (event.pointerType !== 'mouse' || !finePointer.matches || colorScreenOpen) {
+    hideCatCursor()
+    return
+  }
+  // A display can receive mouse events far faster than it can paint. Keep only
+  // the newest point and update once per paint frame for identical movement.
+  pendingCatCursor = { x: event.clientX, y: event.clientY }
+  if (!catCursorFrame) catCursorFrame = requestAnimationFrame(renderCatCursor)
+}
+window.addEventListener('pointermove', moveCatCursor, { passive: true })
+window.addEventListener('blur', hideCatCursor)
+document.addEventListener('mouseleave', hideCatCursor)
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
 type DiceState = {
   rollX: number; rollY: number; targetRollX: number; targetRollY: number
@@ -391,9 +464,14 @@ window.addEventListener('mouseleave', () => {
   hoveredDie = null
   clearIdleRoll()
 })
+let resizeFrame = 0
 window.addEventListener('resize', () => {
-  measureDiceCenters()
-  scheduleUpdate()
+  if (resizeFrame) return
+  resizeFrame = requestAnimationFrame(() => {
+    resizeFrame = 0
+    measureDiceCenters()
+    scheduleUpdate()
+  })
 })
 window.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -407,9 +485,15 @@ window.addEventListener('visibilitychange', () => {
 })
 
 const openColorScreen = (destination: Dice) => {
+  hideCatCursor()
   if (destination.label === 'Lemonade') {
     colorScreenOpen = true
     lemonadeExperience.open()
+    return
+  }
+  if (destination.label === 'PARANGE PLANET') {
+    colorScreenOpen = true
+    parangePlanetExperience.open()
     return
   }
   if (destination.label === 'WaterTouch') {
@@ -422,6 +506,11 @@ const openColorScreen = (destination: Dice) => {
     balloonExperience.open()
     return
   }
+  if (destination.label === 'Glass Bird') {
+    colorScreenOpen = true
+    birdImpactExperience.open()
+    return
+  }
   if (destination.label === 'Bluefish') {
     colorScreenOpen = true
     bluefishExperience.open()
@@ -430,6 +519,31 @@ const openColorScreen = (destination: Dice) => {
   if (destination.label === 'Elephant Drawing') {
     colorScreenOpen = true
     elephantDrawingExperience.open()
+    return
+  }
+  if (destination.label === 'Framing Blueprint') {
+    colorScreenOpen = true
+    framingBlueprintExperience.open()
+    return
+  }
+  if (destination.label === '고무 인간') {
+    colorScreenOpen = true
+    rubberHumanExperience.open()
+    return
+  }
+  if (destination.label === 'Shampoo') {
+    colorScreenOpen = true
+    shampooExperience.open()
+    return
+  }
+  if (destination.label === 'Tooth Gem') {
+    colorScreenOpen = true
+    toothGemExperience.open()
+    return
+  }
+  if (destination.label === 'Heaven vs Hell') {
+    colorScreenOpen = true
+    angelDevilExperience.open()
     return
   }
   colorScreen.style.setProperty('--screen-color', destination.color)
@@ -443,10 +557,17 @@ const openColorScreen = (destination: Dice) => {
 const closeColorScreen = (restoreHistory = false) => {
   if (!colorScreenOpen) return
   lemonadeExperience.close()
+  parangePlanetExperience.close()
   waterTouchExperience.close()
   balloonExperience.close()
+  birdImpactExperience.close()
   bluefishExperience.close()
   elephantDrawingExperience.close()
+  framingBlueprintExperience.close()
+  rubberHumanExperience.close()
+  shampooExperience.close()
+  toothGemExperience.close()
+  angelDevilExperience.close()
   colorScreen.classList.remove('is-open')
   colorScreen.setAttribute('aria-hidden', 'true')
   colorScreenOpen = false
@@ -466,11 +587,12 @@ const navigateTo = (element: HTMLElement) => {
   const state = diceStates.get(element)
   if (!destination?.navigable || !state) return
   navigating = true
+  hideCatCursor()
   element.classList.add('is-animating')
   state.clickStartedAt = performance.now()
   activateDice(element)
 
-  window.setTimeout(() => {
+  const finishNavigation = () => {
     // This is SPA-style navigation: consumers can listen for this event to render
     // the matching view without forcing a full page reload.
     history.pushState({ diceId: destination.id }, '', destination.route)
@@ -482,7 +604,11 @@ const navigateTo = (element: HTMLElement) => {
     state.clickSpin = 0
     navigating = false
     activateDice(element)
-  }, 440)
+  }
+  // Camera permission is requested from the original N-die interaction so the
+  // new face effect opens with the camera already active, not after its roll.
+  if (destination.label === 'Heaven vs Hell' || destination.label === 'Glass Bird') finishNavigation()
+  else window.setTimeout(finishNavigation, 440)
 }
 
 measureDiceCenters()

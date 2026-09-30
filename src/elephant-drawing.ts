@@ -12,6 +12,11 @@ export const createElephantDrawingExperience = () => {
   screen.className = 'elephant-draw-screen'
   screen.setAttribute('aria-hidden', 'true')
   screen.innerHTML = `
+    <svg class="elephant-vhs-filter-definitions" aria-hidden="true" focusable="false">
+      <filter id="elephant-camcorder-grade" color-interpolation-filters="sRGB">
+        <feColorMatrix type="matrix" values=".87 .056 .035 0 .011 .021 .923 .077 0 .011 .014 .105 .944 0 .014 0 0 0 1 0" />
+      </filter>
+    </svg>
     <div class="elephant-board" aria-label="코끼리 드로잉 보드">
       <div class="elephant-head" aria-hidden="true"></div>
       <div class="elephant-ear" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -26,6 +31,8 @@ export const createElephantDrawingExperience = () => {
       </header>
       <div class="elephant-canvas-frame">
         <video class="elephant-camera" autoplay muted playsinline></video>
+        <canvas class="elephant-camera-texture" aria-hidden="true"></canvas>
+        <div class="elephant-vhs-overlay" aria-hidden="true"></div>
         <canvas class="elephant-canvas" aria-label="그림판. 마우스 또는 터치로 그림을 그릴 수 있습니다."></canvas>
         <div class="elephant-stylus" aria-hidden="true">●</div>
       </div>
@@ -42,6 +49,8 @@ export const createElephantDrawingExperience = () => {
   const canvas = screen.querySelector<HTMLCanvasElement>('.elephant-canvas')!
   const context = canvas.getContext('2d', { alpha: true })!
   const video = screen.querySelector<HTMLVideoElement>('.elephant-camera')!
+  const cameraTexture = screen.querySelector<HTMLCanvasElement>('.elephant-camera-texture')!
+  const cameraTextureContext = cameraTexture.getContext('2d', { alpha: false })!
   const status = screen.querySelector<HTMLElement>('.elephant-status')!
   const stylus = screen.querySelector<HTMLElement>('.elephant-stylus')!
   const startButton = screen.querySelector<HTMLButtonElement>('.elephant-camera-start')!
@@ -87,6 +96,38 @@ export const createElephantDrawingExperience = () => {
     canvasRatio = ratio
     context.setTransform(ratio, 0, 0, ratio, 0, 0)
     if (snapshot.width && snapshot.height) context.drawImage(snapshot, 0, 0, snapshot.width, snapshot.height, 0, 0, bounds.width, bounds.height)
+  }
+  const renderCameraTexture = () => {
+    if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || !video.videoWidth || !video.videoHeight) return
+    const bounds = cameraTexture.getBoundingClientRect()
+    // A small, deliberately lower-resolution backing store is scaled back to
+    // the LCD window. This produces the soft, merged detail of a camcorder
+    // display instead of a CSS-only blur over a sharp modern video frame.
+    const textureScale = .54
+    const width = Math.max(1, Math.round(bounds.width * textureScale))
+    const height = Math.max(1, Math.round(bounds.height * textureScale))
+    if (cameraTexture.width !== width || cameraTexture.height !== height) {
+      cameraTexture.width = width
+      cameraTexture.height = height
+    }
+    const sourceAspect = video.videoWidth / video.videoHeight
+    const destinationAspect = width / height
+    let sourceX = 0
+    let sourceY = 0
+    let sourceWidth = video.videoWidth
+    let sourceHeight = video.videoHeight
+    if (sourceAspect > destinationAspect) {
+      sourceWidth = sourceHeight * destinationAspect
+      sourceX = (video.videoWidth - sourceWidth) / 2
+    } else if (sourceAspect < destinationAspect) {
+      sourceHeight = sourceWidth / destinationAspect
+      sourceY = (video.videoHeight - sourceHeight) / 2
+    }
+    cameraTextureContext.imageSmoothingEnabled = true
+    cameraTextureContext.imageSmoothingQuality = 'low'
+    cameraTextureContext.setTransform(-1, 0, 0, 1, width, 0)
+    cameraTextureContext.drawImage(video, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, width, height)
+    cameraTextureContext.setTransform(1, 0, 0, 1, 0, 0)
   }
   const pointFromClient = (clientX: number, clientY: number): Point => {
     const bounds = canvas.getBoundingClientRect()
@@ -198,11 +239,22 @@ export const createElephantDrawingExperience = () => {
     lastHandSeenAt = now
     const bounds = canvas.getBoundingClientRect()
     const tip = landmarks[8]
-    // The preview uses object-fit: fill, so use the full landmark plane as-is.
-    // This keeps the visible fingertip and the drawing cursor aligned at every
-    // edge of the webcam image, including the lower-right corner.
-    const mappedX = Math.max(0, Math.min(1, 1 - tip.x))
-    const mappedY = Math.max(0, Math.min(1, tip.y))
+    // The preview preserves the camera's native aspect ratio with
+    // `object-fit: cover`. Translate the MediaPipe point through that same
+    // centre crop so the finger and drawing cursor remain aligned.
+    const videoAspect = video.videoWidth && video.videoHeight ? video.videoWidth / video.videoHeight : 16 / 9
+    const frameAspect = bounds.width / Math.max(bounds.height, 1)
+    let mappedX = 1 - tip.x
+    let mappedY = tip.y
+    if (videoAspect > frameAspect) {
+      const scale = videoAspect / frameAspect
+      mappedX = mappedX * scale - (scale - 1) / 2
+    } else if (videoAspect < frameAspect) {
+      const scale = frameAspect / videoAspect
+      mappedY = mappedY * scale - (scale - 1) / 2
+    }
+    mappedX = Math.max(0, Math.min(1, mappedX))
+    mappedY = Math.max(0, Math.min(1, mappedY))
     const point = { x: mappedX * bounds.width, y: mappedY * bounds.height }
     if (lastTrackedPoint && lastTrackedAt) {
       const elapsed = Math.max(1, now - lastTrackedAt)
@@ -249,6 +301,7 @@ export const createElephantDrawingExperience = () => {
       frame = null
       return
     }
+    renderCameraTexture()
     trackHand(now)
     frame = requestAnimationFrame(animate)
   }
@@ -283,6 +336,7 @@ export const createElephantDrawingExperience = () => {
       stream?.getTracks().forEach((track) => track.stop())
       stream = null
       video.srcObject = null
+      cameraTextureContext.clearRect(0, 0, cameraTexture.width, cameraTexture.height)
       startButton.disabled = false
       setCameraButtonLabel('Retry Camera')
       showHint('Camera unavailable — use mouse or touch.')
@@ -395,6 +449,7 @@ export const createElephantDrawingExperience = () => {
       stream?.getTracks().forEach((track) => track.stop())
       stream = null
       video.srcObject = null
+      cameraTextureContext.clearRect(0, 0, cameraTexture.width, cameraTexture.height)
       outputStream?.getTracks().forEach((track) => track.stop())
       outputStream = null
       lastVideoTime = -1

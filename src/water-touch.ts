@@ -108,14 +108,22 @@ export const createWaterTouchExperience = () => {
       }
       // Match CSS object-fit: cover. The previous direct UV lookup stretched
       // the camera whenever its native aspect ratio differed from the screen.
-      vec2 source = uv + displacement;
+      // Convert the screen coordinate to the exact cover-fit
+      // source coordinate first. Keeping the cover scale explicit prevents
+      // side stretching when a portrait viewport receives a landscape feed.
       float viewportAspect = aspect;
-      float videoAspect = uVideoSize.x / uVideoSize.y;
+      float videoAspect = uVideoSize.x / max(uVideoSize.y, 1.);
+      vec2 coverScale = vec2(1.);
       if (viewportAspect > videoAspect) {
-        source.y = (source.y - .5) * viewportAspect / videoAspect + .5;
+        // A wider viewport crops the video vertically. Texture-space scale is
+        // video / viewport (not its inverse), matching CSS object-fit: cover.
+        coverScale.y = videoAspect / viewportAspect;
       } else {
-        source.x = (source.x - .5) * videoAspect / viewportAspect + .5;
+        // A taller viewport crops the video horizontally. The previous inverse
+        // scale sent side pixels outside the texture and stretched its edge.
+        coverScale.x = viewportAspect / videoAspect;
       }
+      vec2 source = (uv - .5) * coverScale + .5 + displacement * coverScale;
       source.x = 1. - source.x;
       vec3 color = texture2D(uCamera, clamp(source, .001, .999)).rgb;
       gl_FragColor = vec4(color, 1.);
@@ -163,9 +171,19 @@ export const createWaterTouchExperience = () => {
   }
   const resize = () => {
     if (!gl) return
-    const ratio = Math.min(window.devicePixelRatio || 1, 1.5)
-    const width = Math.round(window.innerWidth * ratio)
-    const height = Math.round(window.innerHeight * ratio)
+    // A WebGL backing buffer larger than the device viewport limit can produce
+    // corrupted strips at the sides on mobile GPUs. Limit the backing buffer
+    // with one shared scale so its aspect ratio remains exactly unchanged.
+    const maxViewport = gl.getParameter(gl.MAX_VIEWPORT_DIMS) as Int32Array
+    const maxDimension = Math.min(maxViewport[0], maxViewport[1])
+    const ratio = Math.min(
+      window.devicePixelRatio || 1,
+      1.5,
+      maxDimension / Math.max(window.innerWidth, 1),
+      maxDimension / Math.max(window.innerHeight, 1),
+    )
+    const width = Math.max(1, Math.round(window.innerWidth * ratio))
+    const height = Math.max(1, Math.round(window.innerHeight * ratio))
     if (canvasWidth === width && canvasHeight === height) return false
     canvasWidth = width
     canvasHeight = height
@@ -235,7 +253,7 @@ export const createWaterTouchExperience = () => {
     if (!open) return
     const viewportChanged = resize()
     if (tracking) inferHands(now)
-    if (gl && shaderProgram && texture && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+    if (gl && shaderProgram && texture && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth && video.videoHeight) {
       for (let index = ripples.length - 1; index >= 0; index -= 1) {
         if (now - ripples[index].startedAt > 2_600) { ripples.splice(index, 1); ripplesDirty = true }
       }
