@@ -12,9 +12,8 @@ const hasLocalCertificate = existsSync(certificatePath('vite-local.pem'))
   && existsSync(certificatePath('vite-local-key.pem'))
 
 export default defineConfig({
-  // GitHub project Pages are served below /<repository>/ rather than /.
-  // The deployment workflow supplies this value; local development stays at /.
-  base: process.env.VITE_BASE_PATH || '/',
+  // The custom domain serves this site from the domain root.
+  base: '/',
   server: {
     // Listen on every network interface so other devices on this LAN can connect.
     host: true,
