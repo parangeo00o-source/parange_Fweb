@@ -118,7 +118,7 @@ export const createBluefishExperience = () => {
     }
     spritesReady = true
   })
-  fishSprites.src = '/bluefish/fish-sprites.png'
+  fishSprites.src = `${import.meta.env.BASE_URL}bluefish/fish-sprites.png`
   let stream: MediaStream | null = null
   let landmarker: HandLandmarker | null = null
   let faceLandmarker: FaceLandmarker | null = null

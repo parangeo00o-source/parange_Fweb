@@ -177,7 +177,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       ${dice.map((item, index) => `<div class="dice dice-${item.texture}${item.navigable ? ' dice-nav' : ''}" data-index="${index}"${item.navigable ? ` data-route="${item.route}" role="button" tabindex="0" aria-label="이동: ${item.label} 페이지"` : ''} style="--dice-color: ${item.color}; --mark-color: ${item.markColor}; --tilt: ${item.tilt}deg; --cube-radius: ${item.rounding}"><div class="dice-cube">${renderFace('dice-front', item)}${renderFace('dice-back', item)}${renderFace('dice-top', item)}${renderFace('dice-bottom', item)}${renderFace('dice-side', item)}${renderFace('dice-left', item)}</div></div>`).join('')}
     </div>
   </main>
-  <div class="cat-cursor" aria-hidden="true"><img src="/black-cat-cursor-optimized.png" alt=""></div>
+  <div class="cat-cursor" aria-hidden="true"><img src="${import.meta.env.BASE_URL}black-cat-cursor-optimized.png" alt=""></div>
   <section class="color-screen" aria-hidden="true">
     <button class="color-screen-close" type="button" aria-label="주사위 화면으로 돌아가기">×</button>
     <p class="color-screen-label"></p>

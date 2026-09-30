@@ -88,7 +88,7 @@ export const createLemonadeExperience = () => {
     const node = document.createElement('div')
     node.className = 'lemon'
     node.dataset.lemon = String(lemon.id)
-    node.innerHTML = `<div class="lemon-fallback"></div><img src="/lemons/lemon.png" alt="" onerror="this.style.display='none'" /><span></span>`
+    node.innerHTML = `<div class="lemon-fallback"></div><img src="${import.meta.env.BASE_URL}lemons/lemon.png" alt="" onerror="this.style.display='none'" /><span></span>`
     orchard.append(node)
     lemonNodes.set(lemon.id, node)
   })

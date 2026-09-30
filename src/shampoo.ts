@@ -520,7 +520,7 @@ export const createShampooExperience = () => {
       if (labelledPersonIndex >= 0) personMaskIndex = labelledPersonIndex
       else if (labels.length === 2) personMaskIndex = 1
       else throw new Error('Selfie Segmenter person confidence mask is unavailable')
-      handWorker = new Worker('/shampoo-hand-worker.js')
+      handWorker = new Worker(`${import.meta.env.BASE_URL}shampoo-hand-worker.js`)
       handWorker.onmessage = (event: MessageEvent<{ type: string; hands?: Array<{ handedness: string; landmarks: Landmark[] }>; message?: string }>) => {
         handRequestPending = false
         if (event.data.type === 'result' && event.data.hands) applyHands(event.data.hands, performance.now())
