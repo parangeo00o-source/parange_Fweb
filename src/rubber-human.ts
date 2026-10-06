@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+import { revealOnFirstVideoFrame } from './camera-page'
 
 type Point = { x: number; y: number }
 type Face = { center: Point; radius: Point; skinCenter: Point; skinRadius: Point }
@@ -32,6 +33,8 @@ export const createRubberHumanExperience = () => {
   const closeButton = screen.querySelector<HTMLButtonElement>('.rubber-human-close')!
   const guide = screen.querySelector<HTMLElement>('.rubber-human-guide')!
   const gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: false })
+  const maxViewportDimensions = gl?.getParameter(gl.MAX_VIEWPORT_DIMS) as Int32Array | undefined
+  const maxViewportDimension = maxViewportDimensions ? Math.min(maxViewportDimensions[0], maxViewportDimensions[1]) : 1
 
   let stream: MediaStream | null = null
   let handLandmarker: HandLandmarker | null = null
@@ -53,6 +56,9 @@ export const createRubberHumanExperience = () => {
   let uploadedVideoHeight = 0
   let face: Face | null = null
   const pulls = new Map<string, RubberPull>()
+  const pullAnchors = new Float32Array(4)
+  const pullDrags = new Float32Array(4)
+  const pullAmounts = new Float32Array(2)
   let samplerUniform: WebGLUniformLocation | null = null
   let faceUniform: WebGLUniformLocation | null = null
   let skinUniform: WebGLUniformLocation | null = null
@@ -189,8 +195,7 @@ export const createRubberHumanExperience = () => {
   }
   const resize = () => {
     if (!gl) return false
-    const maxViewport = gl.getParameter(gl.MAX_VIEWPORT_DIMS) as Int32Array
-    const ratio = Math.min(window.devicePixelRatio || 1, 1.5, Math.min(maxViewport[0], maxViewport[1]) / Math.max(window.innerWidth, window.innerHeight, 1))
+    const ratio = Math.min(window.devicePixelRatio || 1, 1.5, maxViewportDimension / Math.max(window.innerWidth, window.innerHeight, 1))
     const width = Math.max(1, Math.round(window.innerWidth * ratio))
     const height = Math.max(1, Math.round(window.innerHeight * ratio))
     if (width === canvasWidth && height === canvasHeight) return false
@@ -308,18 +313,18 @@ export const createRubberHumanExperience = () => {
       const videoChanged = uploadedVideoWidth !== video.videoWidth || uploadedVideoHeight !== video.videoHeight
       if (viewportChanged || videoChanged) { gl.uniform2f(viewportUniform, canvas.width, canvas.height); gl.uniform2f(videoSizeUniform, video.videoWidth, video.videoHeight); uploadedVideoWidth = video.videoWidth; uploadedVideoHeight = video.videoHeight }
       const currentFace = face ?? { center: { x: .5, y: .5 }, radius: { x: .001, y: .001 }, skinCenter: { x: .5, y: .5 }, skinRadius: { x: .001, y: .001 } }
-      const activePulls = [...pulls.values()].slice(0, 2)
-      const anchors = new Float32Array([-2, -2, -2, -2])
-      const drags = new Float32Array([-2, -2, -2, -2])
-      const amounts = new Float32Array([0, 0])
-      activePulls.forEach((pull, index) => {
-        anchors[index * 2] = pull.anchor.x; anchors[index * 2 + 1] = pull.anchor.y
-        drags[index * 2] = pull.drag.x; drags[index * 2 + 1] = pull.drag.y
-        amounts[index] = pull.amount
-      })
+      pullAnchors.fill(-2); pullDrags.fill(-2); pullAmounts.fill(0)
+      let pullIndex = 0
+      for (const pull of pulls.values()) {
+        if (pullIndex === 2) break
+        pullAnchors[pullIndex * 2] = pull.anchor.x; pullAnchors[pullIndex * 2 + 1] = pull.anchor.y
+        pullDrags[pullIndex * 2] = pull.drag.x; pullDrags[pullIndex * 2 + 1] = pull.drag.y
+        pullAmounts[pullIndex] = pull.amount
+        pullIndex += 1
+      }
       gl.uniform4f(faceUniform, currentFace.center.x, currentFace.center.y, currentFace.radius.x, currentFace.radius.y)
       gl.uniform4f(skinUniform, currentFace.skinCenter.x, currentFace.skinCenter.y, currentFace.skinRadius.x, currentFace.skinRadius.y)
-      gl.uniform2fv(anchorsUniform, anchors); gl.uniform2fv(dragsUniform, drags); gl.uniform1fv(amountsUniform, amounts)
+      gl.uniform2fv(anchorsUniform, pullAnchors); gl.uniform2fv(dragsUniform, pullDrags); gl.uniform1fv(amountsUniform, pullAmounts)
       gl.drawArrays(gl.TRIANGLES, 0, 6)
     }
     frame = requestAnimationFrame(draw)
@@ -330,19 +335,30 @@ export const createRubberHumanExperience = () => {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream; await video.play(); setupRenderer()
+      revealOnFirstVideoFrame(screen, video)
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       const options = { runningMode: 'VIDEO' as const }
       handLandmarker = await HandLandmarker.createFromOptions(vision, { ...options, baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task' }, numHands: 2 })
       faceLandmarker = await FaceLandmarker.createFromOptions(vision, { ...options, baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task' }, numFaces: 1 })
       tracking = true; startButton.classList.add('is-hidden'); screen.classList.add('is-tracking'); guide.textContent = '핀치로 얼굴을 잡아보세요'
-    } catch (error) { console.error(error); startButton.disabled = false; startButton.textContent = '카메라 다시 켜기' }
+    } catch (error) { console.error(error); screen.classList.remove('is-camera-pending'); startButton.disabled = false; startButton.textContent = '카메라 다시 켜기' }
   }
+  const syncVisibility = () => {
+    if (document.hidden) {
+      cancelAnimationFrame(frame)
+      frame = 0
+    } else if (open && !frame) {
+      lastTime = performance.now()
+      frame = requestAnimationFrame(draw)
+    }
+  }
+  document.addEventListener('visibilitychange', syncVisibility)
   startButton.addEventListener('click', startCamera)
   closeButton.addEventListener('click', () => history.back())
   return {
-    open: () => { open = true; screen.classList.add('is-open'); screen.setAttribute('aria-hidden', 'false'); lastTime = performance.now(); frame = requestAnimationFrame(draw); closeButton.focus() },
+    open: () => { open = true; screen.classList.add('is-open', 'is-camera-pending'); screen.setAttribute('aria-hidden', 'false'); lastTime = performance.now(); if (!document.hidden) frame = requestAnimationFrame(draw); void startCamera(); closeButton.focus() },
     close: () => {
-      open = false; cancelAnimationFrame(frame); screen.classList.remove('is-open', 'is-tracking'); screen.setAttribute('aria-hidden', 'true'); tracking = false
+      open = false; cancelAnimationFrame(frame); frame = 0; screen.classList.remove('is-open', 'is-tracking'); screen.setAttribute('aria-hidden', 'true'); tracking = false
       handLandmarker?.close(); handLandmarker = null; faceLandmarker?.close(); faceLandmarker = null
       stream?.getTracks().forEach((track) => track.stop()); stream = null; video.srcObject = null; outputStream?.getTracks().forEach((track) => track.stop()); outputStream = null
       lastUploadedVideoTime = -1; uploadedVideoWidth = 0; uploadedVideoHeight = 0; lastFaceAt = 0; face = null; pulls.clear()

@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver, HandLandmarker, ImageSegmenter } from '@mediapipe/tasks-vision'
+import { revealOnFirstVideoFrame } from './camera-page'
 
 type Frame = { x: number; y: number; width: number; height: number }
 type Point = { x: number; y: number }
@@ -442,6 +443,7 @@ export const createFramingBlueprintExperience = () => {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream; await video.play()
+      revealOnFirstVideoFrame(screen, video)
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       handLandmarker = await HandLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task' }, runningMode: 'VIDEO', numHands: 1 })
       faceLandmarker = await FaceLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task' }, runningMode: 'VIDEO', numFaces: 1 })
@@ -451,12 +453,12 @@ export const createFramingBlueprintExperience = () => {
         personCategory = detectedPersonCategory >= 0 ? detectedPersonCategory : 1
       } catch (error) { console.warn('Person segmentation model could not load', error); segmenter = null }
       tracking = true; startButton.classList.add('is-hidden'); screen.classList.add('is-tracking'); setStatus('V 제스처를 만들면 픽셀 효과가 나타납니다')
-    } catch (error) { console.error(error); setStatus('카메라 권한을 확인한 뒤 다시 시도해 주세요'); startButton.disabled = false; startButton.textContent = '카메라 다시 켜기'; stream?.getTracks().forEach((track) => track.stop()); stream = null; video.srcObject = null }
+    } catch (error) { console.error(error); screen.classList.remove('is-camera-pending'); setStatus('카메라 권한을 확인한 뒤 다시 시도해 주세요'); startButton.disabled = false; startButton.textContent = '카메라 다시 켜기'; stream?.getTracks().forEach((track) => track.stop()); stream = null; video.srcObject = null }
   }
   startButton.addEventListener('click', () => void startCamera())
   closeButton.addEventListener('click', () => history.back())
   return {
-    open: () => { open = true; needsResize = true; resize(); screen.classList.add('is-open'); screen.setAttribute('aria-hidden', 'false'); setStatus('카메라를 켠 뒤 V 제스처를 만들어 보세요'); animation = requestAnimationFrame(run); closeButton.focus() },
+    open: () => { open = true; needsResize = true; resize(); screen.classList.add('is-open', 'is-camera-pending'); screen.setAttribute('aria-hidden', 'false'); setStatus('카메라를 켠 뒤 V 제스처를 만들어 보세요'); animation = requestAnimationFrame(run); void startCamera(); closeButton.focus() },
     close: () => { open = false; cancelAnimationFrame(animation); screen.classList.remove('is-open', 'is-tracking'); screen.setAttribute('aria-hidden', 'true'); tracking = false; handLandmarker?.close(); handLandmarker = null; faceLandmarker?.close(); faceLandmarker = null; segmenter?.close(); segmenter = null; stream?.getTracks().forEach((track) => track.stop()); stream = null; outputStream?.getTracks().forEach((track) => track.stop()); outputStream = null; video.srcObject = null; personMask = null; personBounds = null; personHead = null; headContour = null; faceContour = null; lastFaceContourAt = 0; handTileMask = null; personCategory = 1; starParticles.splice(0); loveReadings = []; gestureAnchor = null; lastParticleRenderAt = 0; lastParticleUpdateAt = 0; lastLoveReadingAt = 0; lastRenderedVideoTime = -1; lastGestureInference = 0; lastGestureVideoTime = -1; lastGestureAt = 0; lastFaceInference = 0; lastFaceVideoTime = -1; lastSegmentation = 0; lastSegmentedVideoTime = -1; effectActive = false; opacity = 0; startButton.disabled = false; startButton.textContent = '카메라 켜기'; startButton.classList.remove('is-hidden') },
     getRecordingStream: () => { if (!open || !canvas.captureStream) return null; outputStream ??= canvas.captureStream(30); return outputStream },
     getRecordingCanvas: () => open ? canvas : null,

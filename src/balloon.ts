@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+import { revealOnFirstVideoFrame } from './camera-page'
 
 type Point = { x: number; y: number }
 type Balloon = { id: number; x: number; y: number; vx: number; vy: number; radius: number; color: string; stringLength: number; grabbed: boolean; zoomStartedAt: number | null; zoomCooldownUntil: number; node: HTMLElement }
@@ -194,6 +195,7 @@ export const createBalloonExperience = () => {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream
       await video.play()
+      revealOnFirstVideoFrame(screen, video)
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       landmarker = await HandLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task' }, runningMode: 'VIDEO', numHands: 2 })
       faceLandmarker = await FaceLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task' }, runningMode: 'VIDEO', numFaces: 1 })
@@ -202,6 +204,7 @@ export const createBalloonExperience = () => {
       screen.classList.add('is-tracking')
     } catch (error) {
       console.error(error)
+      screen.classList.remove('is-camera-pending')
       startButton.disabled = false
       startButton.textContent = '카메라 다시 켜기'
     }
@@ -209,7 +212,7 @@ export const createBalloonExperience = () => {
   startButton.addEventListener('click', startCamera)
   closeButton.addEventListener('click', () => history.back())
   return {
-    open: () => { open = true; screen.classList.add('is-open'); screen.setAttribute('aria-hidden', 'false'); lastTime = performance.now(); frame = requestAnimationFrame(run); closeButton.focus() },
+    open: () => { open = true; screen.classList.add('is-open', 'is-camera-pending'); screen.setAttribute('aria-hidden', 'false'); lastTime = performance.now(); frame = requestAnimationFrame(run); void startCamera(); closeButton.focus() },
     close: () => {
       open = false; cancelAnimationFrame(frame); screen.classList.remove('is-open', 'is-tracking'); screen.setAttribute('aria-hidden', 'true'); tracking = false
       landmarker?.close(); landmarker = null; stream?.getTracks().forEach((track) => track.stop()); stream = null; video.srcObject = null

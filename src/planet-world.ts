@@ -341,9 +341,14 @@ export const createPlanetWorld = (canvas: HTMLCanvasElement, landmarks: Landmark
   canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel)
   canvas.addEventListener('wheel',event=>{event.preventDefault();if(!arrival)targetZoom=clamp(targetZoom*Math.exp(-event.deltaY*.001),.7,2.7)},{passive:false})
   window.addEventListener('resize',()=>{if(active)resize()},{passive:true})
+  const syncVisibility=()=>{
+    if(document.hidden){cancelAnimationFrame(frame);frame=0}
+    else if(active&&!frame){lastTime=performance.now();frame=requestAnimationFrame(render)}
+  }
+  document.addEventListener('visibilitychange',syncVisibility)
   return {
-    open:()=>{active=true;lastTime=performance.now();resize();cancelAnimationFrame(frame);frame=requestAnimationFrame(render)},
-    close:()=>{active=false;pointer=null;cancelAnimationFrame(frame);cancelArrival()},
+    open:()=>{active=true;lastTime=performance.now();resize();cancelAnimationFrame(frame);frame=document.hidden?0:requestAnimationFrame(render)},
+    close:()=>{active=false;pointer=null;cancelAnimationFrame(frame);frame=0;cancelArrival()},
     setNight:(night:boolean)=>{ambient.intensity=night?.65:1.4;sun.intensity=night?1.1:2.7;sun.color.set(night?'#a6c8ff':'#fff2d8');scene.environmentIntensity=night?.25:.55},
     presentResident,
     cancelArrival,

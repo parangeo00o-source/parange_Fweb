@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+import { revealOnFirstVideoFrame } from './camera-page'
 
 type Point = { x: number; y: number }
 type Lemon = {
@@ -373,6 +374,7 @@ export const createLemonadeExperience = () => {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream
       await video.play()
+      revealOnFirstVideoFrame(screen, video)
       // Keep the remotely loaded WASM runtime aligned with the installed package.
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       landmarker = await HandLandmarker.createFromOptions(vision, {
@@ -391,6 +393,7 @@ export const createLemonadeExperience = () => {
       hintTimer = window.setTimeout(() => hint.classList.remove('is-visible'), 5_000)
     } catch (error) {
       console.error(error)
+      screen.classList.remove('is-camera-pending')
       cameraButton.disabled = false
       cameraButton.textContent = '카메라 다시 켜기'
       status.textContent = '카메라 권한을 허용하면 손 추적을 시작할 수 있어요'
@@ -404,9 +407,11 @@ export const createLemonadeExperience = () => {
     open: () => {
       open = true
       screen.classList.add('is-open')
+      screen.classList.add('is-camera-pending')
       screen.setAttribute('aria-hidden', 'false')
       lastTime = performance.now()
       animation = requestAnimationFrame(run)
+      void startCamera()
       closeButton.focus()
     },
     close: () => {

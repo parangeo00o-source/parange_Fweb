@@ -44,11 +44,21 @@ const gemShape = (kind: GemKind) => {
 }
 
 const gemMarkup = (option: GemOption) => {
-  // Retain the vector fallback as a no-op shape check, while the production
-  // UI uses the generated, alpha-backed 3D gem sprite sheet below.
+  // The original ten gems use the supplied sprite sheet. The six additions
+  // have matching, alpha-backed cut-gem assets of their own.
   void gemShape(option.kind)
   const index = gems.indexOf(option)
   if (index < 10) return `<span class="gem-sprite" aria-hidden="true" style="--gem-column:${index % 5};--gem-row:${Math.floor(index / 5)}"></span>`
+  const files: Partial<Record<GemKind, string>> = {
+    cloud: 'cloud',
+    'flower-orange': 'flower-orange',
+    square: 'square',
+    raindrop: 'raindrop',
+    cat: 'cat',
+    'butterfly-aqua': 'butterfly-aqua',
+  }
+  const file = files[option.kind]
+  if (file) return `<img class="gem-image gem-image--${file}" src="/tooth-gem-extra/${file}.png" alt="" draggable="false">`
   const id = `extra-gem-${index}`
   const shapes: Record<string, string> = {
     cloud: '<path class="extra-gem-body" d="M11 48c-8 0-11-10-4-15 0-11 14-16 21-7 8-10 24-5 23 7 10 4 7 15-2 15H11Z"/><path class="extra-gem-facet" d="M11 36c8-7 13 1 17-6 6 5 13-1 22 6l-9 8H18l-7-8Z"/>',
@@ -91,7 +101,7 @@ export const createToothGemExperience = () => {
 
   const video = screen.querySelector<HTMLVideoElement>('.tooth-gem-camera')!
   const canvas = screen.querySelector<HTMLCanvasElement>('.tooth-gem-canvas')!
-  const context = canvas.getContext('2d', { alpha: false })!
+  const context = canvas.getContext('2d', { alpha: true })!
   const placedLayer = screen.querySelector<HTMLElement>('.tooth-gem-placed')!
   const transformGuide = screen.querySelector<HTMLElement>('.tooth-gem-transform')!
   const startButton = screen.querySelector<HTMLButtonElement>('.tooth-gem-start')!
@@ -248,7 +258,9 @@ export const createToothGemExperience = () => {
     const width = Math.round(fit.width * ratio); const height = Math.round(fit.height * ratio)
     if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height }
     context.setTransform(ratio, 0, 0, ratio, 0, 0)
-    context.fillStyle = '#2e2c45'; context.fillRect(0, 0, fit.width, fit.height)
+    // Leave the connecting state transparent instead of showing a coloured
+    // placeholder. The live frame fills the canvas as soon as it is ready.
+    context.clearRect(0, 0, fit.width, fit.height)
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       context.save(); context.translate(fit.width, 0); context.scale(-1, 1)
       context.drawImage(video, fit.offsetX, fit.offsetY, video.videoWidth * fit.scale, video.videoHeight * fit.scale); context.restore()
@@ -397,6 +409,14 @@ export const createToothGemExperience = () => {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream; await video.play()
+      // Do not reveal the editor over the home page while a camera stream is
+      // still negotiating. Its controls become visible with the first usable
+      // webcam frame instead.
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        await new Promise<void>((resolve) => video.addEventListener('loadeddata', () => resolve(), { once: true }))
+      }
+      if (!open) return
+      screen.classList.add('is-camera-ready')
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task' },
@@ -406,15 +426,26 @@ export const createToothGemExperience = () => {
     } catch (error) {
       console.error('Tooth Gem camera:', error)
       stream?.getTracks().forEach((track) => track.stop()); stream = null; video.srcObject = null
-      faceLandmarker?.close(); faceLandmarker = null; startButton.disabled = false
+      faceLandmarker?.close(); faceLandmarker = null; screen.classList.remove('is-camera-ready'); startButton.disabled = false; startButton.classList.remove('is-hidden')
     }
   }
   startButton.addEventListener('click', () => { void startCamera() })
 
   return {
-    open: () => { open = true; screen.classList.add('is-open'); screen.setAttribute('aria-hidden', 'false'); frame = requestAnimationFrame(draw); closeButton.focus() },
+    open: () => {
+      open = true
+      screen.classList.add('is-open')
+      screen.setAttribute('aria-hidden', 'false')
+      // The upper A entry opens straight into its live camera experience; the
+      // central control is retained only if a permission or connection retry is needed.
+      startButton.disabled = true
+      startButton.classList.add('is-hidden')
+      frame = requestAnimationFrame(draw)
+      void startCamera()
+      closeButton.focus()
+    },
     close: () => {
-      open = false; cancelAnimationFrame(frame); screen.classList.remove('is-open', 'is-smiling', 'is-tracking'); screen.setAttribute('aria-hidden', 'true')
+      open = false; cancelAnimationFrame(frame); screen.classList.remove('is-open', 'is-smiling', 'is-tracking', 'is-camera-ready'); screen.setAttribute('aria-hidden', 'true')
       tracking = false; faceLandmarker?.close(); faceLandmarker = null
       stream?.getTracks().forEach((track) => track.stop()); stream = null; video.srcObject = null
       outputStream?.getTracks().forEach((track) => track.stop()); outputStream = null

@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver, ImageSegmenter } from '@mediapipe/tasks-vision'
+import { revealOnFirstVideoFrame } from './camera-page'
 
 type Point = { x: number; y: number }
 type Landmark = { x: number; y: number; z?: number }
@@ -33,7 +34,7 @@ export const createShampooExperience = () => {
 
   const video = screen.querySelector<HTMLVideoElement>('.shampoo-camera')!
   const canvas = screen.querySelector<HTMLCanvasElement>('.shampoo-canvas')!
-  const context = canvas.getContext('2d', { alpha: false })!
+  const context = canvas.getContext('2d', { alpha: true })!
   const startButton = screen.querySelector<HTMLButtonElement>('.shampoo-start')!
   const lever = screen.querySelector<HTMLButtonElement>('.shampoo-lever')!
   const closeButton = screen.querySelector<HTMLButtonElement>('.shampoo-close')!
@@ -456,7 +457,9 @@ export const createShampooExperience = () => {
     const width = Math.round(fit.width * ratio); const height = Math.round(fit.height * ratio)
     if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height }
     context.setTransform(ratio, 0, 0, ratio, 0, 0)
-    context.fillStyle = '#183631'; context.fillRect(0, 0, fit.width, fit.height)
+    // Keep the connecting state colorless; the canvas becomes opaque only
+    // once an actual webcam frame is available.
+    context.clearRect(0, 0, fit.width, fit.height)
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       context.save(); context.translate(fit.width, 0); context.scale(-1, 1)
       context.drawImage(video, fit.offsetX, fit.offsetY, video.videoWidth * fit.scale, video.videoHeight * fit.scale); context.restore()
@@ -509,6 +512,7 @@ export const createShampooExperience = () => {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream; await video.play()
+      revealOnFirstVideoFrame(screen, video)
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       const options = { runningMode: 'VIDEO' as const }
       faceLandmarker = await FaceLandmarker.createFromOptions(vision, { ...options, baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task' }, numFaces: 1 })
@@ -536,10 +540,13 @@ export const createShampooExperience = () => {
       tracking = true; startButton.classList.add('is-hidden'); screen.classList.add('is-tracking'); setGuide('손 인식을 준비 중이에요…')
     } catch (error) {
       console.error(error)
+      screen.classList.remove('is-camera-pending')
       stream?.getTracks().forEach((track) => track.stop()); stream = null; video.srcObject = null
       faceLandmarker?.close(); faceLandmarker = null; segmenter?.close(); segmenter = null
       handWorker?.terminate(); handWorker = null
-      startButton.disabled = false; setGuide('카메라와 모델을 연결하지 못했어요')
+      // The button remains only as an error-recovery route. On a normal visit
+      // the camera starts immediately when the shampoo die opens.
+      startButton.disabled = false; startButton.classList.remove('is-hidden'); setGuide('카메라와 모델을 연결하지 못했어요')
     }
   }
   startButton.addEventListener('click', () => { void startCamera() })
@@ -575,7 +582,19 @@ export const createShampooExperience = () => {
   closeButton.addEventListener('click', () => history.back())
 
   return {
-    open: () => { open = true; screen.classList.add('is-open'); screen.setAttribute('aria-hidden', 'false'); lastTime = performance.now(); frame = requestAnimationFrame(draw); closeButton.focus() },
+    open: () => {
+      open = true
+      screen.classList.add('is-open', 'is-camera-pending')
+      screen.setAttribute('aria-hidden', 'false')
+      // Do not make visitors pass through a separate start screen. Hide the
+      // retry control during connection and request the webcam immediately.
+      startButton.disabled = true
+      startButton.classList.add('is-hidden')
+      lastTime = performance.now()
+      frame = requestAnimationFrame(draw)
+      void startCamera()
+      closeButton.focus()
+    },
     close: () => {
       open = false; cancelAnimationFrame(frame); screen.classList.remove('is-open', 'is-tracking'); screen.setAttribute('aria-hidden', 'true')
       tracking = false

@@ -472,8 +472,8 @@ body { margin: 0; overflow: hidden; background: #ffffff; }
 
 /* Shampoo keeps the live, mirrored cover-fit camera and all foam in one
    composited canvas. The canvas is also the capture source. */
-.shampoo-screen { position: fixed; z-index: 31; inset: 0; overflow: hidden; isolation: isolate; visibility: hidden; opacity: 0; pointer-events: none; background: #183631; transition: opacity .35s ease, visibility .35s; }.shampoo-screen.is-open { visibility: visible; opacity: 1; pointer-events: auto; }
-.shampoo-camera { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }.shampoo-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; background: #183631; }.shampoo-wash { position: absolute; z-index: 1; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 30%, transparent 30%, rgba(12,45,38,.08) 72%, rgba(7,27,25,.3)), linear-gradient(180deg, rgba(241,255,247,.14), transparent 28%, transparent 70%, rgba(1,28,25,.18)); }
+.shampoo-screen { position: fixed; z-index: 31; inset: 0; overflow: hidden; isolation: isolate; visibility: hidden; opacity: 0; pointer-events: none; background: transparent; transition: opacity .35s ease, visibility .35s; }.shampoo-screen.is-open { visibility: visible; opacity: 1; pointer-events: auto; }
+.shampoo-camera { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }.shampoo-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; background: transparent; }.shampoo-wash { display: none; }
 .shampoo-start { position: absolute; z-index: 3; left: 50%; top: 50%; display: grid; place-items: center; width: 72px; height: 72px; padding: 0; border: 1px solid rgba(255,232,244,.82); border-radius: 50%; color: #c85d93; background: #fff0f7; box-shadow: 0 10px 28px rgba(88,18,53,.26); cursor: pointer; }.shampoo-start svg { width: 48px; height: 48px; fill: currentColor; }.shampoo-start-shine { fill: rgba(255,255,255,.7); }.shampoo-start:disabled { opacity: .7; cursor: wait; }.shampoo-start.is-hidden { display: none; }.shampoo-lever { --lever-pull: 0; position: absolute; z-index: 3; top: clamp(75px, 9vw, 108px); right: clamp(12px, 2.4vw, 34px); width: 76px; height: 158px; padding: 0; border: 0; background: transparent; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }.shampoo-lever::before { content: ''; position: absolute; left: 50%; top: 1px; width: 23px; height: 27px; border: 2px solid rgba(255,231,244,.88); border-radius: 13px 13px 7px 7px; background: linear-gradient(135deg, #fff5fa, #ef9fc4 72%); box-shadow: inset 2px 2px 1px rgba(255,255,255,.72), 0 3px 9px rgba(89,18,53,.28); transform: translateX(-50%); }.shampoo-lever i { position: absolute; left: 50%; top: 23px; width: 7px; height: calc(77px + var(--lever-pull) * 49px); border-radius: 9px; background: linear-gradient(90deg, #b94e83, #ffe6f1 48%, #d36b9b); box-shadow: 0 2px 5px rgba(84,13,46,.3); transform: translateX(-50%); transform-origin: 50% 0; transition: height .1s ease; }.shampoo-lever b { position: absolute; left: 50%; top: 91px; width: 37px; height: 37px; border: 2px solid rgba(255,237,247,.9); border-radius: 50%; background: radial-gradient(circle at 31% 26%, #fffafd 0 11%, #ffd2e4 25%, #ec8fba 63%, #be4e83 100%); box-shadow: inset 3px 3px 2px rgba(255,255,255,.64), 0 3px 8px rgba(90,14,49,.3); transform: translate(-50%, calc(var(--lever-pull) * 49px)); transition: transform .1s ease; }.shampoo-lever:active { cursor: grabbing; }.shampoo-close { position: absolute; z-index: 3; top: clamp(20px, 3vw, 42px); right: clamp(20px, 3vw, 42px); width: 44px; height: 44px; border: 1px solid rgba(255,237,247,.68); border-radius: 50%; color: #fff; background: rgba(104,17,59,.28); font: 300 32px/36px system-ui, sans-serif; cursor: pointer; }
 
 .balloon-screen { position: fixed; z-index: 30; inset: 0; overflow: hidden; isolation: isolate; visibility: hidden; opacity: 0; pointer-events: none; background: #261b2e; transition: opacity .35s ease, visibility .35s; }.balloon-screen.is-open { visibility: visible; opacity: 1; pointer-events: auto; }.balloon-camera { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }.balloon-wash { position: absolute; z-index: 1; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(29,12,35,.42), transparent 28%, transparent 68%, rgba(32,9,35,.3)); }
@@ -870,10 +870,10 @@ body { margin: 0; overflow: hidden; background: #ffffff; }
 @media (max-width: 620px) { .framing-blueprint-interface { top: 22px; left: 20px; right: 20px; }.framing-blueprint-guide { padding-right: 40px; font-size: 15px; }.framing-blueprint-status { max-width: calc(100vw - 40px); }.framing-blueprint-close { top: 18px; right: 18px; } }
 
 /* Tooth Gem — a glassy dressing tray over a live, mirrored mouth camera. */
-.tooth-gem-screen { position: fixed; z-index: 31; inset: 0; overflow: hidden; isolation: isolate; visibility: hidden; opacity: 0; pointer-events: none; background: #343049; transition: opacity .32s ease, visibility .32s; }
+.tooth-gem-screen { position: fixed; z-index: 31; inset: 0; overflow: hidden; isolation: isolate; visibility: hidden; opacity: 0; pointer-events: none; background: transparent; transition: opacity .32s ease, visibility .32s; }
 .tooth-gem-screen.is-open { visibility: visible; opacity: 1; pointer-events: auto; }
 .tooth-gem-camera { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.tooth-gem-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; background: #343049; }
+.tooth-gem-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; background: transparent; }
 .tooth-gem-placed { position: absolute; z-index: 3; inset: 0; pointer-events: none; opacity: 0; transition: opacity .16s ease; }.tooth-gem-placed.is-visible { opacity: 1; pointer-events: auto; }
 .tooth-gem-attached { position: absolute; z-index: 1; transform-origin: center; filter: drop-shadow(0 2px 1px rgba(35,1,37,.45)) drop-shadow(0 0 5px rgba(255,255,255,.68)); cursor: grab; pointer-events: auto; }.tooth-gem-attached:active { cursor: grabbing; }
 .tooth-gem-transform { position: absolute; z-index: 2; display: none; box-sizing: border-box; border: 1.5px solid #1976d2; box-shadow: 0 0 0 1px rgba(232,247,255,.82); transform-origin: center; pointer-events: none; }.tooth-gem-transform.is-visible { display: block; }.tooth-gem-transform i { position: absolute; width: 8px; height: 8px; box-sizing: border-box; border: 1.5px solid #1976d2; background: #edf8ff; box-shadow: 0 0 0 1px rgba(255,255,255,.78); pointer-events: auto; touch-action: none; }.tooth-gem-transform i:nth-child(1) { left: -5px; top: -5px; }.tooth-gem-transform i:nth-child(2) { left: 50%; top: -5px; transform: translateX(-50%); }.tooth-gem-transform i:nth-child(3) { right: -5px; top: -5px; }.tooth-gem-transform i:nth-child(4) { right: -5px; top: 50%; transform: translateY(-50%); }.tooth-gem-transform i:nth-child(5) { right: -5px; bottom: -5px; }.tooth-gem-transform i:nth-child(6) { left: 50%; bottom: -5px; transform: translateX(-50%); }.tooth-gem-transform i:nth-child(7) { left: -5px; bottom: -5px; }.tooth-gem-transform i:nth-child(8) { left: -5px; top: 50%; transform: translateY(-50%); }
@@ -888,6 +888,10 @@ body { margin: 0; overflow: hidden; background: #ffffff; }
 .tooth-gem-drag-preview { position: fixed; z-index: 50; display: grid; place-items: center; width: 58px; height: 58px; pointer-events: none; opacity: 0; filter: drop-shadow(0 6px 7px rgba(59,14,55,.45)) drop-shadow(0 0 9px rgba(255,238,249,.9)); transition: opacity .1s ease; }.tooth-gem-drag-preview.is-visible { opacity: 1; }.tooth-gem-drag-preview .gem-sprite { width: 100%; height: 100%; }
 .tooth-gem-start { position: absolute; z-index: 6; left: 50%; top: 50%; width: 70px; height: 70px; padding: 0; border: 1px solid rgba(255,255,255,.82); border-radius: 50%; background: radial-gradient(circle at 35% 29%, #fff, #ffd2ec 38%, #e285bb 100%); box-shadow: inset 3px 3px 2px rgba(255,255,255,.8), 0 10px 28px rgba(57,14,65,.36); cursor: pointer; transform: translate(-50%, -50%); }.tooth-gem-start span { display: block; width: 23px; height: 23px; margin-left: 3px; clip-path: polygon(0 0, 100% 50%, 0 100%); background: #a33b79; }.tooth-gem-start:disabled { opacity: .7; cursor: wait; }.tooth-gem-start.is-hidden { display: none; }
 .tooth-gem-close { position: absolute; z-index: 6; top: clamp(17px, 3vw, 38px); left: clamp(17px, 3vw, 38px); width: 43px; height: 43px; padding: 0; border: 1px solid rgba(255,255,255,.7); border-radius: 50%; color: #fff; background: rgba(68,38,90,.3); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); font: 300 31px/38px system-ui, sans-serif; cursor: pointer; backdrop-filter: blur(7px); }
+.tooth-gem-screen:not(.is-camera-ready) .tooth-gem-tray,
+.tooth-gem-screen:not(.is-camera-ready) .tooth-gem-close,
+.tooth-gem-screen:not(.is-camera-ready) .tooth-gem-placed,
+.tooth-gem-screen:not(.is-camera-ready) .tooth-gem-transform { opacity: 0; pointer-events: none; }
 .tooth-gem-screen.is-tracking ~ .global-camera-capture { display: grid; }
 @media (max-width: 680px) { .tooth-gem-tray { top: auto; bottom: max(14px, env(safe-area-inset-bottom)); right: 50%; width: min(91vw, 420px); padding: 0 8px 8px; border-radius: 16px 16px 10px 10px; transform: translateX(50%); }.tooth-gem-tray::after { display: none; }.tooth-gem-tray-head { margin-bottom: 6px; }.tooth-gem-parts { grid-template-columns: repeat(5, 1fr); gap: 6px; max-height: 96px; padding-right: 0; overflow-y: auto; }.tooth-gem-part { border-radius: 7px; padding: 5px; }.tooth-gem-clear { top: 7px; right: 9px; transform: none; }.tooth-gem-close { left: 16px; top: 16px; } }
 
@@ -1021,3 +1025,46 @@ body { margin: 0; overflow: hidden; background: #ffffff; }
 .planet-screen .planet-building { background: #eff3eef5; }
 .planet-screen .planet-building-orbit span { color: #f2f4e9; background: #2675d3; box-shadow: none; }
 .planet-screen .planet-building-orbit { border-color: #2675d380; }
+
+/* Camera destinations remain invisible until a decoded webcam frame exists.
+   Their controls and placeholder colour therefore never layer over home while
+   permission and stream setup are in progress. */
+.lemonade-screen.is-camera-pending,
+.water-touch-screen.is-camera-pending,
+.balloon-screen.is-camera-pending,
+.bluefish-screen.is-camera-pending,
+.elephant-draw-screen.is-camera-pending,
+.framing-blueprint-screen.is-camera-pending,
+.rubber-human-screen.is-camera-pending,
+.bird-impact-screen.is-camera-pending,
+.angel-devil-screen.is-camera-pending,
+.shampoo-screen.is-camera-pending { opacity: 0; pointer-events: none; }
+
+/* These three camera experiences intentionally open without a wordmark. */
+.lemonade-header,
+.water-touch-header,
+.balloon-header { display: none; }
+
+/* Keep the live camera completely unfiltered in the requested experiences. */
+.lemonade-wash,
+.balloon-wash { display: none; }
+
+/* The final six Tooth Gem tray items are inline SVGs rather than cells from
+   the sprite sheet. Give them the same coloured acrylic body, facets and
+   highlights as the existing cubic gems instead of the browser's black SVG
+   fallback. */
+.extra-gem { display: block; width: 100%; height: 100%; overflow: visible; }
+.extra-gem-body { fill: var(--gem); stroke: color-mix(in srgb, var(--gem), white 58%); stroke-width: 1.5; stroke-linejoin: round; }
+.extra-gem-facet { fill: rgba(255,255,255,.38); stroke: rgba(255,255,255,.58); stroke-width: .7; stroke-linejoin: round; }
+.extra-gem-core { fill: #fff5cf; stroke: rgba(255,255,255,.76); stroke-width: 1.3; }
+.extra-gem-dark { fill: color-mix(in srgb, var(--gem), #432345 44%); }
+.extra-gem-shine { fill: none; stroke: rgba(255,255,255,.88); stroke-width: 3; stroke-linecap: round; }
+.gem-image { --gem-tone: saturate(1); display: block; object-fit: contain; filter: var(--gem-tone) drop-shadow(0 2px 1px rgba(45,2,49,.38)) drop-shadow(0 0 3px rgba(255,255,255,.6)); user-select: none; }
+.gem-image--cloud { --gem-tone: saturate(1.2) contrast(1.07) brightness(.96); }
+.gem-image--flower-orange { --gem-tone: saturate(1.12) contrast(1.06) brightness(.95); }
+.gem-image--square { --gem-tone: saturate(1.14) contrast(1.08) brightness(.94); }
+.gem-image--raindrop { --gem-tone: saturate(1.28) contrast(1.1) brightness(.94); }
+.gem-image--cat { --gem-tone: saturate(1.3) contrast(1.08) brightness(.96); }
+.gem-image--butterfly-aqua { --gem-tone: saturate(1.24) contrast(1.1) brightness(.94); }
+.tooth-gem-part .gem-image { width: 88%; height: 88%; filter: var(--gem-tone) drop-shadow(0 2px 2px rgba(73,16,71,.25)); }
+.tooth-gem-attached .gem-image, .tooth-gem-drag-preview .gem-image { width: 100%; height: 100%; }

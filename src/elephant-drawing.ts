@@ -1,4 +1,5 @@
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+import { revealOnFirstVideoFrame } from './camera-page'
 
 type Point = { x: number; y: number }
 
@@ -210,10 +211,10 @@ export const createElephantDrawingExperience = () => {
     return [8, 12, 16, 20].every((tip) => distance(landmarks[tip], landmarks[0]) < palmSize * 1.05)
   }
   const trackHand = (now: number) => {
-    // The video timestamp guard prevents duplicate inference. A 45fps ceiling
-    // stays responsive for drawing while avoiding redundant high-heat model
-    // passes from 60fps camera streams.
-    if (!tracking || !landmarker || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || now - lastInferenceAt < 22 || video.currentTime === lastVideoTime) return
+    // The video timestamp guard prevents duplicate inference. Matching the
+    // 30fps camera cadence keeps the pen responsive without redundant model
+    // passes or a 60fps camera stream warming the device.
+    if (!tracking || !landmarker || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || now - lastInferenceAt < 30 || video.currentTime === lastVideoTime) return
     lastInferenceAt = now
     lastVideoTime = video.currentTime
     const landmarks = landmarker.detectForVideo(video, now).landmarks[0]
@@ -315,9 +316,10 @@ export const createElephantDrawingExperience = () => {
     showHint('Raise your index finger to start drawing', 5000)
     try {
       if (!navigator.mediaDevices?.getUserMedia) throw new Error('Camera API unavailable')
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 45, max: 60 } }, audio: false })
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream
       await video.play()
+      revealOnFirstVideoFrame(screen, video)
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       landmarker = await HandLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task' },
@@ -333,6 +335,7 @@ export const createElephantDrawingExperience = () => {
       if (frame === null) frame = requestAnimationFrame(animate)
     } catch (error) {
       console.error(error)
+      screen.classList.remove('is-camera-pending')
       stream?.getTracks().forEach((track) => track.stop())
       stream = null
       video.srcObject = null
@@ -429,8 +432,10 @@ export const createElephantDrawingExperience = () => {
     open: () => {
       open = true
       screen.classList.add('is-open')
+      screen.classList.add('is-camera-pending')
       screen.setAttribute('aria-hidden', 'false')
       resizeCanvas()
+      void startCamera()
       closeButton.focus()
     },
     close: () => {

@@ -73,7 +73,10 @@ export const createCameraCapture = () => {
     const active = currentVideo()
     if (active) return active
     if (!navigator.mediaDevices?.getUserMedia) throw new Error('Camera API is unavailable')
-    fallbackStream ??= await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false })
+    // Match the live experiences' capped camera budget. A fallback is used
+    // only for capture, so requesting 1080p here added heat without improving
+    // the visible page or its 720p camera effects.
+    fallbackStream ??= await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
     fallbackVideo.srcObject = fallbackStream
     await fallbackVideo.play()
     if (fallbackVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {

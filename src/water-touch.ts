@@ -1,4 +1,5 @@
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+import { revealOnFirstVideoFrame } from './camera-page'
 
 const fingertipIndices = [4, 8, 12, 16, 20]
 const maxTouches = 10
@@ -23,6 +24,8 @@ export const createWaterTouchExperience = () => {
   const startButton = screen.querySelector<HTMLButtonElement>('.water-touch-start')!
   const closeButton = screen.querySelector<HTMLButtonElement>('.water-touch-close')!
   const gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: false })
+  const maxViewportDimensions = gl?.getParameter(gl.MAX_VIEWPORT_DIMS) as Int32Array | undefined
+  const maxViewportDimension = maxViewportDimensions ? Math.min(maxViewportDimensions[0], maxViewportDimensions[1]) : 1
   let stream: MediaStream | null = null
   let handLandmarker: HandLandmarker | null = null
   let open = false
@@ -174,13 +177,11 @@ export const createWaterTouchExperience = () => {
     // A WebGL backing buffer larger than the device viewport limit can produce
     // corrupted strips at the sides on mobile GPUs. Limit the backing buffer
     // with one shared scale so its aspect ratio remains exactly unchanged.
-    const maxViewport = gl.getParameter(gl.MAX_VIEWPORT_DIMS) as Int32Array
-    const maxDimension = Math.min(maxViewport[0], maxViewport[1])
     const ratio = Math.min(
       window.devicePixelRatio || 1,
       1.5,
-      maxDimension / Math.max(window.innerWidth, 1),
-      maxDimension / Math.max(window.innerHeight, 1),
+      maxViewportDimension / Math.max(window.innerWidth, 1),
+      maxViewportDimension / Math.max(window.innerHeight, 1),
     )
     const width = Math.max(1, Math.round(window.innerWidth * ratio))
     const height = Math.max(1, Math.round(window.innerHeight * ratio))
@@ -286,6 +287,7 @@ export const createWaterTouchExperience = () => {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream
       await video.play()
+      revealOnFirstVideoFrame(screen, video)
       setupRenderer()
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       handLandmarker = await HandLandmarker.createFromOptions(vision, {
@@ -297,23 +299,36 @@ export const createWaterTouchExperience = () => {
       screen.classList.add('is-tracking')
     } catch (error) {
       console.error(error)
+      screen.classList.remove('is-camera-pending')
       startButton.disabled = false
       startButton.textContent = '카메라 다시 켜기'
     }
   }
+  const syncVisibility = () => {
+    if (document.hidden) {
+      cancelAnimationFrame(frame)
+      frame = 0
+    } else if (open && !frame) {
+      frame = requestAnimationFrame(draw)
+    }
+  }
+  document.addEventListener('visibilitychange', syncVisibility)
   startButton.addEventListener('click', startCamera)
   closeButton.addEventListener('click', () => history.back())
   return {
     open: () => {
       open = true
       screen.classList.add('is-open')
+      screen.classList.add('is-camera-pending')
       screen.setAttribute('aria-hidden', 'false')
-      frame = requestAnimationFrame(draw)
+      if (!document.hidden) frame = requestAnimationFrame(draw)
+      void startCamera()
       closeButton.focus()
     },
     close: () => {
       open = false
       cancelAnimationFrame(frame)
+      frame = 0
       screen.classList.remove('is-open', 'is-tracking')
       screen.setAttribute('aria-hidden', 'true')
       tracking = false

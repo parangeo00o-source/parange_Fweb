@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+import { revealOnFirstVideoFrame } from './camera-page'
 import angelUrl from './assets/angel-devil/angel-classic-v5.png'
 import cloudUrl from './assets/angel-devil/cloud-platform-pet-v2.png'
 import devilUrl from './assets/angel-devil/devil-tail-charcoal-v2.png'
@@ -929,6 +930,7 @@ export const createAngelDevilExperience = () => {
       if (!open) { stream.getTracks().forEach((track) => track.stop()); stream = null; return }
       video.srcObject = stream
       await video.play()
+      revealOnFirstVideoFrame(screen, video)
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       // Prefer the GPU delegate: the exact same model/output is used, but the
       // heavy inference no longer competes with canvas work on supported phones.
@@ -967,6 +969,7 @@ export const createAngelDevilExperience = () => {
       screen.classList.add('is-tracking')
     } catch (error) {
       console.error('Angel Devil camera:', error)
+      screen.classList.remove('is-camera-pending')
       releaseCamera()
       startButton.disabled = false
       startButton.classList.remove('is-hidden')
@@ -993,6 +996,7 @@ export const createAngelDevilExperience = () => {
       open = true
       lastRenderAt = 0
       screen.classList.add('is-open')
+      screen.classList.add('is-camera-pending')
       screen.setAttribute('aria-hidden', 'false')
       startButton.classList.add('is-hidden')
       frame = requestAnimationFrame(run)

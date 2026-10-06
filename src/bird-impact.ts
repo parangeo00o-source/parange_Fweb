@@ -1,4 +1,5 @@
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
+import { revealOnFirstVideoFrame } from './camera-page'
 import impactFrontalUrl from './assets/bird-impact/wing-impact-frontal-v1.png'
 import impactVUpUrl from './assets/bird-impact/wing-impact-v-up-v1.png'
 import impactDiagonalUrl from './assets/bird-impact/wing-impact-diagonal-v1.png'
@@ -528,6 +529,7 @@ export const createBirdImpactExperience = () => {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
       video.srcObject = stream
       await video.play()
+      revealOnFirstVideoFrame(screen, video)
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task' },
@@ -539,6 +541,7 @@ export const createBirdImpactExperience = () => {
       resetInteraction()
     } catch (error) {
       console.error('Bird Impact camera:', error)
+      screen.classList.remove('is-camera-pending')
       stream?.getTracks().forEach((track) => track.stop())
       stream = null
       video.srcObject = null
@@ -558,6 +561,7 @@ export const createBirdImpactExperience = () => {
       resize()
       resetInteraction()
       screen.classList.add('is-open')
+      screen.classList.add('is-camera-pending')
       screen.setAttribute('aria-hidden', 'false')
       animation = requestAnimationFrame(render)
       // G-die navigation opens synchronously from a user action, so this can
