@@ -26,7 +26,7 @@
 .planet-studio-heading em { font-style: normal; color: #e9803c; }
 .planet-studio-heading p { font-size: 12px; color: #71828b; }
 .planet-studio-close { position: absolute; z-index: 5; right: clamp(18px, 4vw, 55px); top: 30px; width: 42px; height: 42px; border: 1px solid #15457345; border-radius: 50%; color: #154573; background: #fffdf580; font: 300 29px/34px system-ui; cursor: pointer; }
-.planet-studio-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; width: 100%; max-width: 1280px; min-height: 240px; flex: 1; max-height: 580px; }
+.planet-studio-panels { display: grid; grid-template-columns: minmax(0, 620px); justify-content: center; gap: 22px; width: 100%; max-width: 1280px; min-height: 240px; flex: 1; max-height: 580px; }
 .planet-studio-panels > section { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border-radius: 20px; border: 1px solid #25516c26; background: #fffdf8; box-shadow: 0 10px 35px #19436807; }
 .planet-studio-panels header { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px; gap: 10px; font: 700 10px/1.2 ui-monospace, monospace; letter-spacing: .07em; }
 .planet-studio-panels header b { font-size: 8px; color: #76918d; font-weight: 500; }
