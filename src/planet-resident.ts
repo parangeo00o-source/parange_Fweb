@@ -3,8 +3,10 @@ import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 import { residentDesigns, residentEnglish } from './resident-designs'
 import { createResidentRig } from './resident-model'
 import { residentPortrait } from './resident-portrait'
+import { normalizeResidentName } from './resident-store'
+import { selectResidentDesign } from './resident-selection'
 
-export type ResidentModel = { group: THREE.Group; animate: (time: number, walking: boolean, mood?: 'normal' | 'held' | 'meeting') => void; dispose: () => void; portrait: string; mapped: boolean; name: string; trait: string }
+export type ResidentModel = { group: THREE.Group; animate: (time: number, walking: boolean, mood?: 'normal' | 'held' | 'meeting') => void; dispose: () => void; portrait: string; mapped: boolean; name: string; trait: string; id?:string; designIndex?:number; customName?:boolean }
 
 let faceModel: Promise<FaceLandmarker> | null = null
 export const prepareResidentModels = () => {
@@ -21,17 +23,18 @@ const faceTemperament = (points: Array<{ x: number; y: number }>) => {
   if (!left || !right || !upper || !lower || !nose) return 0
   return Math.floor((Math.hypot(right.x - left.x, right.y - left.y) * 991 + Math.hypot(upper.x - lower.x, upper.y - lower.y) * 577 + Math.abs(nose.x - (left.x + right.x) / 2) * 313) * 10_000)
 }
-export const buildResident = async (photo: HTMLCanvasElement, report: (message: string) => void, signal: AbortSignal): Promise<ResidentModel> => {
+export const buildResident = async (photo: HTMLCanvasElement, report: (message: string) => void, signal: AbortSignal, requestedName='', existingDesigns:readonly (number|undefined)[]=[]): Promise<ResidentModel> => {
   const check = () => signal.throwIfAborted()
   check(); report('Looking for your smile…')
   const model = await prepareResidentModels(); check(); await nextFrame(); check()
   const face = model.detect(photo).faceLandmarks[0]
   if (!face) throw new Error('We could not see your face. Look at the camera and take another snapshot.')
   report('Finding your little neighbor…'); await nextFrame(); check()
-  const index = (Math.abs(faceTemperament(face)) + Math.floor(Math.random() * residentDesigns.length)) % residentDesigns.length
+  const index = selectResidentDesign(existingDesigns,faceTemperament(face))
   const design = residentDesigns[index], portrait = await residentPortrait(index); check()
   const english=residentEnglish[design.kind]
-  report(english.name + ' is getting ready to move in…'); await nextFrame(); check()
+  report((normalizeResidentName(requestedName)||'Your little neighbor') + ' is getting ready to move in…'); await nextFrame(); check()
   const rig = createResidentRig(index)
-  return { ...rig, mapped: false, ...english, portrait }
+  const name=normalizeResidentName(requestedName)
+  return { ...rig, mapped: false, ...english, name, customName:Boolean(name), designIndex:index, portrait }
 }

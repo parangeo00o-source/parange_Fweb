@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 import type { ResidentModel } from './planet-resident'
+import { createPlanetSinkhole } from './planet-sinkhole'
 
-export type VillageState = { following: string | null; holding: string | null; meeting: boolean; count: number }
+export type VillageState = { following: string | null; followingId:string|null; holding: string | null; meeting: boolean; count: number; sinkhole:boolean; overSinkhole:boolean; expelled:{id:string;name:string}|null; latest:{id:string;name:string;portrait:string;trait:string}|null; persistent?:boolean }
 export type VillageObstacle = { normal: THREE.Vector3; radius: number }
 type Resident = {
   model: ResidentModel; normal: THREE.Vector3; tangent: THREE.Vector3
@@ -13,6 +14,8 @@ type Options = {
   targets: THREE.Object3D[]; radius: number; clearing: THREE.Vector3; obstacles: VillageObstacle[]
   surface: (normal: THREE.Vector3) => { bank: number; height: number }
   select: (id: string) => void; onChange: (state: VillageState) => void
+  prepare?: (model:ResidentModel)=>boolean; onRemove?: (model:ResidentModel)=>void
+  underlays?:THREE.Mesh[]
 }
 
 export function createPlanetVillage(options: Options) {
@@ -23,10 +26,22 @@ export function createPlanetVillage(options: Options) {
   const meetingForward=new THREE.Vector3().crossVectors(clearing,meetingRight).normalize()
   let enabled=true, follow:Resident|null=null, meeting=false, yaw=0, pitch=.33, distance=1.32
   let globeZoom=1, globeTargetZoom=1, transitioning=false, suspendedAt=0, pressTimer=0
-  let held:{resident:Resident; origin:THREE.Vector3; valid:THREE.Vector3|null}|null=null
+  let held:{resident:Resident; origin:THREE.Vector3; valid:THREE.Vector3|null;overSinkhole:boolean}|null=null
+  let falling:{resident:Resident;started:number;normal:THREE.Vector3}|null=null
+  let expelled:VillageState['expelled']=null
+  const sinkhole=createPlanetSinkhole(world,terrain,radius,surface,options.underlays)
   let pointer:{id:number;x:number;y:number;startX:number;startY:number;distance:number;resident:Resident|null;dragging:boolean}|null=null
   const lookTarget=new THREE.Vector3()
-  const state=():VillageState=>({following:follow?.model.name??null,holding:held?.resident.model.name??null,meeting,count:residents.length})
+  const orientRight=new THREE.Vector3(),orientFrame=new THREE.Matrix4(),nextNormal=new THREE.Vector3()
+  const desiredPosition=new THREE.Vector3(),desiredUp=new THREE.Vector3(),desiredTarget=new THREE.Vector3()
+  const followNormal=new THREE.Vector3(),followForward=new THREE.Vector3(),followRight=new THREE.Vector3()
+  const rotation=new THREE.Quaternion(),interpolatedRotation=new THREE.Quaternion(),forward=new THREE.Vector3(0,0,1)
+  const state=():VillageState=>{
+    const latest=residents.at(-1)?.model
+    return {following:follow?.model.name??null,followingId:follow?.model.id??null,holding:held?.resident.model.name??null,meeting,count:residents.length,
+      sinkhole:sinkhole.open,overSinkhole:held?.overSinkhole??false,expelled,
+      latest:latest?{id:latest.id!,name:latest.name,portrait:latest.portrait,trait:latest.trait}:null}
+  }
   const notify=()=>options.onChange(state())
   const tangentAt=(normal:THREE.Vector3)=>{
     const tangent=new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).projectOnPlane(normal)
@@ -35,6 +50,7 @@ export function createPlanetVillage(options: Options) {
   const spacing=.105
   const safe=(normal:THREE.Vector3,ignore?:Resident,occupied=true)=>surface(normal).bank>.075
     && obstacles.every(item=>normal.distanceTo(item.normal)>item.radius+.047)
+    && (!sinkhole.open||ignore===held?.resident||normal.distanceTo(sinkhole.normal)>sinkhole.clearance)
     && (!occupied||residents.every(item=>item===ignore||normal.distanceTo(item.normal)>spacing))
   const nearestSafe=(point:THREE.Vector3,ignore?:Resident)=>{
     if(safe(point,ignore))return point.clone()
@@ -50,9 +66,9 @@ export function createPlanetVillage(options: Options) {
   const orient=(resident:Resident)=>{
     resident.tangent.projectOnPlane(resident.normal).normalize()
     if(resident.tangent.lengthSq()<.001)resident.tangent.copy(tangentAt(resident.normal))
-    const right=new THREE.Vector3().crossVectors(resident.normal,resident.tangent).normalize()
+    orientRight.crossVectors(resident.normal,resident.tangent).normalize()
     resident.model.group.position.copy(resident.normal).multiplyScalar(radius+surface(resident.normal).height+.012+resident.lift)
-    resident.model.group.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right,resident.normal,resident.tangent))
+    resident.model.group.quaternion.setFromRotationMatrix(orientFrame.makeBasis(orientRight,resident.normal,resident.tangent))
     resident.model.group.scale.setScalar(.24)
   }
   const ringMaterial=new THREE.MeshBasicMaterial({color:'#ffe366',side:THREE.DoubleSide,depthWrite:false,transparent:true,opacity:.85})
@@ -79,30 +95,69 @@ export function createPlanetVillage(options: Options) {
     follow=resident;yaw=0;pitch=.33;distance=1.32;transitioning=true;notify()
   }
   const clearPress=()=>{window.clearTimeout(pressTimer);pressTimer=0}
+  const expel=(resident:Resident)=>{
+    const index=residents.indexOf(resident);if(index<0)return
+    residents.splice(index,1);resident.meeting=null
+    if(follow===resident){follow=null;transitioning=true}
+    if(!residents.length)meeting=false
+    resident.normal.copy(sinkhole.normal)
+    expelled={id:resident.model.id!,name:resident.model.name}
+    falling={resident,normal:sinkhole.normal.clone(),started:performance.now()}
+    options.onRemove?.(resident.model)
+  }
   const drop=(cancelled=false)=>{
     if(!held)return
-    const {resident,origin,valid}=held
-    resident.normal.copy(cancelled?origin:valid??origin);resident.lift=0
-    resident.pauseUntil=performance.now()+800
-    held=null;ring.visible=false;canvas.style.cursor='grab';orient(resident);notify()
+    const {resident,origin,valid,overSinkhole}=held
+    if(!cancelled&&overSinkhole){expel(resident);sinkhole.close(650)}
+    else{
+      resident.normal.copy(cancelled?origin:valid??origin);resident.lift=0
+      resident.pauseUntil=performance.now()+800;orient(resident);sinkhole.close()
+    }
+    held=null;ring.visible=false;canvas.style.cursor='grab';sinkhole.hover(false);notify()
   }
   const resetPointer=(cancelled=false)=>{
     clearPress();const id=pointer?.id;pointer=null;drop(cancelled)
     if(id!==undefined&&canvas.hasPointerCapture(id))canvas.releasePointerCapture(id)
   }
   const grab=(resident:Resident)=>{
+    if(falling||!residents.includes(resident))return
     resident.meeting=null
     if(follow){world.quaternion.setFromUnitVectors(resident.normal,new THREE.Vector3(0,0,1));setFollow(null)}
-    held={resident,origin:resident.normal.clone(),valid:resident.normal.clone()};resident.lift=.23
+    held={resident,origin:resident.normal.clone(),valid:resident.normal.clone(),overSinkhole:false};resident.lift=.23
+    // Search concentric rings around THIS resident, not a fixed screen corner.
+    // Keep the complete enlarged rim clear of scenery, coast and other feet.
+    // The origin is outside the opening, so a stationary release is harmless.
+    const inverse=world.quaternion.clone().invert(),origin=resident.normal
+    const right=new THREE.Vector3(1,0,0).applyQuaternion(inverse).projectOnPlane(origin).normalize()
+    if(right.lengthSq()<.001)right.copy(meetingRight).projectOnPlane(origin).normalize()
+    const around=new THREE.Vector3().crossVectors(origin,right).normalize()
+    const rimAngle=sinkhole.outerRadius/(radius+surface(origin).height)
+    let spot:THREE.Vector3|null=null,score=Infinity
+    for(let ringIndex=0;ringIndex<8&&!spot;ringIndex++)for(let j=0;j<32;j++){
+      const angle=j/32*Math.PI*2-.5,offset=rimAngle+.083+ringIndex*.035
+      const candidate=origin.clone().addScaledVector(right,Math.cos(angle)*offset).addScaledVector(around,Math.sin(angle)*offset).normalize()
+      if(!safe(candidate,resident)||obstacles.some(o=>candidate.distanceTo(o.normal)<o.radius+rimAngle+.018)
+        ||residents.some(r=>r!==resident&&r.normal.distanceTo(candidate)<rimAngle+.065))continue
+      const worldPoint=candidate.clone().multiplyScalar(radius+surface(candidate).height).applyQuaternion(world.quaternion)
+      if(worldPoint.clone().normalize().dot(camera.position.clone().sub(worldPoint).normalize())<.2)continue
+      const edgeRight=right.clone().projectOnPlane(candidate).normalize(),edgeUp=new THREE.Vector3().crossVectors(candidate,edgeRight)
+      if(Array.from({length:12},(_,k)=>k*Math.PI/6).some(a=>surface(candidate.clone().addScaledVector(edgeRight,Math.cos(a)*rimAngle).addScaledVector(edgeUp,Math.sin(a)*rimAngle).normalize()).bank<.035))continue
+      const next=candidate.distanceTo(origin)+.015*(1-Math.cos(angle+.5))
+      if(next<score){score=next;spot=candidate}
+    }
+    if(spot)sinkhole.show(spot)
     canvas.style.cursor='grabbing';ring.visible=true;ringMaterial.color.set('#ffe366');notify()
   }
   const moveHeld=(x:number,y:number)=>{
     if(!held)return
     setRay(x,y);const hit=ray.intersectObject(terrain,false)[0]
-    if(!hit){held.valid=null;ringMaterial.color.set('#f86e62');return}
+    if(!hit){const changed=held.overSinkhole;held.overSinkhole=false;held.valid=null;sinkhole.hover(false);ringMaterial.color.set('#f86e62');if(changed)notify();return}
     const normal=world.worldToLocal(hit.point.clone()).normalize()
-    held.valid=nearestSafe(normal,held.resident);held.resident.normal.copy(held.valid??normal)
-    ringMaterial.color.set(held.valid?'#ffe366':'#f86e62')
+    const wasOver=held.overSinkhole;held.overSinkhole=sinkhole.contains(normal)
+    held.valid=held.overSinkhole?null:nearestSafe(normal,held.resident)
+    held.resident.normal.copy(held.overSinkhole?sinkhole.normal:held.valid??normal)
+    ringMaterial.color.set(held.overSinkhole?'#ff674d':held.valid?'#ffe366':'#f86e62');sinkhole.hover(held.overSinkhole)
+    if(wasOver!==held.overSinkhole)notify()
   }
   const onDown=(event:PointerEvent)=>{
     if(!enabled||event.button!==0||pointer)return
@@ -125,6 +180,7 @@ export function createPlanetVillage(options: Options) {
   }
   const onUp=(event:PointerEvent)=>{
     if(!pointer||pointer.id!==event.pointerId)return
+    if(held)moveHeld(event.clientX,event.clientY)
     const click=!pointer.dragging&&!held,selected=pointer.resident
     resetPointer()
     if(!click)return
@@ -160,7 +216,7 @@ export function createPlanetVillage(options: Options) {
   }
   const toggleMeeting=()=>{
     if(!enabled||!residents.length)return false
-    resetPointer();meeting=!meeting
+    resetPointer(true);meeting=!meeting
     if(meeting){setFollow(null);world.quaternion.setFromUnitVectors(clearing,new THREE.Vector3(0,0,1));globeTargetZoom=1.3;assignMeeting()}
     else residents.forEach(resident=>{
       const trip=resident.meeting
@@ -170,12 +226,23 @@ export function createPlanetVillage(options: Options) {
     notify();return meeting
   }
   const add=(model:ResidentModel,normal:THREE.Vector3)=>{
+    if(options.prepare&&!options.prepare(model)){model.dispose();return false}
+    model.id??=model.group.uuid
+    if(residents.some(r=>r.model.id===model.id))return false
     const resident:Resident={model,normal:normal.clone(),tangent:tangentAt(normal),turnAt:0,pauseUntil:performance.now()+700,speed:.024+Math.random()*.016,lift:0,meeting:null}
     const place=nearestSafe(normal,resident);if(place)resident.normal.copy(place)
     world.add(model.group);residents.push(resident);orient(resident)
-    if(meeting)assignMeeting();notify()
+    if(meeting)assignMeeting();notify();return true
   }
   const update=(now:number,dt:number,fitDistance:number)=>{
+    sinkhole.update(now,dt)
+    if(falling){
+      const {resident,normal,started}=falling,t=THREE.MathUtils.clamp((now-started)/950,0,1)
+      resident.normal.copy(normal);resident.lift=THREE.MathUtils.lerp(.23,-.5,t*t);orient(resident)
+      resident.model.group.scale.setScalar(.24*(1-t)**.8)
+      resident.model.group.rotateY(t*Math.PI*1.3);resident.model.animate(now,false,'held')
+      if(t>=1){resident.model.dispose();falling=null}
+    }
     for(const resident of residents){
       let walking=false
       if(held?.resident===resident)resident.lift=.23+Math.sin(now*.012)*.012
@@ -183,8 +250,9 @@ export function createPlanetVillage(options: Options) {
         const destination=resident.meeting,t=THREE.MathUtils.clamp((now-destination.started)/destination.duration,0,1)
         if(t<1){
           // A travel hop clears rivers and scenery. Only validated slots land.
-          const ease=t*t*(3-2*t),q=new THREE.Quaternion().setFromUnitVectors(destination.from,destination.to)
-          resident.normal.copy(destination.from).applyQuaternion(new THREE.Quaternion().slerp(q,ease))
+          const ease=t*t*(3-2*t)
+          rotation.setFromUnitVectors(destination.from,destination.to)
+          resident.normal.copy(destination.from).applyQuaternion(interpolatedRotation.identity().slerp(rotation,ease))
           resident.lift=Math.sin(t*Math.PI)*.85
           resident.tangent.copy(destination.to).projectOnPlane(resident.normal).normalize();walking=true
         }else{
@@ -196,7 +264,7 @@ export function createPlanetVillage(options: Options) {
         if(now>resident.turnAt){resident.tangent.applyAxisAngle(resident.normal,(Math.random()-.5)*1.5);resident.turnAt=now+2000+Math.random()*5500;if(Math.random()<.2)resident.pauseUntil=now+600+Math.random()*1200}
         walking=now>resident.pauseUntil
         if(walking){
-          const next=resident.normal.clone().addScaledVector(resident.tangent,dt*resident.speed).normalize()
+          const next=nextNormal.copy(resident.normal).addScaledVector(resident.tangent,dt*resident.speed).normalize()
           if(!safe(next,resident)){resident.tangent.applyAxisAngle(resident.normal,.9+Math.random());walking=false}
           else resident.normal.copy(next)
         }
@@ -204,14 +272,16 @@ export function createPlanetVillage(options: Options) {
       orient(resident)
       resident.model.animate(now,walking,held?.resident===resident?'held':resident.meeting&&!walking?'meeting':'normal')
     }
-    if(held){ring.position.copy(held.resident.normal).multiplyScalar(radius+surface(held.resident.normal).height+.023);ring.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),held.resident.normal)}
+    if(held){ring.position.copy(held.resident.normal).multiplyScalar(radius+surface(held.resident.normal).height+.023);ring.quaternion.setFromUnitVectors(forward,held.resident.normal)}
     globeZoom=THREE.MathUtils.damp(globeZoom,globeTargetZoom,9,dt)
-    const desiredPosition=new THREE.Vector3(0,0,fitDistance/globeZoom),desiredUp=up.clone(),desiredTarget=new THREE.Vector3()
+    desiredPosition.set(0,0,fitDistance/globeZoom);desiredUp.copy(up);desiredTarget.set(0,0,0)
     if(follow){
-      world.updateMatrixWorld(true)
-      const normal=follow.normal.clone().applyQuaternion(world.quaternion),forward=follow.tangent.clone().applyQuaternion(world.quaternion)
-      const right=new THREE.Vector3().crossVectors(normal,forward).normalize()
-      desiredTarget.copy(world.localToWorld(follow.model.group.position.clone())).addScaledVector(normal,.23)
+      // Only this parent transform is needed; the renderer updates descendants
+      // once later. Traversing the entire planet here doubled follow-mode work.
+      world.updateWorldMatrix(true,false)
+      const normal=followNormal.copy(follow.normal).applyQuaternion(world.quaternion),forward=followForward.copy(follow.tangent).applyQuaternion(world.quaternion)
+      const right=followRight.crossVectors(normal,forward).normalize()
+      desiredTarget.copy(follow.model.group.position).applyMatrix4(world.matrixWorld).addScaledVector(normal,.23)
       desiredPosition.copy(desiredTarget).addScaledVector(forward,Math.cos(yaw)*Math.cos(pitch)*distance)
         .addScaledVector(right,Math.sin(yaw)*Math.cos(pitch)*distance).addScaledVector(normal,Math.sin(pitch)*distance)
       desiredUp.copy(normal)
@@ -222,17 +292,18 @@ export function createPlanetVillage(options: Options) {
     if(camera.position.lengthSq()<1e-8)camera.position.copy(desiredPosition).normalize().multiplyScalar(radius+.24)
     else if(camera.position.length()<radius+.24)camera.position.setLength(radius+.24)
     lookTarget.lerp(desiredTarget,mix)
-    const upRotation=new THREE.Quaternion().setFromUnitVectors(camera.up,desiredUp)
-    camera.up.applyQuaternion(new THREE.Quaternion().slerp(upRotation,mix)).normalize();camera.lookAt(lookTarget)
+    rotation.setFromUnitVectors(camera.up,desiredUp)
+    camera.up.applyQuaternion(interpolatedRotation.identity().slerp(rotation,mix)).normalize();camera.lookAt(lookTarget)
     if(camera.position.distanceTo(desiredPosition)<.015)transitioning=false
   }
   return {
-    add,update,toggleMeeting,
+    add,update,toggleMeeting,refresh:notify,
     get residents(){return residents},get state(){return state()},
+    get sinkhole(){return sinkhole},
     safePosition:(point:THREE.Vector3)=>nearestSafe(point),
-    reset:()=>{resetPointer(true);setFollow(null);globeTargetZoom=1;world.rotation.set(.12,-.3,-.10)},
+    reset:()=>{resetPointer(true);setFollow(null);globeTargetZoom=1;world.rotation.set(-.08,.30,-.10)},
     setEnabled:(value:boolean)=>{enabled=value;if(!value){resetPointer(true);setFollow(null)}},
-    suspend:()=>{resetPointer(true);setFollow(null);enabled=false;suspendedAt=performance.now()},
+    suspend:()=>{resetPointer(true);if(falling){falling.resident.model.dispose();falling=null}sinkhole.hide();setFollow(null);enabled=false;suspendedAt=performance.now()},
     resume:()=>{enabled=true;if(suspendedAt){residents.forEach(r=>{if(r.meeting)r.meeting.started+=performance.now()-suspendedAt});suspendedAt=0}},
   }
 }

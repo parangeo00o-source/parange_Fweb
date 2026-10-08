@@ -1,0 +1,354 @@
+/* Early-console packaging: ink outlines, orange checks and candy-colour stickers.
+   Scoped to move-in and dialogue; the home artwork and 3D world stay untouched. */
+.planet-sky-game {
+  --retro-ink: #382d29;
+  --retro-paper: #fff9e7;
+  --retro-orange: #ff8c3e;
+  --retro-blue: #1699d0;
+  --retro-pink: #f7709e;
+  --retro-checks: conic-gradient(from 90deg, #ffac57 25%, #ff9145 0 50%, #ffac57 0 75%, #ff9145 0);
+}
+
+.planet-sky-game .planet-studio {
+  padding: 30px 28px max(26px,env(safe-area-inset-bottom));
+  background: radial-gradient(ellipse at 50% 30%, #fff1b94d, transparent 72%), var(--retro-checks);
+  background-size: auto, 112px 112px;
+  color: var(--retro-ink); backdrop-filter: none;
+  border: 8px solid var(--retro-paper); outline: 3px solid var(--retro-ink); outline-offset: -9px;
+}
+/* Move-in is a continuous screen, not a fade through the globe underneath.
+   The controller removes this cover only after the first capsule render. */
+.planet-sky-game.is-joining .planet-studio { transition: none; }
+.planet-sky-game.is-joining:not(.is-presenting) .planet-canvas { visibility: hidden; }
+.planet-sky-game.is-joining .planet-header .planet-brand { visibility: hidden; }
+.planet-sky-game .planet-studio-heading {
+  position: relative; align-self: center; flex-shrink: 0; width: min(940px,100%);
+  margin: 0 0 24px; padding: 0 48px; text-align: center;
+}
+.planet-sky-game .planet-studio-heading .planet-card-index {
+  display: inline-block; padding: 7px 15px; border: 2px solid var(--retro-ink); border-radius: 7px;
+  color: var(--retro-ink); background: var(--retro-paper); box-shadow: 2px 3px var(--retro-ink);
+  font-size: 11px; letter-spacing: .08em; transform: rotate(-2deg);
+}
+.planet-sky-game .planet-studio-heading h2 {
+  margin: 18px 0 12px; color: var(--retro-paper); font-size: clamp(34px,4.4vw,62px);
+  line-height: .97; letter-spacing: .01em; -webkit-text-stroke: 4px var(--retro-ink);
+  paint-order: stroke fill; text-shadow: 3px 5px var(--retro-ink);
+}
+.planet-sky-game .planet-studio-heading h2 em { margin-top: 4px; color: #ffed59; text-shadow: 3px 5px var(--retro-ink); }
+.planet-sky-game .planet-studio-heading p { margin: 14px 0 0; color: var(--retro-ink); font-size: 14px; }
+.planet-sky-game .planet-studio-heading::before,
+.planet-sky-game .planet-studio-heading::after {
+  position: absolute; top: 60px; content: '★'; color: #ffed59; font: 400 62px/1 var(--game-display);
+  -webkit-text-stroke: 3px var(--retro-ink); paint-order: stroke fill; text-shadow: 3px 4px var(--retro-ink);
+  transform: rotate(-18deg); pointer-events: none;
+}
+.planet-sky-game .planet-studio-heading::before { left: 9%; }
+.planet-sky-game .planet-studio-heading::after { right: 9%; top: 96px; color: var(--retro-pink); transform: rotate(16deg); font-size: 44px; }
+.planet-sky-game .planet-studio-close {
+  top: 20px; right: 22px; border: 3px solid var(--retro-ink); color: var(--retro-ink);
+  background: var(--retro-paper); box-shadow: 2px 4px var(--retro-ink);
+}
+.planet-sky-game .planet-studio-close:hover { color: var(--retro-ink); background: #ffed59; }
+.planet-studio-console {
+  display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); align-items: stretch;
+  gap: 24px; width: min(940px,100%); flex-shrink: 0;
+}
+.planet-sky-game .planet-studio .planet-studio-panels { display: flex; width: 100%; min-height: 0; max-height: none; }
+.planet-sky-game .planet-studio-panels > section {
+  width: 100%; border: 3px solid var(--retro-ink); border-radius: 20px;
+  background: var(--retro-paper); box-shadow: 5px 7px var(--retro-ink); overflow: hidden;
+}
+.planet-sky-game .planet-studio-panels header {
+  padding: 15px 17px; background: #9bded4; color: var(--retro-ink); border-bottom: 3px solid var(--retro-ink); font-size: 15px;
+}
+.planet-sky-game .planet-studio-panels header b { color: var(--retro-ink); font-size: 9px; }
+.planet-sky-game .planet-studio-panels header i { width: 8px; height: 8px; background: #f96669; border: 1px solid var(--retro-ink); }
+.planet-sky-game .planet-camera-viewport {
+  margin: 14px 14px 0; min-height: 220px; aspect-ratio: 4 / 3; flex: 1;
+  border: 3px solid var(--retro-ink); border-radius: 12px; background: #214f64;
+}
+.planet-sky-game .planet-camera-frame { border: 2px dashed #fff9e7c9; border-radius: 44%; }
+.planet-sky-game .planet-camera-empty {
+  color: var(--retro-paper); background-color: #167da8;
+  background-image: radial-gradient(#fff9e72e 1.5px,transparent 1.5px); background-size: 12px 12px;
+}
+.planet-sky-game .planet-camera-empty > span { color: #ffed59; text-shadow: 2px 3px var(--retro-ink); }
+.planet-sky-game .planet-studio-panels footer { padding: 13px 15px; color: #605047; font-size: 12px; line-height: 1.4; }
+.planet-sky-game .planet-name-entry {
+  display: flex; flex-direction: column; margin: 0; width: 100%; min-width: 0; padding: 25px;
+  border: 3px solid var(--retro-ink); border-radius: 20px 20px 40px 20px;
+  background: var(--retro-paper); color: var(--retro-ink); box-shadow: 5px 7px var(--retro-ink);
+}
+.planet-sky-game .planet-name-entry .planet-player-stickers {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 24px;
+}
+.planet-player-stickers > span {
+  display: grid; place-content: center; width: 94px; height: 94px; flex-shrink: 0;
+  border: 3px solid var(--retro-ink); border-radius: 50%; color: var(--retro-paper);
+  background: var(--retro-blue); box-shadow: inset 0 0 0 4px #a2e5f2,3px 4px var(--retro-ink);
+  font: 400 40px/.95 var(--game-display); text-align: center; transform: rotate(-12deg);
+}
+.planet-sky-game .planet-player-stickers > span small { display: block; margin-top: 5px; opacity: 1; font-size: 8px; }
+.planet-player-stickers b {
+  position: relative; padding: 9px 12px; border: 3px solid var(--retro-ink); border-radius: 50%;
+  background: #ffed59; font-size: 25px; white-space: nowrap; transform: rotate(9deg); box-shadow: 2px 3px var(--retro-ink);
+}
+.planet-player-stickers i { color: var(--retro-pink); font: normal 34px/1 var(--game-display); -webkit-text-stroke: 2px var(--retro-ink); paint-order: stroke fill; }
+.planet-sky-game .planet-player-step { margin: 0 0 12px; color: #9d4330; font-size: 11px; letter-spacing: .1em; }
+.planet-sky-game .planet-name-entry label { display: flex; flex-direction: column; gap: 8px; font-size: 24px; line-height: 1.1; }
+.planet-sky-game .planet-name-entry small { color: #69594b; opacity: 1; font-size: 10px; }
+.planet-sky-game .planet-name-controls { flex-direction: column; gap: 13px; margin: 15px 0 12px; }
+.planet-sky-game .planet-name-entry input {
+  width: 100%; flex: auto; min-height: 49px; border: 3px solid var(--retro-ink); border-radius: 9px;
+  background: #fffdf6; box-shadow: inset 2px 3px #e5d9ba; color: var(--retro-ink); font-size: 17px;
+}
+.planet-sky-game .planet-name-entry input::placeholder { color: #837566; opacity: 1; }
+.planet-sky-game .planet-name-entry button,
+.planet-sky-game :is(.planet-camera-retry,.planet-studio-retry) {
+  min-height: 46px; padding: 12px; border: 3px solid var(--retro-ink); border-radius: 10px;
+  background: #ffde4e; color: var(--retro-ink); box-shadow: inset 0 3px #fff2b8,3px 4px var(--retro-ink); font-size: 15px;
+}
+.planet-sky-game .planet-name-entry button:disabled { opacity: 1; background: #ddd4bb; color: #6b6050; box-shadow: inset 0 3px #f8f1df,2px 3px #736453; }
+.planet-sky-game .planet-player-note { display: flex; align-items: center; gap: 9px; margin: auto 0 0; padding-top: 20px; font-size: 12px; color: #5c5147; }
+.planet-player-note > span { font-size: 24px; color: #ae3c65; }
+.planet-sky-game .planet-studio .planet-studio-status {
+  width: min(940px,100%); flex-shrink: 0; margin-top: 22px; padding: 12px 18px;
+  border: 2px solid var(--retro-ink); border-radius: 10px; color: var(--retro-ink);
+  background: #fff4d6; box-shadow: 2px 3px var(--retro-ink); font-size: 13px; text-align: left;
+}
+.planet-sky-game .planet-status-dot { flex-shrink: 0; width: 10px; height: 10px; background: #249788; border: 2px solid var(--retro-ink); box-shadow: none; }
+.planet-sky-game .planet-studio-privacy { flex-shrink: 0; color: #533b2d; font-size: 11px; margin: 14px 0 0; }
+.planet-sky-game .planet-countdown { color: #ffed59; -webkit-text-stroke: 4px var(--retro-ink); paint-order: stroke fill; text-shadow: 5px 7px var(--retro-ink); }
+.planet-sky-game .planet-building {
+  position: fixed; background: radial-gradient(#dfcaa3 1px,transparent 1px) 0 0 / 8px 8px,var(--retro-paper);
+  border: 8px solid var(--retro-orange); color: var(--retro-ink); backdrop-filter: none;
+}
+.planet-sky-game .planet-building h3 { color: var(--retro-ink); line-height: 1.1; }
+.planet-sky-game .planet-building p { color: #655344; max-width: 80%; }
+.planet-sky-game .planet-building-orbit { border: 3px dashed var(--retro-ink); }
+.planet-sky-game .planet-building-orbit span { background: var(--retro-pink); color: var(--retro-ink); border: 3px solid var(--retro-ink); box-shadow: 3px 4px var(--retro-ink); }
+
+/* Paper speech bubble sitting on an offset, orange game-card backing. */
+.planet-sky-game .planet-dialogue {
+  padding: 23px 28px 17px; border: 3px solid var(--retro-ink); border-radius: 23px;
+  background: var(--retro-paper); color: var(--retro-ink);
+  box-shadow: 5px 7px 0 1px var(--retro-orange),5px 7px 0 4px var(--retro-ink);
+}
+.planet-sky-game .planet-dialogue-text { font-family: var(--game-font); letter-spacing: 0; }
+.planet-sky-game .planet-dialogue::before {
+  top: -14px; left: 46%; width: 25px; height: 25px; border: 3px solid var(--retro-ink);
+  border-right: 0; border-bottom: 0; background: var(--retro-paper); z-index: 0; transform: skew(-20deg) rotate(40deg);
+}
+.planet-sky-game .planet-dialogue header { position: relative; min-height: 34px; }
+.planet-sky-game .planet-dialogue-name {
+  left: -12px; top: -44px; padding: 10px 22px; border: 3px solid var(--retro-ink); border-radius: 9px;
+  max-width: calc(100% - 125px); background: #ffde4e; color: var(--retro-ink);
+  box-shadow: 3px 4px var(--retro-ink); transform: rotate(-4deg); font-size: 22px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.planet-dialogue-channel { margin-right: auto; padding-top: 12px; color: #96603d; font-size: 10px; letter-spacing: .12em; }
+.planet-sky-game .planet-dialogue button { min-height: 38px; border: 2px solid var(--retro-ink); box-shadow: 2px 3px var(--retro-ink); border-radius: 8px; }
+.planet-sky-game .planet-dialogue-exit { background: #afe6e1; color: var(--retro-ink); }
+.planet-sky-game .planet-dialogue-text { margin: 14px 0 20px; font-size: clamp(20px,2.2vw,27px); word-break: keep-all; }
+.planet-sky-game .planet-dialogue.is-typing .planet-dialogue-text::after { color: #bc4540; }
+.planet-sky-game .planet-dialogue footer {
+  position: relative; border-top: 0; padding-top: 17px;
+  background: repeating-linear-gradient(90deg,#ddcbb0 0 8px,transparent 8px 16px) top left / 100% 3px no-repeat;
+}
+.planet-sky-game .planet-dialogue footer > span { display: flex; gap: 8px; align-items: center; color: #766048; letter-spacing: .06em; }
+.planet-dialogue footer i { color: #348c9c; font-size: 22px; font-style: normal; }
+.planet-sky-game .planet-dialogue-next { background: var(--retro-pink); color: var(--retro-ink); }
+.planet-sky-game .planet-dialogue-next span { color: var(--retro-ink); }
+.planet-sky-game :is(.planet-dialogue,.planet-studio) button:not(:disabled):hover { filter: brightness(1.07); }
+.planet-sky-game :is(.planet-dialogue,.planet-studio) button:not(:disabled):active { translate: 1px 2px; box-shadow: 0 1px var(--retro-ink); }
+.planet-sky-game :is(.planet-dialogue,.planet-studio) :is(button,input):focus-visible { outline: 3px solid #075d9e; outline-offset: 4px; }
+
+@media (max-width:720px) {
+  .planet-sky-game .planet-studio { padding: 22px 15px max(22px,env(safe-area-inset-bottom)); border-width: 5px; outline-offset: -6px; background-size: auto,76px 76px; }
+  .planet-sky-game .planet-studio-heading { padding: 0 20px; margin-bottom: 20px; }
+  .planet-sky-game .planet-studio-heading .planet-card-index { font-size: 8px; padding: 6px 8px; }
+  .planet-sky-game .planet-studio-heading h2 { font-size: 39px; margin-top: 16px; -webkit-text-stroke-width: 3px; }
+  .planet-sky-game .planet-studio-heading p { font-size: 11px; line-height: 1.4; max-width: 240px; margin: 12px auto 0; }
+  .planet-sky-game .planet-studio-heading::before { left: 0; top: 58px; font-size: 32px; -webkit-text-stroke-width: 2px; }
+  .planet-sky-game .planet-studio-heading::after { right: 0; top: 99px; font-size: 25px; -webkit-text-stroke-width: 2px; }
+  .planet-sky-game .planet-studio-close { top: 10px; right: 10px; width: 32px; height: 32px; font-size: 24px; }
+  .planet-studio-console { grid-template-columns: minmax(0,1fr); gap: 20px; max-width: 470px; }
+  .planet-sky-game .planet-studio .planet-studio-panels { min-height: 0; }
+  .planet-sky-game .planet-studio-panels header { padding: 11px 13px; font-size: 12px; }
+  .planet-sky-game .planet-studio-panels header b { display: inline; font-size: 8px; }
+  .planet-sky-game .planet-camera-viewport { margin: 10px 10px 0; min-height: 170px; max-height: 235px; }
+  .planet-sky-game .planet-studio-panels footer { padding: 10px 14px; font-size: 10px; min-height: 0; }
+  .planet-sky-game .planet-name-entry { position: relative; padding: 19px; border-radius: 18px 18px 30px 18px; }
+  .planet-sky-game .planet-name-entry .planet-player-stickers { position: absolute; right: 14px; top: -13px; margin: 0; }
+  .planet-player-stickers > span { width: 52px; height: 52px; font-size: 24px; border-width: 2px; box-shadow: inset 0 0 0 2px #a2e5f2,2px 3px var(--retro-ink); }
+  .planet-sky-game .planet-player-stickers > span small { font-size: 5px; margin-top: 2px; }
+  .planet-player-stickers :is(b,i) { display: none; }
+  .planet-sky-game .planet-player-step { margin-bottom: 14px; font-size: 10px; }
+  .planet-sky-game .planet-name-entry label { font-size: 22px; }
+  .planet-sky-game .planet-name-entry input { flex-basis: auto; }
+  .planet-sky-game .planet-player-note { padding-top: 10px; font-size: 10px; }
+  .planet-sky-game .planet-studio .planet-studio-status { margin-top: 20px; padding: 10px 12px; font-size: 12px; }
+  .planet-sky-game .planet-studio-privacy { font-size: 10px; }
+  .planet-sky-game .planet-dialogue { width: calc(100% - 34px); padding: 19px 17px 14px; border-radius: 18px; }
+  .planet-sky-game .planet-dialogue-name { left: -7px; top: -41px; padding: 8px 13px; font-size: 18px; max-width: calc(100% - 100px); }
+  .planet-sky-game .planet-dialogue-text { font-size: 20px; margin: 12px 0 17px; }
+  .planet-dialogue-channel { font-size: 8px; letter-spacing: .04em; }
+  .planet-sky-game .planet-dialogue footer > span { max-width: 130px; gap: 5px; font-size: 8px; }
+}
+@media (max-height:600px) and (min-width:721px) {
+  .planet-sky-game .planet-studio-heading h2 { font-size: 36px; }
+  .planet-sky-game .planet-dialogue { bottom: 18px; padding-top: 12px; padding-bottom: 12px; }
+  .planet-sky-game .planet-dialogue-text { min-height: 2.2em; margin: 8px 0; font-size: 19px; }
+}
+
+/* The character reveal uses the same packaging, with a real, measured 3D stage
+   above a separate caption row. Decorations never intercept globe controls. */
+.planet-sky-game.is-revealing .planet-sky {
+  background: radial-gradient(ellipse at 50% 42%,#fff1b96b,transparent 70%),var(--retro-checks);
+  background-size: auto,112px 112px; filter: none; transition: none;
+}
+.planet-sky-game.is-presenting .planet-header .planet-brand { visibility: hidden; }
+.planet-arrival {
+  position: absolute; z-index: 3; inset: 0; display: grid; grid-template-rows: minmax(0,1fr) auto;
+  gap: 15px; padding: 65px 28px max(30px,env(safe-area-inset-bottom)); pointer-events: none;
+}
+.planet-arrival[hidden] { display: none; }
+.planet-reveal-stage { position: relative; width: min(780px,100%); min-height: 0; justify-self: center; }
+.planet-reveal-halo {
+  position: absolute; inset: 9% 14%; border: 3px dashed #fff9e77a; border-radius: 50%;
+  box-shadow: 0 0 0 15px #fff9e71a,0 0 0 35px #fff9e710;
+}
+.planet-reveal-star {
+  position: absolute; color: #ffef59; font: 400 clamp(25px,4.5vw,64px)/1 var(--game-display);
+  -webkit-text-stroke: 3px var(--retro-ink); paint-order: stroke fill; text-shadow: 3px 4px var(--retro-ink);
+  animation: planet-reveal-pop .65s cubic-bezier(.2,.9,.35,1.3) both,planet-reveal-sparkle 2.5s ease-in-out .65s infinite;
+}
+.planet-reveal-star.star-0 { left: 12%; top: 18%; rotate: -16deg; }
+.planet-reveal-star.star-1 { right: 12%; top: 12%; color: #f7709e; animation-delay: .14s,.79s; }
+.planet-reveal-star.star-2 { left: 4%; top: 52%; color: #9bded4; font-size: clamp(26px,3vw,44px); animation-delay: .22s,.87s; }
+.planet-reveal-star.star-3 { right: 4%; top: 51%; animation-delay: .08s,.73s; }
+.planet-reveal-star.star-4 { left: 19%; bottom: 9%; color: #f7709e; font-size: clamp(22px,3vw,40px); animation-delay: .30s,.95s; }
+.planet-reveal-star.star-5 { right: 18%; bottom: 7%; rotate: 16deg; color: #9bded4; animation-delay: .18s,.83s; }
+.planet-reveal-star.star-6 { left: 37%; top: 2%; font-size: 27px; animation-delay: .1s,.75s; }
+.planet-reveal-star.star-7 { right: 36%; bottom: 0; font-size: 25px; animation-delay: .25s,.9s; }
+.planet-reveal-sticker {
+  position: absolute; right: 0; top: 0; padding: 12px 17px; border: 3px solid var(--retro-ink); border-radius: 50%;
+  color: var(--retro-paper); background: var(--retro-blue); box-shadow: 3px 4px var(--retro-ink);
+  font: 400 20px/.95 var(--game-display); text-align: center; transform: rotate(12deg);
+}
+.planet-sky-game .planet-arrival-caption {
+  position: relative; inset: auto; transform: none; justify-self: center; width: min(780px,100%);
+  padding: 24px 25px 16px; border: 3px solid var(--retro-ink); border-radius: 20px;
+  color: var(--retro-ink); background: var(--retro-paper); text-align: center;
+  box-shadow: 4px 5px var(--retro-orange),4px 5px 0 3px var(--retro-ink);
+}
+.planet-sky-game .planet-arrival-caption .planet-card-index {
+  display: inline-block; position: absolute; top: -16px; left: 50%; transform: translateX(-50%) rotate(-2deg);
+  width: max-content; max-width: calc(100% - 24px); padding: 7px 14px;
+  border: 2px solid var(--retro-ink); border-radius: 7px; background: #ffde4e; color: var(--retro-ink);
+  box-shadow: 2px 3px var(--retro-ink); font-size: 11px;
+}
+.planet-sky-game .planet-arrival-caption h2 {
+  margin: 2px 0 8px; color: var(--retro-ink); font: 400 clamp(24px,3vw,38px)/1.12 var(--game-display);
+  text-shadow: none; overflow-wrap: anywhere; letter-spacing: .01em;
+}
+.planet-sky-game .planet-arrival-caption p { margin: 0; color: #655344; font-size: 14px; line-height: 1.4; text-shadow: none; }
+.planet-sky-game .planet-arrival-caption small { display: block; margin-top: 13px; color: #9d4330; font: 400 9px/1.2 var(--game-display); letter-spacing: .12em; }
+.planet-arrival.is-flying .planet-reveal-stage { visibility: hidden; }
+@keyframes planet-reveal-pop { from { scale: .1; opacity: 0; } to { scale: 1; opacity: 1; } }
+@keyframes planet-reveal-sparkle { 0%,100% { translate: 0 0; scale: 1; } 50% { translate: 0 -7px; scale: 1.12; } }
+@media (max-width:720px) {
+  .planet-sky-game.is-revealing .planet-sky { background-size: auto,76px 76px; }
+  .planet-arrival { padding: 65px 18px max(24px,env(safe-area-inset-bottom)); gap: 16px; }
+  .planet-sky-game .planet-arrival-caption { padding: 21px 15px 14px; border-radius: 16px; }
+  .planet-sky-game .planet-arrival-caption h2 { font-size: clamp(21px,6vw,28px); }
+  .planet-sky-game .planet-arrival-caption p { font-size: 12px; }
+  .planet-sky-game .planet-arrival-caption .planet-card-index { font-size: 9px; }
+  .planet-reveal-sticker { font-size: 14px; padding: 9px 12px; right: 5px; }
+  .planet-reveal-star { -webkit-text-stroke-width: 2px; text-shadow: 2px 3px var(--retro-ink); }
+}
+@media (max-height:500px) and (min-width:721px) {
+  .planet-arrival { grid-template-columns: minmax(0,1fr) minmax(260px,.8fr); grid-template-rows: minmax(0,1fr); align-items: center; padding: 42px 65px 22px 24px; gap: 20px; }
+  .planet-reveal-stage { height: 100%; }
+  .planet-sky-game .planet-arrival-caption h2 { font-size: 24px; }
+  .planet-sky-game .planet-arrival-caption p { font-size: 12px; }
+  .planet-reveal-sticker { font-size: 13px; padding: 8px 10px; }
+}
+@media (prefers-reduced-motion:reduce) { .planet-reveal-star { animation: none; } }
+
+/* A collectible, die-cut game-cover card: oversized outlined lettering, a
+   bubble showcase and a yellow speech sticker, not a software-window bezel. */
+.planet-sky-game {
+  --unlock-width: min(980px,calc(100% - 64px));
+  --unlock-height: min(640px,calc(100% - 112px));
+}
+.planet-reveal-backdrop {
+  display: none; position: absolute; z-index: 0; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: var(--unlock-width); height: var(--unlock-height); border-radius: 42px 85px 42px 85px;
+  background: radial-gradient(ellipse at 28% 59%,#5bbcd599,transparent 38%),radial-gradient(#cfbd913b 1px,transparent 1px) 0 0 / 7px 7px,#fff5d8;
+  box-shadow: 10px 13px #603d2b,15px 20px 0 #f0bc61;
+}
+.planet-sky-game.is-revealing .planet-reveal-backdrop { display: block; }
+.planet-arrival { display: block; padding: 0; }
+.planet-arrival-window {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: var(--unlock-width); height: var(--unlock-height);
+  display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); grid-template-rows: auto minmax(0,1fr); gap: 18px;
+  padding: 27px 32px 30px; border: 4px solid #49362b; border-radius: 42px 85px 42px 85px;
+  box-shadow: inset 0 0 0 5px #fffdf0;
+}
+.planet-unlock-header {
+  grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 9px;
+  color: #e95636; font: 400 clamp(32px,4.6vw,61px)/1 var(--game-display); transform: rotate(-3deg);
+}
+.planet-unlock-header b { color: #66452e; font: 400 10px/1.2 var(--game-display); letter-spacing: .13em; }
+.planet-unlock-header i { font-style: normal; -webkit-text-stroke: 5px #4b382b; paint-order: stroke fill; text-shadow: 2px 3px #fff4ae,4px 6px #a34728; }
+.planet-unlock-header i:first-child { color: #f5c938; }
+.planet-arrival .planet-reveal-stage { width: 100%; height: 100%; margin: 0; }
+.planet-reveal-sticker { top: 2px; right: 3px; font-size: 13px; color: #fff8d4; background: #d65844; border-color: #58352c; transform: rotate(14deg); }
+.planet-reveal-halo { inset: 7% 5%; border: 4px solid #f4ffffbb; border-radius: 50%; box-shadow: inset 8px 4px 0 #fffefa61,inset -7px -5px #229bad39,0 0 0 2px #569faa; }
+.planet-reveal-halo::after { content: ''; position: absolute; top: 6%; left: 15%; width: 27%; height: 9%; background: #ffffff99; border-radius: 50%; rotate: -28deg; }
+.planet-reveal-star { font-size: clamp(22px,3vw,41px); }
+.planet-reveal-star.star-0 { left: 0; top: 14%; }
+.planet-reveal-star.star-1 { right: 2%; top: 24%; }
+.planet-reveal-star.star-2 { left: 0; }
+.planet-reveal-star.star-3 { right: 0; }
+.planet-sky-game .planet-arrival-caption {
+  align-self: center; width: 100%; padding: 34px 22px 25px; border: 3px solid #4d3929; border-radius: 42px 28px 45px 19px;
+  background: #ffde52; box-shadow: 5px 6px #a5662b; transform: rotate(2deg);
+}
+.planet-sky-game .planet-arrival-caption .planet-card-index {
+  padding: 8px 13px; border: 2px solid #473c2b; border-radius: 7px; background: #73c8b1;
+  box-shadow: 2px 3px #365749; transform: translateX(-50%) rotate(-5deg); color: #263f36;
+}
+.planet-sky-game .planet-arrival-caption h2 { color: #583420; text-shadow: 1px 2px #fff3b0; font-size: clamp(24px,3vw,37px); }
+.planet-sky-game .planet-arrival-caption p { color: #62492d; line-height: 1.6; }
+.planet-sky-game .planet-arrival-caption small { margin-top: 24px; color: #a4492e; letter-spacing: .06em; font-size: 9px; }
+.planet-arrival.is-flying .planet-arrival-window { border-color: transparent; box-shadow: none; }
+.planet-arrival.is-flying .planet-unlock-header { visibility: hidden; }
+@media(max-width:720px) {
+  .planet-sky-game { --unlock-width: calc(100% - 38px); --unlock-height: min(730px,calc(100% - 112px)); }
+  .planet-arrival-window { grid-template-columns: minmax(0,1fr); grid-template-rows: auto minmax(0,1fr) auto; gap: 13px; padding: 20px 13px 19px; border-width: 3px; border-radius: 27px 45px 27px 45px; }
+  .planet-reveal-backdrop { border-radius: 27px 45px 27px 45px; box-shadow: 6px 8px #603d2b,10px 12px #efba60; background-position: center; }
+  .planet-unlock-header { font-size: clamp(25px,7.6vw,39px); gap: 7px; }
+  .planet-unlock-header b { font-size: 7px; }
+  .planet-unlock-header i { -webkit-text-stroke-width: 3px; text-shadow: 1px 2px #fff4ae,2px 4px #a34728; }
+  .planet-sky-game .planet-arrival-caption { padding: 21px 12px 13px; border-radius: 24px 19px 25px 14px; transform: none; }
+  .planet-sky-game .planet-arrival-caption h2 { font-size: 21px; }
+  .planet-sky-game .planet-arrival-caption p { font-size: 11px; line-height: 1.4; }
+  .planet-sky-game .planet-arrival-caption small { margin-top: 12px; font-size: 8px; }
+  .planet-reveal-sticker { font-size: 9px; padding: 7px; top: 5px; right: 1px; }
+  .planet-reveal-star.star-6 { top: 3%; }
+}
+@media(max-height:500px) and (min-width:721px) {
+  .planet-sky-game { --unlock-height: calc(100% - 60px); --unlock-width: calc(100% - 116px); }
+  .planet-arrival-window { gap: 12px; padding: 14px 20px 19px; }
+  .planet-unlock-header { font-size: 29px; gap: 5px; }
+  .planet-unlock-header b { font-size: 8px; }
+  .planet-unlock-header i { -webkit-text-stroke-width: 3px; text-shadow: 1px 2px #fff4ae,2px 4px #a34728; }
+  .planet-sky-game .planet-arrival-caption { padding: 20px 12px 12px; }
+  .planet-sky-game .planet-arrival-caption h2 { font-size: 20px; }
+  .planet-sky-game .planet-arrival-caption small { margin-top: 10px; }
+  .planet-reveal-sticker { display: none; }
+}

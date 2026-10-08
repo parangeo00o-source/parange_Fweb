@@ -16,7 +16,7 @@
   background: #0099da url('./assets/planet/cloud-sky-reference.png') center / 100% 100% no-repeat;
   transition: filter .8s ease;
 }
-.planet-sky-game.is-night .planet-sky { filter: brightness(.43) saturate(.85) hue-rotate(18deg); }
+.planet-sky-game.is-night .planet-sky { background: linear-gradient(#0c102a, #182b53 70%, #203862); filter: none; }
 .planet-sky-game .planet-canvas { z-index: 1; }
 .planet-sky-game .planet-grain { z-index: 2; opacity: 0; }
 .planet-sky-game .planet-header, .planet-sky-game .planet-guide, .planet-sky-game .planet-spot-card,
@@ -172,6 +172,51 @@
 .planet-follow-status button { position: absolute; right: 13px; top: 11px; padding: 7px 9px; border: 1px solid #79afd0; border-radius: 10px; background: #d5efff; color: #195b8e; font: 400 10px/1 var(--game-display); cursor: pointer; }
 .planet-follow-status strong { max-width: calc(100% - 100px); }
 .planet-sky-game.is-holding .planet-follow-status button { display: none; }
+.planet-sky-game.is-following .planet-follow-status { display: none; }
+.planet-sky-game:is(.is-following,.is-holding) .planet-join-primary,
+.planet-sky-game.is-holding :is(.planet-spot-card,.planet-resident-card,.planet-guide) { visibility: hidden; pointer-events: none; }
+.planet-follow-status.is-danger { border-color: #ffcab0; background: #fff0d8; color: #a43824; box-shadow: 0 5px #a4382480; }
+.planet-follow-status strong { overflow-wrap: anywhere; }
+
+/* Big game-dialogue silhouette, with chunky early-console colours and trim. */
+.planet-dialogue { position: absolute; z-index: 5; left: 50%; bottom: max(34px,env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(760px,calc(100% - 48px)); padding: 26px 34px 17px; border: 4px solid #165c83; border-radius: 38px 38px 40px 15px; background: #fff6dc; color: #24526b; box-shadow: inset 0 4px #fffdf4,0 7px #073d66,0 13px 0 #003d6530; font-family: var(--game-display); }
+.planet-dialogue[hidden] { display: none; }
+.planet-dialogue::before { content: ''; position: absolute; left: 40px; top: -13px; width: 23px; height: 23px; border: 4px solid #165c83; background: #fff6dc; transform: rotate(45deg); z-index: -1; }
+.planet-dialogue header { display: flex; align-items: center; justify-content: flex-end; min-height: 24px; gap: 16px; }
+.planet-dialogue-name { position: absolute; left: 28px; top: -25px; max-width: calc(100% - 180px); padding: 9px 23px; border: 3px solid #7e4320; border-radius: 15px 19px 15px 10px; background: #ffb83f; box-shadow: inset 0 3px #ffe583,0 4px #bb692b; color: #673b20; font: 400 clamp(18px,2.1vw,24px)/1.2 var(--game-display); transform: rotate(-3deg); overflow-wrap: anywhere; }
+.planet-dialogue button { border: 0; cursor: pointer; font: 400 12px/1.2 var(--game-display); letter-spacing: .04em; }
+.planet-dialogue-exit { padding: 8px 10px; border-radius: 10px; background: #e5eddf; color: #3d7187; }
+.planet-dialogue-text { min-height: 2.9em; margin: 12px 0 18px; font: 400 clamp(19px,2.2vw,27px)/1.45 var(--game-display); letter-spacing: .01em; overflow-wrap: anywhere; }
+.planet-dialogue.is-typing .planet-dialogue-text::after { content: '▍'; display: inline; margin-left: 2px; color: #dc872c; }
+.planet-dialogue footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 2px dashed #d8d6ba; padding-top: 12px; }
+.planet-dialogue footer > span { font-size: 10px; color: #748b8b; letter-spacing: .09em; }
+.planet-dialogue-next { padding: 10px 14px; border-radius: 11px; background: #186a94; box-shadow: 0 3px #094866; color: #fff7db; }
+.planet-dialogue-next span { display: inline-block; margin-left: 5px; color: #ffd166; }
+.planet-dialogue button:focus-visible,.planet-name-entry :is(input,button):focus-visible { outline: 3px solid #ef9a24; outline-offset: 4px; }
+.planet-dialogue-announcement { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.planet-name-entry { width: min(660px,100%); margin: 16px auto 0; flex-shrink: 0; color: #174f77; font-family: var(--game-display); }
+.planet-name-entry label { display: flex; flex-wrap: wrap; gap: 7px 14px; align-items: baseline; font-size: 16px; }
+.planet-name-entry small { font: 400 10px/1.5 var(--game-display); opacity: .8; }
+.planet-name-entry > div { display: flex; gap: 10px; margin: 8px 0 6px; }
+.planet-name-entry input { flex: 1; width: 0; min-width: 0; padding: 12px 15px; border: 3px solid #76b9d3; border-radius: 13px; background: #fffbed; color: #235474; font: 400 18px/1.2 var(--game-display); }
+.planet-name-entry button { padding: 12px 17px; border: 3px solid #fff5c6; border-radius: 13px; background: #ffca54; box-shadow: 0 3px #cd8129; color: #754416; font: 400 14px/1.2 var(--game-display); cursor: pointer; }
+.planet-name-entry button:disabled { opacity: .55; cursor: default; }
+.planet-sky-game .planet-studio { overflow-y: auto; }
+.planet-sky-game .planet-studio:has(.planet-name-entry) .planet-studio-status { padding-top: 12px; }
+@media(max-width:720px){
+  .planet-dialogue { bottom: max(24px,env(safe-area-inset-bottom)); width: calc(100% - 26px); padding: 21px 19px 15px; border-width: 3px; border-radius: 27px 27px 30px 12px; }
+  .planet-dialogue-name { left: 17px; top: -23px; padding: 8px 14px; max-width: calc(100% - 130px); }
+  .planet-dialogue header { min-height: 22px; }
+  .planet-dialogue-text { margin-top: 10px; min-height: 4.1em; font-size: 20px; }
+  .planet-dialogue-exit { font-size: 10px!important; padding: 7px; }
+  .planet-dialogue footer > span { font-size: 8px; max-width: 110px; line-height: 1.4; }
+  .planet-dialogue-next { font-size: 11px!important; }
+  .planet-name-entry { margin-top: 11px; }
+  .planet-name-entry > div { flex-wrap: wrap; }
+  .planet-name-entry input { width: 100%; flex-basis: 100%; padding: 10px 12px; }
+  .planet-name-entry button { width: 100%; padding: 10px; }
+  .planet-sky-game .planet-studio:has(.planet-name-entry) .planet-studio-panels { min-height: 210px; }
+}
 @media(max-width:720px){
   .planet-meeting { right: 19px; top: 127px; padding: 9px 12px; font-size: 15px; }
   .planet-meeting small { font-size: 7px; }

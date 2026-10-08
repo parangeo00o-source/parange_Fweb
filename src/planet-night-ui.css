@@ -1,0 +1,52 @@
+/* Moonlit console shell. Colour-only overrides preserve layout, fonts and hit areas. */
+.planet-sky-game.is-night {
+  --retro-ink: #080f20; --retro-paper: #dce6ef; --retro-orange: #305994;
+  --retro-blue: #225fb4; --retro-pink: #6866c6;
+  --retro-checks: conic-gradient(from 90deg,#172b48 25%,#102038 0 50%,#172b48 0 75%,#102038 0);
+  color: #e2ecf7;
+}
+.planet-sky-game.is-night :is(.planet-close,.planet-studio-close,.planet-day-toggle,.planet-meeting,.planet-follow-status button) {
+  color: #e8effa; border-color: #49648f; background: linear-gradient(#294771,#121d39);
+  box-shadow: inset 0 2px #5986c240,0 4px #080f20,0 0 18px #3875ca16;
+}
+.planet-sky-game.is-night .planet-day-toggle i { color: #e9b957; }
+.planet-sky-game.is-night .planet-meeting[aria-pressed=true] { background: linear-gradient(#176d78,#10424f); border-color: #479da2; }
+.planet-sky-game.is-night .planet-logo-row > span { color: #737cff; -webkit-text-stroke-color: #203e70; text-shadow: 0 2px #343f98,1px 4px #182453,3px 6px #070e20; }
+.planet-sky-game.is-night .planet-logo-row > span:nth-child(3n+1) { color: #56a3ff; }
+.planet-sky-game.is-night .planet-logo-row > span:nth-child(3n) { color: #e2ae51; }
+.planet-sky-game.is-night :is(.planet-coordinates,.planet-coordinates b,.planet-brand-words small) { color: #cbdcf0; text-shadow: 0 2px 4px #081226; }
+.planet-sky-game.is-night .planet-spot-card h2 { color: #d4e8ff; -webkit-text-stroke-color: #2b4f81; text-shadow: 1px 3px #395f94,3px 6px #102442; }
+.planet-sky-game.is-night .planet-spot-card h2 em { color: #6ca4ef; text-shadow: 1px 3px #2859a1,3px 6px #102442; }
+.planet-sky-game.is-night .planet-spot-card p { color: #c4d4e8; text-shadow: 0 2px 4px #081226; }
+.planet-sky-game.is-night .planet-spot-card .planet-card-index { color: #d5e4f8; background: #142642; border-color: #42618c; }
+.planet-sky-game.is-night .planet-spot-sticker { background: #203f6c; color: #e1ecfa; border-color: #4e78ac; box-shadow: 2px 3px #0a1933; }
+.planet-sky-game.is-night :is(.planet-guide,.planet-resident-card,.planet-follow-status,.planet-toast) {
+  background: linear-gradient(135deg,#101e35f5,#0a1327f5); border-color: #35517b; color: #dce5f3;
+  box-shadow: inset 0 2px #6c93c527,0 5px #060d1c,0 0 24px #3066ad16;
+}
+.planet-sky-game.is-night .planet-guide b { background: #234775; color: #dbeaff; box-shadow: 0 2px #0b1b36; }
+.planet-sky-game.is-night .planet-resident-card :is(.planet-card-index,small) { color: #afc3df; }
+.planet-sky-game.is-night .planet-resident-name { color: #e5edf8; }
+.planet-sky-game.is-night .planet-resident-avatar { border-color: #426a9d; background: radial-gradient(circle at 35% 25%,#365f96,#1d355f 60%,#101d37); box-shadow: 0 3px #091326; }
+.planet-sky-game.is-night .planet-resident-empty { color: #fff2b9; text-shadow: 0 0 8px #f5d17a66; }
+.planet-sky-game.is-night .planet-join-primary { color: #edf3ff; border-color: #6088d1; background: linear-gradient(#326acc,#2853a0 45%,#203c7e 55%,#182960); box-shadow: inset 0 3px #5488db,inset 0 -3px #122049,0 6px #080f2d,0 8px #35528d,0 12px 25px #03091870; }
+.planet-sky-game.is-night .planet-join-primary:hover { background: linear-gradient(#3d78db,#3264b8 45%,#244a90); }
+.planet-sky-game.is-night .planet-join-icon { background: #183567; border-color: #6089c6; box-shadow: inset 0 2px #102344; }
+.planet-sky-game.is-night .planet-join-label { text-shadow: 0 1px #0b1937; }
+.planet-sky-game.is-night :is(.planet-join-label small,.planet-join-arrow) { color: #e6bd70; }
+.planet-sky-game.is-night .planet-follow-status.is-danger { color: #ffe4df; border-color: #e39eac; background: #5b2d47; }
+.planet-sky-game.is-night .planet-dialogue { background: #101d34; color: #e5edf8; border-color: #42638f; box-shadow: 5px 7px #233f68,5px 7px 0 4px #081124; }
+.planet-sky-game.is-night .planet-dialogue::before { background: #101d34; border-color: #42638f; }
+.planet-sky-game.is-night .planet-dialogue-name { color: #ebc782; background: #243c66; border-color: #5274a0; }
+.planet-sky-game.is-night :is(.planet-dialogue-channel,.planet-dialogue footer > span) { color: #b6c8e2; }
+.planet-sky-game.is-night .planet-dialogue footer { background-image: repeating-linear-gradient(90deg,#355072 0 8px,transparent 8px 16px); }
+.planet-sky-game.is-night .planet-dialogue-exit { background: #203956; color: #e4edf8; }
+.planet-sky-game.is-night .planet-dialogue-next { background: #295c9f; color: #edf3ff; }
+.planet-sky-game.is-night .planet-dialogue-next span { color: #efc77b; }
+.planet-sky-game.is-night .planet-dialogue.is-typing .planet-dialogue-text::after { color: #efdba8; }
+.planet-sky-game.is-night .planet-studio-heading p { color: #e5def5; }
+.planet-sky-game.is-night :is(.planet-studio-status,.planet-studio-privacy) { color: #eee8ff; }
+.planet-sky-game.is-night :is(button,a,input):focus-visible { outline-color: #ffe8a6; }
+@media(prefers-reduced-motion:no-preference) {
+  .planet-sky-game :is(.planet-guide,.planet-resident-card,.planet-day-toggle,.planet-meeting,.planet-dialogue) { transition: background-color .35s,color .35s,border-color .35s,box-shadow .35s; }
+}

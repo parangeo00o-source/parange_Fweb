@@ -1,0 +1,69 @@
+/* Capsule premiere: lime sunburst, candy rainbow and outlined arcade type.
+   The canvas sits between the backdrop and this measured, transparent stage. */
+.planet-sky-game.is-presenting { --unlock-width: min(860px,calc(100% - 64px)); --unlock-height: min(820px,calc(100% - 106px)); }
+.planet-sky-game.is-revealing .planet-sky {
+  background: radial-gradient(ellipse at 50% 47%,#ddfc4d66,transparent 65%),repeating-conic-gradient(from -12deg at 50% 48%,#93c900 0deg 15deg,#82bb00 15deg 30deg);
+  background-size: auto; filter: none;
+}
+.planet-sky-game .planet-reveal-backdrop {
+  border-radius: 42px;box-shadow: 0 12px 0 #39562255;
+  background: radial-gradient(ellipse at 50% 40%,#eeff8540,transparent 70%),#68a60030;
+}
+.planet-sky-game .planet-arrival-window {
+  grid-template-columns: minmax(0,1fr);grid-template-rows: auto minmax(0,1fr) auto;
+  padding: 22px 30px;gap: 12px;border: 3px solid #eaffaf80;border-radius: 42px;box-shadow: inset 0 0 0 4px #54881830;
+}
+.planet-sky-game .planet-unlock-header {font-size: clamp(27px,4vw,50px);transform: rotate(-2deg);gap: 8px;}
+.planet-sky-game .planet-unlock-header b {color:#fffbc4;font-size:9px;letter-spacing:.17em;}
+.planet-sky-game .planet-unlock-header i {color:#fffcec;-webkit-text-stroke:5px #ed901c;text-shadow:0 4px #b4510d,2px 6px #446313;}
+.planet-sky-game .planet-unlock-header i:first-child {color:#ffe852;}
+.planet-sky-game .planet-reveal-halo {display:none;}
+.planet-sky-game .planet-reveal-backdrop::before {
+  content:'';position:absolute;left:var(--stage-x,50%);top:var(--stage-y,43%);
+  width:var(--halo-size,420px);height:var(--halo-size,420px);transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,transparent 0 37%,#ee5799 37% 44%,#ff8142 44% 51%,#ffcf49 51% 58%,#8ce394 58% 65%,#5ad9e6 65% 72%,transparent 72%);
+  opacity:.8; transition:opacity .45s;
+}
+.planet-sky-game .planet-reveal-halo::after {display:none;}
+.planet-reveal-backdrop:is([data-phase="rolling"],[data-phase="settling"])::before {opacity:.24;}
+.planet-sky-game .planet-reveal-star {color:#fff192;-webkit-text-stroke:0;text-shadow:0 3px 0 #5d930844;opacity:0;animation:none;}
+.planet-arrival:is([data-phase="opening"],[data-phase="revealed"]) .planet-reveal-star {opacity:1;animation:planet-reveal-pop .55s ease-out both,planet-reveal-sparkle 2.5s ease-in-out .55s infinite;}
+.planet-sky-game .planet-reveal-star:nth-of-type(3n) {color:#ffb4dc;}
+.planet-sky-game .planet-reveal-star:nth-of-type(3n + 1) {color:#c4fff0;}
+.planet-sky-game .planet-reveal-sticker {right:3%;top:8%;background:#fa8c28;color:#fffde0;border-color:#fff3a4;box-shadow:3px 4px #537711;font-size:11px;}
+.planet-sky-game .planet-arrival-caption {
+  justify-self:center;width:min(610px,100%);min-height:130px;align-self:stretch;padding:23px 18px 12px;transform:none;
+  border:3px solid #fff4ad;border-radius:28px;background:#fff9d9;box-shadow:0 5px #48731780;
+}
+.planet-sky-game .planet-arrival-caption h2 {color:#d45b17;text-shadow:none;font-size:clamp(21px,2.6vw,31px);margin:0 0 4px;}
+.planet-sky-game .planet-arrival-caption p {color:#4c6728;font-size:13px;line-height:1.35;}
+.planet-sky-game .planet-arrival-caption small {margin-top:8px;color:#77932d;font-size:8px;}
+.planet-sky-game .planet-arrival-caption .planet-card-index {background:#ffe46a;color:#63511b;border-color:#fff7c0;box-shadow:2px 3px #cf8b2a;white-space:nowrap;}
+.planet-sky-game.is-night.is-revealing .planet-sky {background:radial-gradient(ellipse at center,#376f7b44,transparent 65%),repeating-conic-gradient(from -12deg at 50% 48%,#122f4b 0deg 15deg,#183b50 15deg 30deg);}
+.planet-sky-game.is-night .planet-reveal-backdrop {background:#10332f55;box-shadow:0 12px #07162770;}
+.planet-sky-game.is-night .planet-arrival-caption {background:#112f49;border-color:#77b9b1;}
+.planet-sky-game.is-night .planet-arrival-caption h2 {color:#ffe37c;}
+.planet-sky-game.is-night .planet-arrival-caption p {color:#c1d9e9;}
+.planet-arrival.is-flying .planet-arrival-caption {align-self:end;}
+@media(max-width:720px) {
+  .planet-sky-game.is-presenting {--unlock-width:calc(100% - 32px);--unlock-height:calc(100% - 112px);}
+  .planet-sky-game .planet-arrival-window {padding:18px 12px 15px;gap:10px;border-radius:28px;}
+  .planet-sky-game .planet-reveal-backdrop {border-radius:28px;}
+  .planet-sky-game .planet-unlock-header {font-size:clamp(24px,7vw,39px);}
+  .planet-sky-game .planet-unlock-header i {-webkit-text-stroke-width:3px;}
+  .planet-sky-game .planet-unlock-header b {font-size:7px;}
+  .planet-sky-game .planet-arrival-caption {min-height:128px;padding:22px 10px 10px;}
+  .planet-sky-game .planet-arrival-caption h2 {font-size:21px;}
+  .planet-sky-game .planet-arrival-caption p {font-size:11px;}
+  .planet-sky-game .planet-reveal-sticker {font-size:8px;right:0;}
+}
+@media(max-height:500px) and (min-width:721px) {
+  .planet-sky-game.is-presenting {--unlock-width:calc(100% - 116px);--unlock-height:calc(100% - 60px);}
+  .planet-sky-game .planet-arrival-window {grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);padding:12px 18px;}
+  .planet-sky-game .planet-unlock-header {font-size:26px;gap:4px;}
+  .planet-sky-game .planet-arrival-caption {align-self:center;min-height:120px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .planet-sky-game .planet-reveal-star {animation:none!important;}
+  .planet-sky-game .planet-reveal-backdrop::before {transition:none;}
+}
