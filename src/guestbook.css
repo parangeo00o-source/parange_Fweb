@@ -1,5 +1,8 @@
 .guestbook-screen { --gb-ink: #494233; --gb-pink: #d0178e; position: fixed; inset: 0; z-index: 60; overflow: auto; overscroll-behavior: contain; background: #fcfaf4; color: var(--gb-ink); font: 16px/1.5 'Times New Roman', Times, serif; padding: 25px clamp(18px, 5vw, 80px) 32px; }
 .guestbook-screen[hidden] { display: none; }
+.guestbook-screen.is-opening { visibility: hidden; pointer-events: none; }
+.gb-opening-notice { position: fixed; z-index: 61; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 10px 18px; border: 1px solid #ded8cb; border-radius: 3px; background: #fcfaf4; color: #494233; box-shadow: 0 3px 16px #49423312; font: 12px/1.5 'Helvetica Neue', Helvetica, Arial, sans-serif; pointer-events: none; }
+.gb-opening-notice[hidden] { display: none; }
 .guestbook-screen button { cursor: pointer; font: inherit; }
 .guestbook-screen button:disabled { cursor: default; opacity: .35; }
 .guestbook-screen :focus-visible { outline: 2px solid var(--gb-pink); outline-offset: 5px; }
@@ -106,6 +109,15 @@
 .gb-collection.is-preparing { visibility: hidden; pointer-events: none; }
 .gb-cabinet-wrap { width: 100%; max-width: none; padding: 0 28px; margin: 0 auto 30px; perspective: 1700px; perspective-origin: 50% 38%; }
 .gb-cabinet { --depth: 31px; --rail: 5px; aspect-ratio: 1.75; transform: rotateX(36deg); transform-origin: 50% 50%; }
+/* Two independent 3D scenes, ordered in 2D. Keeping cards in the same depth
+   scene as overlapping floor planes can cause rectangular compositing cutouts.
+   Match cabinet projection exactly, but never depth-sort paper against walls. */
+.gb-cabinet-wrap { position: relative; z-index: 0; }
+.gb-cabinet { z-index: 0; }
+.gb-card-stage { position: absolute; z-index: 1; inset: 0 28px; transform: rotateX(36deg); transform-origin: 50% 50%; transform-style: preserve-3d; pointer-events: none; }
+.gb-card-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(5, minmax(0, 1fr)); transform-style: preserve-3d; }
+.gb-card-slot { position: relative; min-width: 0; min-height: 0; padding: 17px 13px 11px; transform-style: preserve-3d; }
+.gb-card-slot > button { pointer-events: auto; }
 .gb-cabinet-cap { font-family: inherit; }
 .gb-front { height: 85px; }
 .gb-outer-side { width: 85px; }
@@ -152,6 +164,7 @@
  .gb-write { font-size: 10px !important; }
  .gb-collection { max-width: 650px; }
  .gb-cabinet-wrap { padding: 0 18px; margin: 0 auto 22px; perspective: 1100px; }
+ .gb-card-stage { inset-inline: 18px; transform: rotateX(32deg); }
  .gb-cabinet { --depth: 19px; --rail: 3px; aspect-ratio: 1.1; transform: rotateX(32deg); }
  .gb-cabinet-cap { top: -26px; height: 26px; }
  .gb-front { height: 59px; }.gb-outer-side { top: -26px; height: calc(100% + 26px); width: 59px; }
@@ -171,7 +184,7 @@
 
 /* File portrait prints sideways on their long edge, without cropping the art.
    Only cabinet thumbnails rotate; the picker and reader stay upright. */
-.gb-postcard { left: 50%; bottom: 27%; width: 68%; height: auto; aspect-ratio: 3 / 2; margin-left: 0; padding: 0; border: 0; border-radius: 2px; transform: translateX(-50%) translateZ(1px) rotateX(-64deg) rotateY(var(--card-turn)); background: #eee3cd; backface-visibility: hidden; }
+.gb-postcard { left: 50%; bottom: 27%; width: 68%; height: auto; aspect-ratio: 3 / 2; margin-left: 0; padding: 0; border: 0; border-radius: 2px; transform: translateX(-50%) translateZ(1px) rotateX(-64deg) rotateY(var(--card-turn)); background: #eee3cd; backface-visibility: visible; }
 /* A short lift within the compartment's clearance, with no outward tilt. */
 .gb-postcard:hover, .gb-postcard:focus-visible { transform: translateX(-50%) translateZ(7px) rotateX(-64deg) rotateY(var(--card-turn)); box-shadow: 1px 5px 5px #65583f55; }
 .gb-postcard .gb-card-art { position: absolute; inset: 0; flex: none; height: 100%; }
@@ -218,3 +231,4 @@
  .gb-read { padding: 35px 15px 15px; }
 }
 @media (max-width: 420px) { .gb-paper-options { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .gb-card-slot { padding: 11px 5px 7px; } }

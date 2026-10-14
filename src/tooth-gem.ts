@@ -1,3 +1,4 @@
+import { requestCamera, trackEvent } from './analytics'
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 
 type Point = { x: number; y: number }
@@ -407,7 +408,7 @@ export const createToothGemExperience = () => {
     if (tracking) return
     startButton.disabled = true
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
+      stream = await requestCamera({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream; await video.play()
       // Do not reveal the editor over the home page while a camera stream is
       // still negotiating. Its controls become visible with the first usable
@@ -417,6 +418,7 @@ export const createToothGemExperience = () => {
       }
       if (!open) return
       screen.classList.add('is-camera-ready')
+      trackEvent('camera_ready', { page_id: 'tooth_gem' })
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
       faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task' },

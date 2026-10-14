@@ -1,4 +1,5 @@
 import './style.css'
+import { pageId, pageReady, startPage, trackEvent } from './analytics'
 import { createCameraCapture } from './camera-capture'
 
 type SymbolType = 'pip' | 'letter' | 'heart' | 'clover' | 'arrow' | 'double' | 'star' | 'paw' | 'lemon' | 'droplet' | 'balloon' | 'shampoo'
@@ -192,7 +193,8 @@ type ExperienceFactoryLoader = () => Promise<ExperienceFactory>
 // after its die is activated.
 const experienceFactoryLoaders: Record<string, ExperienceFactoryLoader> = {
   Guestbook: async () => {
-    const { createGuestbookExperience } = await import('./guestbook')
+    const { createGuestbookExperience, warmGuestbook } = await import('./guestbook')
+    warmGuestbook()
     return () => createGuestbookExperience(() => closeColorScreen(true))
   },
   Lemonade: async () => { const { createLemonadeExperience } = await import('./lemonade'); return createLemonadeExperience },
@@ -671,6 +673,7 @@ else reducedMotion.addListener(handleMotionPreferenceChange)
 
 const openColorScreen = (destination: Pick<Dice, 'label' | 'color'>) => {
   hideCatCursor()
+  startPage(destination.label)
   const experience = loadExperience(destination.label)
   if (experience) {
     colorScreenOpen = true
@@ -680,8 +683,12 @@ const openColorScreen = (destination: Pick<Dice, 'label' | 'color'>) => {
       if (!colorScreenOpen || request !== experienceRequest) return
       activeExperience = loadedExperience
       loadedExperience.open()
+      if (destination.label !== 'Guestbook') pageReady(destination.label)
     }).catch((error: unknown) => {
       if (request === experienceRequest) {
+        trackEvent('page_load_error', { reason: 'load_failed' })
+        startPage('Home', 'load_failed')
+        pageReady('Home')
         console.error('Unable to load experience:', error)
         colorScreenOpen = false
         document.querySelector<HTMLElement>('.stage')!.inert = false
@@ -695,6 +702,7 @@ const openColorScreen = (destination: Pick<Dice, 'label' | 'color'>) => {
   colorScreen.setAttribute('aria-hidden', 'false')
   colorScreenOpen = true
   colorScreenClose.focus()
+  pageReady(destination.label)
 }
 
 const closeColorScreen = (restoreHistory = false) => {
@@ -706,6 +714,8 @@ const closeColorScreen = (restoreHistory = false) => {
   colorScreen.classList.remove('is-open')
   colorScreen.setAttribute('aria-hidden', 'true')
   colorScreenOpen = false
+  startPage('Home', 'back')
+  pageReady('Home')
   document.title = 'Dice Field'
   document.querySelector<HTMLElement>('.stage')!.inert = false
   if (wasGuestbook) document.querySelector<HTMLElement>('.dice[data-route="#guestbook"]')?.focus()
@@ -729,12 +739,14 @@ window.addEventListener('popstate', () => {
   else closeColorScreen()
 })
 if (location.hash === '#guestbook') openGuestbook()
+else { startPage('Home', 'initial'); pageReady('Home') }
 
 const navigateTo = (element: HTMLElement) => {
   if (navigating) return
   const destination = dice[Number(element.dataset.index)]
   const state = diceStates.get(element)
   if (!destination?.navigable || !state) return
+  trackEvent('navigation_select', { destination: pageId(destination.label) })
   navigating = true
   hideCatCursor()
   // Start only the selected module's download after the user clicks. The

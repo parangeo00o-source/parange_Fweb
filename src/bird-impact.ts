@@ -1,3 +1,4 @@
+import { requestCamera } from './analytics'
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 import { revealOnFirstVideoFrame } from './camera-page'
 import impactFrontalUrl from './assets/bird-impact/wing-impact-frontal-v1.png'
@@ -526,7 +527,7 @@ export const createBirdImpactExperience = () => {
     if (tracking) return
     if (!navigator.mediaDevices?.getUserMedia) return
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
+      stream = await requestCamera({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
       video.srcObject = stream
       await video.play()
       revealOnFirstVideoFrame(screen, video)

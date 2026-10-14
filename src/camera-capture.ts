@@ -1,3 +1,4 @@
+import { requestCamera, analyticsContext, trackEvent } from './analytics'
 type RecordingState = {
   recorder: MediaRecorder
   chunks: Blob[]
@@ -76,7 +77,7 @@ export const createCameraCapture = () => {
     // Match the live experiences' capped camera budget. A fallback is used
     // only for capture, so requesting 1080p here added heat without improving
     // the visible page or its 720p camera effects.
-    fallbackStream ??= await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
+    fallbackStream ??= await requestCamera({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
     fallbackVideo.srcObject = fallbackStream
     await fallbackVideo.play()
     if (fallbackVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
@@ -85,6 +86,7 @@ export const createCameraCapture = () => {
     return fallbackVideo
   }
   const takePhoto = async () => {
+    const context = analyticsContext()
     try {
       // In Lemonade this is the same composited canvas used by video recording,
       // so a still image contains every on-screen effect as well.
@@ -106,10 +108,12 @@ export const createCameraCapture = () => {
       }
       if (!photo) throw new Error('Could not create photo')
       await saveBlob(photo, `lemonade-${dateStamp()}.jpg`)
+      trackEvent('photo_capture', { ...context, status: 'success' })
       showMessage('사진을 저장할 수 있어요')
     } catch (error) {
       console.error(error)
       showMessage('카메라 권한을 확인해 주세요')
+      trackEvent('photo_capture', { ...context, status: 'failed' })
     }
   }
   const stopRecording = () => {
@@ -122,6 +126,8 @@ export const createCameraCapture = () => {
   }
   const startRecording = async () => {
     if (recording) return
+    const context = analyticsContext()
+    let recordingStarted = 0
     try {
       // Browser display capture is the only source that preserves the actual
       // page compositor: CSS graphics, filters, text, and layout match 1:1.
@@ -144,6 +150,7 @@ export const createCameraCapture = () => {
       recording = nextRecording
       recorder.addEventListener('dataavailable', (event) => { if (event.data.size) nextRecording.chunks.push(event.data) })
       recorder.addEventListener('stop', async () => {
+        trackEvent('recording_end', { ...context, duration_ms: performance.now() - recordingStarted })
         const finished = nextRecording
         recording = null
         if (finished.isDisplayCapture) finished.stream.getTracks().forEach((track) => track.stop())
@@ -156,6 +163,8 @@ export const createCameraCapture = () => {
         if (recording === nextRecording && recorder.state !== 'inactive') stopRecording()
       }, { once: true })
       recorder.start(250)
+      recordingStarted = performance.now()
+      trackEvent('recording_start', context)
       button.classList.add('is-recording')
       button.setAttribute('aria-label', '영상 촬영 중지')
       button.setAttribute('aria-pressed', 'true')
@@ -163,6 +172,7 @@ export const createCameraCapture = () => {
     } catch (error) {
       console.error(error)
       showMessage('이 브라우저에서는 영상 촬영을 지원하지 않아요')
+      trackEvent('recording_error', { ...context, reason: 'start_failed' })
     }
   }
 

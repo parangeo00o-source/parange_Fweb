@@ -3,9 +3,9 @@ import assert from 'node:assert/strict'
 import { mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright')
+const { chromium, webkit } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const output = await mkdtemp(join(tmpdir(), 'parange-drawer-loading-'))
-const browser = await chromium.launch({ channel: 'chrome', headless: true })
+const browser = process.env.BROWSER_ENGINE === 'webkit' ? await webkit.launch({ headless: true }) : await chromium.launch({ channel: 'chrome', headless: true })
 const gate = () => { let release; const promise = new Promise(resolve => { release = resolve }); return { promise, release } }
 try {
   const page = await browser.newPage({ ignoreHTTPSErrors: true, viewport: { width: 1366, height: 768 } })
@@ -29,6 +29,9 @@ try {
   await page.goto(process.env.REVIEW_URL || 'https://localhost:5173')
   await page.locator('.dice[data-route="#guestbook"]').click()
   await apiStarted.promise
+  await page.locator('.guestbook-screen').waitFor({ state: 'attached' })
+  assert.equal(await page.locator('.guestbook-screen').isVisible(), false, 'The whole page waits, including its title')
+  assert.equal(await page.locator('.gb-title-mark').isVisible(), false)
   assert.equal(await page.locator('.gb-collection').isVisible(), false, 'Do not reveal an empty cabinet before records arrive')
   assert.equal(await page.locator('.gb-collection').evaluate(node => node.inert), true)
   api.release()
@@ -51,6 +54,15 @@ try {
   const lifted = await card.evaluate(node => new DOMMatrix(getComputedStyle(node).transform).m43)
   assert.ok(lifted - rest > 5, 'Hover retains a visible upward lift')
   await page.screenshot({ path: join(output, 'hover.png') })
+  await card.evaluate(node => { window.qaOriginalCard = node })
+  await page.locator('.gb-refresh').click()
+  await page.waitForFunction(() => !document.querySelector('.gb-refresh').disabled)
+  assert.ok(await card.evaluate(node => node === window.qaOriginalCard), 'Unchanged refresh preserves card layers instead of rebuilding them')
+  await page.locator('.gb-back').click()
+  await page.locator('.dice[data-route="#guestbook"]').click()
+  await page.locator('.guestbook-screen').waitFor({ state: 'visible' })
+  assert.equal(await page.locator('.gb-postcard').count(), 3, 'Reopening uses the complete cached drawer')
+  assert.ok(await card.evaluate(node => node === window.qaOriginalCard))
   // A failed asset must not replace a complete drawer with half-loaded cards.
   records = [{ ...records[0], paper: 24 }]
   await page.locator('.gb-refresh').click()
@@ -59,5 +71,5 @@ try {
   assert.equal(await page.locator('.gb-collection').isVisible(), true)
   assert.equal(await page.locator('.gb-refresh').isEnabled(), true)
   assert.deepEqual(errors, [])
-  console.log(JSON.stringify({ output, checks: 'delayed API, delayed images, atomic reveal, eager decoded thumbnails, title mark, hover lift, failed image preserves drawer, retry enabled', errors }, null, 2))
+  console.log(JSON.stringify({ output, checks: 'delayed API, delayed images, whole-page atomic reveal, eager decoded thumbnails, title mark, hover lift, unchanged refresh and cached reopen preserve layers, failed image preserves drawer, retry enabled', errors }, null, 2))
 } finally { await browser.close() }

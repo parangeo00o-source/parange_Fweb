@@ -1,3 +1,4 @@
+import { requestCamera } from './analytics'
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
 import { revealOnFirstVideoFrame } from './camera-page'
 
@@ -284,7 +285,7 @@ export const createWaterTouchExperience = () => {
     startButton.disabled = true
     startButton.textContent = '카메라 연결 중…'
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
+      stream = await requestCamera({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
       video.srcObject = stream
       await video.play()
       revealOnFirstVideoFrame(screen, video)

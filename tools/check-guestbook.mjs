@@ -2,9 +2,9 @@ import assert from 'node:assert/strict'
 import { mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright')
+const { chromium, webkit } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const output = await mkdtemp(join(tmpdir(), 'parange-guestbook-'))
-const browser = await chromium.launch({ channel: 'chrome', headless: true })
+const browser = process.env.BROWSER_ENGINE === 'webkit' ? await webkit.launch({ headless: true }) : await chromium.launch({ channel: 'chrome', headless: true })
 try {
   const page = await browser.newPage({ ignoreHTTPSErrors: true, viewport: { width: 1440, height: 1000 } })
   const errors = []
@@ -58,6 +58,8 @@ try {
   assert.equal(await page.locator('.gb-wall-row').count(), 6)
   assert.equal(await page.locator('.gb-wall-column').count(), 6)
   assert.equal(await page.locator('.gb-cabinet').evaluate(e => getComputedStyle(e).transformStyle), 'preserve-3d')
+  assert.equal(await page.locator('.gb-cabinet .gb-card-stage').count(), 0, 'Paper is not depth-sorted against cabinet floors or dividers')
+  assert.equal(await page.locator('.gb-card-stage').evaluate(e => getComputedStyle(e).zIndex), '1')
   assert.ok(await page.evaluate(() => !/[가-힣]/.test(document.querySelector('.guestbook-screen').textContent)), 'All authored UI is English')
   assert.equal(await page.locator('.gb-cell').count(), 25)
   assert.ok(!(await page.locator('.guestbook-screen').textContent()).includes('A CABINET OF LITTLE MEMORIES'))

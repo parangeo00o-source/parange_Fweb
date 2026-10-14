@@ -1,3 +1,4 @@
+import { requestCamera, trackEvent } from './analytics'
 import { createPlanetWorld } from './planet-world'
 import type {PlanetMode} from './planet-world'
 import './planet-resident.css'
@@ -101,6 +102,7 @@ export const createParangePlanetExperience = () => {
   }
   const resetControls = () => { retry.hidden = true; building.hidden = true; studio.classList.remove('is-building'); captured.hidden = true;nameInput.disabled=false;captureStart.disabled=true }
   const cancel = () => {
+    if (state !== 'idle') trackEvent('planet_join', { page_id: 'parange_planet', status: 'cancelled' })
     session++; abort?.abort(); abort = null; cancelCountdown(); stopCamera(); world?.cancelArrival()
     state = 'idle'; setStudioVisible(false); resetControls(); arrivalUI.hide()
     screen.classList.remove('is-presenting', 'is-joining'); join.disabled = false; world?.setInteractionEnabled(true)
@@ -110,6 +112,7 @@ export const createParangePlanetExperience = () => {
 
   const processPhoto = async () => {
     if (state !== 'countdown' || !stream || !video.videoWidth) return
+    trackEvent('planet_join', { page_id: 'parange_planet', status: 'building' })
     const currentSession = session
     state = 'building'; cancelCountdown(); building.hidden = false; studio.classList.add('is-building')
     abort?.abort(); abort = new AbortController()
@@ -131,6 +134,7 @@ export const createParangePlanetExperience = () => {
       const presenting=world!.presentResident(model, arrivalUI.fly, () => {
         if (currentSession !== session) return
         state = 'idle'; arrivalUI.hide(); screen.classList.remove('is-joining'); join.disabled = false
+        trackEvent('planet_join', { page_id: 'parange_planet', status: 'success' })
         notify(`${model.name} has moved in! Click to follow. Hold to pick up.`); join.focus()
       }, arrivalUI.getFrame,arrivalUI.update,()=>{
         if(currentSession!==session||!open)return
@@ -140,6 +144,7 @@ export const createParangePlanetExperience = () => {
       if(!presenting)throw new Error('Your neighbor could not move in. Please try another snapshot.')
     } catch (error) {
       if (currentSession !== session || abort?.signal.aborted) return
+      trackEvent('planet_join', { page_id: 'parange_planet', status: 'failed' })
       setStudioVisible(true);arrivalUI.hide();world?.cancelArrival();world?.setInteractionEnabled(false)
       state = 'editing'; building.hidden = true; studio.classList.remove('is-building'); retry.hidden = false;nameInput.disabled=false
       say(error instanceof Error ? error.message : 'Something went wrong. Please try again.')
@@ -167,12 +172,12 @@ export const createParangePlanetExperience = () => {
     const currentSession = session; cameraConnecting = true; cameraRetry.hidden = true; cameraEmpty.hidden = false
     cameraEmpty.querySelector('p')!.textContent = 'Connecting your camera…'
     try {
-      const nextStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 960 }, height: { ideal: 720 } }, audio: false })
+      const nextStream = await requestCamera({ video: { facingMode: 'user', width: { ideal: 960 }, height: { ideal: 720 } }, audio: false })
       if (currentSession !== session) { nextStream.getTracks().forEach(track => track.stop()); return }
       stream = nextStream; video.srcObject = stream; await video.play()
       if (currentSession !== session) return
       cameraConnecting = false; cameraEmpty.hidden = true; captured.hidden = true
-      const ready=()=>{if(currentSession===session&&state==='editing'){captureStart.disabled=false;say('Choose a name, then press READY. Your snapshot starts after a 5-second countdown.')}}
+      const ready=()=>{if(currentSession===session&&state==='editing'){captureStart.disabled=false;trackEvent('camera_ready',{page_id:'parange_planet'});say('Choose a name, then press READY. Your snapshot starts after a 5-second countdown.')}}
       if(video.readyState>=HTMLMediaElement.HAVE_CURRENT_DATA)ready()
       else video.addEventListener('loadeddata',ready,{once:true})
     } catch {
@@ -184,6 +189,7 @@ export const createParangePlanetExperience = () => {
 
   join.addEventListener('click', () => {
     if (state !== 'idle') return
+    trackEvent('planet_join', { page_id: 'parange_planet', status: 'start' })
     session++; state = 'editing'; join.disabled = true; resetControls();nameInput.value=''; setStudioVisible(true)
     screen.classList.add('is-joining'); world?.setInteractionEnabled(false)
     say('Give your new neighbor a name. Press READY to start your snapshot.'); nameInput.focus()
@@ -210,6 +216,8 @@ export const createParangePlanetExperience = () => {
   const tabs=[...screen.querySelectorAll<HTMLButtonElement>('.planet-mode-tab')]
   const selectMode=(value:PlanetMode)=>{
     if(!open||state!=='idle')return
+    const previousMode = tabs.find(tab => tab.getAttribute('aria-selected') === 'true')?.dataset.mode ?? 'day'
+    if (previousMode !== value) trackEvent('planet_mode_change', { page_id: 'parange_planet', mode: value, previous_mode: previousMode })
     world?.setMode(value);screen.classList.toggle('is-night',value==='night');screen.classList.toggle('is-neon',value==='neon')
     screen.classList.toggle('planet-acid-ui',value==='neon')
     tabs.forEach(tab=>{const selected=tab.dataset.mode===value;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1})
@@ -228,6 +236,7 @@ export const createParangePlanetExperience = () => {
   $<HTMLButtonElement>('.planet-meeting').addEventListener('click',()=>{
     if(state!=='idle')return
     const meeting=world?.toggleMeeting()
+    trackEvent('planet_meeting', { page_id: 'parange_planet', action: meeting ? 'start' : 'end' })
     notify(meeting?'MEETING TIME! Everyone, meet at the clearing.':'Meeting over. Time to explore!')
   })
   $<HTMLButtonElement>('.planet-follow-status button').addEventListener('click',()=>world?.reset())
@@ -237,6 +246,7 @@ export const createParangePlanetExperience = () => {
       open = true; screen.classList.add('is-open'); screen.setAttribute('aria-hidden', 'false')
       world ??= createPlanetWorld(canvas, spots, id => {
         const spot = spots.find(item => item.id === id); if (!spot) return
+        trackEvent('planet_spot_view', { page_id: 'parange_planet', spot_id: spots.indexOf(spot) + 1 })
         $<HTMLElement>('.planet-spot-card').innerHTML = `<span class="planet-card-index">0${spots.indexOf(spot) + 1} / VILLAGE</span><h2>${spot.name.replace(' ', '<br>')}</h2><p>${spot.subtitle}</p>`
       }, village=>{
         const meetingButton=$<HTMLButtonElement>('.planet-meeting')
