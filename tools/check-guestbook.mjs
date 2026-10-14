@@ -67,7 +67,15 @@ try {
   assert.equal(await page.locator('.gb-top').evaluate(e => getComputedStyle(e).borderBottomWidth), '0px')
   assert.equal(await page.locator('.gb-postcard').count(), 0)
   assert.equal(await page.locator('.gb-empty-invite svg').count(), 0, 'Old mouse illustration is replaced')
-  assert.equal(await page.locator('.gb-empty-invite img').getAttribute('src'), await page.locator('.gb-title-mark img').getAttribute('src'), 'Invitation paper uses the new title mark')
+  assert.equal(await page.locator('.gb-heading').count(), 0, 'The left-hand title area is removed')
+  assert.match(await page.locator('.gb-empty-invite img').getAttribute('src'), /leave-a-little-hello-mark-v1/, 'Invitation paper keeps the title mark')
+  const [collectionBox, cabinetBox] = await Promise.all([
+    page.locator('.gb-collection').boundingBox(),
+    page.locator('.gb-cabinet-wrap').boundingBox(),
+  ])
+  assert.ok(collectionBox && cabinetBox)
+  assert.ok(Math.abs((collectionBox.x + collectionBox.width / 2) - 720) < 1, 'Guestbook collection is centered')
+  assert.ok(Math.abs((cabinetBox.x + cabinetBox.width / 2) - 720) < 1, 'Cabinet is centered')
   await page.locator('.gb-empty-invite img').evaluate(img => img.decode())
   await page.screenshot({ path: join(output, 'empty.png') })
   await page.locator('.gb-empty-invite').click()
@@ -173,7 +181,9 @@ try {
     assert.ok(await page.locator('.gb-read').isVisible())
     await page.keyboard.press('Escape')
     if (width === 320) {
-      await page.locator('.gb-write').click()
+      await page.locator('.gb-next').click()
+      await page.waitForFunction(() => document.querySelector('.gb-page').textContent === '02')
+      await page.locator('.gb-empty-invite').first().click()
       await page.locator('input[name=paper][value="24"]').check()
       assert.equal(await page.locator('input[name=paper]:checked').inputValue(), '24')
       assert.ok(await page.locator('.gb-compose').evaluate(e => e.scrollWidth <= e.clientWidth + 1), '25-card picker fits narrow phones')
@@ -183,7 +193,7 @@ try {
     }
   }
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.locator('.gb-write').click()
+  await page.locator('.gb-empty-invite').first().click()
   await page.locator('[name=name]').fill('<img src=x onerror=alert(1)>')
   await page.locator('[name=message]').fill('<script>window.XSS = true</script>')
   failWrite = true

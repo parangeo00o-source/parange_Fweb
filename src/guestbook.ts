@@ -47,10 +47,10 @@ export function createGuestbookExperience(onBack: () => void) {
   screen.setAttribute('aria-label', 'Guestbook')
   screen.innerHTML = `
     <header class="gb-top"><button type="button" class="gb-back">← Back home</button><button type="button" class="gb-refresh">Refresh ↻</button></header>
-    <div class="gb-workspace"><aside class="gb-heading"><h1 class="gb-title-mark"><img src="${titleMark}" alt="Leave A Little Hello" width="1600" height="1024" decoding="async"></h1><button type="button" class="gb-write">Leave a postcard <span>↗</span></button><p class="gb-status" role="status" aria-live="polite"></p></aside>
-    <div class="gb-collection">
+    <div class="gb-workspace"><div class="gb-collection">
     <div class="gb-cabinet-wrap"><div class="gb-cabinet"><div class="gb-cabinet-cap"><i></i><span>LITTLE HELLOS</span><i></i></div><div class="gb-grid" aria-label="Postcard cabinet"></div>${partitions}<i class="gb-outer-side gb-outer-left" aria-hidden="true"></i><i class="gb-outer-side gb-outer-right" aria-hidden="true"></i><div class="gb-front"><span class="gb-brass-label">No. 01</span><span class="gb-handle" aria-hidden="true"></span></div></div></div>
     <footer class="gb-caption"><strong class="gb-drawer-label">Drawer 01</strong><nav aria-label="Browse drawers"><button type="button" class="gb-prev" aria-label="Previous drawer">←</button><span class="gb-page">01</span><button type="button" class="gb-next" aria-label="Next drawer">→</button></nav></footer>
+    <p class="gb-status" role="status" aria-live="polite"></p>
     <div class="gb-directory" aria-label="Postcard authors"></div>
     </div></div>
     <dialog class="gb-dialog gb-compose" aria-labelledby="gb-compose-title"><button class="gb-dialog-close" type="button" aria-label="Close">×</button><span class="gb-eyebrow">TO OUR LITTLE WORLD</span><h2 id="gb-compose-title">A few words to keep.</h2><form>
@@ -199,8 +199,6 @@ export function createGuestbookExperience(onBack: () => void) {
       })
       const drawer = unchanged ? null : prepareDrawer(result.entries, target)
       if (drawer) await decodeDrawer(drawer.cells, signal)
-      // Include the heading mark even when every slot is occupied.
-      await decodeDrawer(get('.gb-title-mark'), signal)
       if (id !== requestId || !opened) return
       page = target
       entries = result.entries
@@ -234,7 +232,6 @@ export function createGuestbookExperience(onBack: () => void) {
   }
 
   get('.gb-back').addEventListener('click', onBack)
-  get('.gb-write').addEventListener('click', openCompose)
   refresh.addEventListener('click', () => void load())
   prev.addEventListener('click', () => void load(page - 1))
   next.addEventListener('click', () => void load(page + 1))

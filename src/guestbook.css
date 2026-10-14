@@ -9,13 +9,7 @@
 .gb-top { display: flex; justify-content: space-between; align-items: center; gap: 15px; max-width: 1400px; margin: 0 auto; padding-bottom: 19px; border-bottom: 1px solid #ded8cb; }
 .gb-top span { font: 12px/1.5 'Times New Roman', Times, serif; letter-spacing: .12em; }
 .gb-top button { color: #6f6256; border: 0; padding: 5px 0; background: transparent; font-size: 12px; }
-.gb-heading { position: relative; max-width: 980px; margin: 25px auto 0; text-align: center; }
 .gb-eyebrow { font: 11px/1.5 'Times New Roman', Times, serif; letter-spacing: .16em; color: #80715f; }
-.gb-heading h1 { margin: 8px 0 5px; color: #493e30; font: normal clamp(32px, 3.6vw, 46px)/1.15 'Times New Roman', Times, serif; letter-spacing: -1.4px; }
-.gb-heading p { color: #80715f; font-size: 15px; font-style: italic; }
-.gb-write { margin-top: 19px; padding: 9px 20px; background: transparent; color: #ad3979; border: 1px solid #c991aa; border-radius: 2px; font-size: 12px !important; }
-.gb-write span { margin-left: 19px; }
-.gb-write:hover { background: #f9eaf0; }
 .gb-status { min-height: 22px; margin: 14px auto 0; max-width: 820px; text-align: center; font-size: 13px; color: #857763; }
 /* The entire cabinet shares one perspective space. No overflow/filter/opacity
    on these ancestors: those properties flatten the individual 3D walls. */
@@ -85,7 +79,7 @@
 .gb-read-footer { display: flex; justify-content: space-between; align-items: end; gap: 15px; border-top: 1px solid #98866a50; padding-top: 15px; }.gb-read-footer h2 { margin: 0; font: italic 18px/1.4 Georgia, serif; overflow-wrap: anywhere; }.gb-read-footer time { font: 10px/1.5 monospace; flex-shrink: 0; }
 @media (max-width: 600px) {
  .guestbook-screen { padding: 15px 16px 30px; }.gb-top { padding-bottom: 12px; }.gb-top span { font-size: 8px; letter-spacing: .07em; }.gb-top button { font-size: 11px; }
- .gb-heading { margin-top: 24px; }.gb-heading h1 { font-size: 35px; }.gb-cabinet-wrap { perspective: 1000px; padding: 0 19px; margin: 22px auto 24px; }.gb-cabinet { --depth: 24px; --rail: 4px; aspect-ratio: .85; transform: rotateX(32deg); }.gb-cabinet-cap { top: -26px; height: 26px; padding: 0 10px; font-size: 6px; }
+ .gb-cabinet-wrap { perspective: 1000px; padding: 0 19px; margin: 22px auto 24px; }.gb-cabinet { --depth: 24px; --rail: 4px; aspect-ratio: .85; transform: rotateX(32deg); }.gb-cabinet-cap { top: -26px; height: 26px; padding: 0 10px; font-size: 6px; }
  .gb-cell { padding: 11px 5px 7px; }.gb-front { left: -6px; right: -6px; height: 64px; border-top-width: 5px; }.gb-outer-side { top: -26px; height: calc(100% + 26px); width: 64px; }.gb-handle { width: 64px; height: 28px; top: 16px; border-width: 4px; }.gb-brass-label { left: 15px; top: 8px; font-size: 7px; }
  .gb-postcard { padding: 4px; gap: 4px; }.gb-card-post { font-size: 4px; letter-spacing: 0; }.gb-card-post i { width: 11px; height: 14px; font-size: 9px; }.gb-card-message { font-size: 8px; -webkit-line-clamp: 3; }.gb-card-name { font-size: 6px; }
  .gb-empty-invite svg { width: 38px; height: 22px; }.gb-empty-invite em { font-size: 9px; }.gb-empty-invite span { font-size: 6px; }.gb-caption strong { font-size: 16px; }.gb-caption p { font-size: 12px; }.gb-caption-note { display: none; }.gb-directory { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }.gb-directory button { font-size: 12px; }
@@ -97,14 +91,9 @@
 .guestbook-screen { --gb-ink: #242923; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 22px clamp(20px, 4vw, 64px); background: #f9f8f2; }
 .gb-top { border: 0; padding: 0; }
 .gb-top button { color: var(--gb-ink); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-.gb-workspace { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: clamp(25px, 4vw, 65px); max-width: 1440px; min-height: calc(100svh - 95px); margin: auto; align-items: center; }
-.gb-heading { margin: 0; text-align: left; align-self: center; }
-.gb-heading h1 { font: 800 clamp(37px, 3.5vw, 52px)/.94 'Helvetica Neue', Helvetica, Arial, sans-serif; text-transform: uppercase; letter-spacing: -.065em; color: #242923; margin: 0 0 30px; }
-.gb-title-mark img { display: block; width: 100%; height: auto; }
-.gb-write { margin: 0; padding: 11px 0; width: 100%; display: flex; justify-content: space-between; border: 0; border-top: 1px solid #363a32; border-bottom: 1px solid #363a32; border-radius: 0; color: #242923; font-weight: 600 !important; }
-.gb-write span { margin: 0; }
-.gb-heading .gb-status { margin: 16px 0 0; text-align: left; font: 11px/1.6 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #74766b; min-height: 54px; }
-.gb-collection { width: 100%; max-width: min(1070px, calc((100svh - 205px) * 1.7)); justify-self: center; min-width: 0; }
+.gb-workspace { display: flex; justify-content: center; max-width: 1440px; min-height: calc(100svh - 95px); margin: auto; align-items: center; }
+.gb-status { margin: 14px auto 0; max-width: 600px; min-height: 0; text-align: center; font: 11px/1.6 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #74766b; }
+.gb-collection { width: 100%; max-width: min(1070px, calc((100svh - 205px) * 1.7)); min-width: 0; }
 /* visibility preserves perspective/layout; opacity/filter would flatten 3D. */
 .gb-collection.is-preparing { visibility: hidden; pointer-events: none; }
 .gb-cabinet-wrap { width: 100%; max-width: none; padding: 0 28px; margin: 0 auto 30px; perspective: 1700px; perspective-origin: 50% 38%; }
@@ -131,12 +120,12 @@
 .gb-empty-invite em { font: 600 10px/1.1 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .gb-empty-invite svg { width: 38px; height: 22px; }
 .gb-empty-invite span { margin-top: 4px; }
-.gb-caption { max-width: none; margin: 0 25px; align-items: center; }
+.gb-caption { max-width: none; margin: 0 25px; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; }
 .gb-caption strong { font: 800 20px/1 'Helvetica Neue', Helvetica, Arial, sans-serif; text-transform: uppercase; letter-spacing: -.05em; }
 .gb-caption nav { font-family: inherit; }
 .gb-caption nav button { border: 0; font-size: 20px; color: #242923; }
-.gb-directory { max-width: none; margin: 10px 25px 0; gap: 5px 12px; }
-.gb-directory button { font: 11px/1.35 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #66685d; }
+.gb-directory { grid-template-columns: repeat(auto-fit, minmax(86px, max-content)); justify-content: center; max-width: none; margin: 10px 25px 0; gap: 5px 12px; }
+.gb-directory button { font: 11px/1.35 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #66685d; text-align: center; }
 .gb-dialog, .gb-eyebrow, .gb-compose input:not([type=radio]), .gb-compose textarea, .gb-read-message, .gb-read-footer h2, .gb-read-header { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .gb-dialog h2 { font: 800 28px/1.05 'Helvetica Neue', Helvetica, Arial, sans-serif; letter-spacing: -.04em; }
 .gb-read-footer h2 { font-size: 16px; font-style: normal; letter-spacing: -.02em; }
@@ -157,11 +146,7 @@
 @keyframes gb-file-card { from { transform: translateZ(65px) rotateX(-76deg) rotateY(var(--card-turn)); opacity: 0; } to { transform: translateZ(2px) rotateX(-76deg) rotateY(var(--card-turn)); opacity: 1; } }
 @media (max-width: 750px) {
  .guestbook-screen { padding: 15px 16px 24px; }
- .gb-workspace { display: block; min-height: 0; }
- .gb-heading { display: grid; grid-template-columns: 1fr 145px; gap: 10px 16px; align-items: center; margin: 22px 5px 34px; }
- .gb-heading h1 { font-size: 33px; margin: 0; }
- .gb-heading .gb-status { grid-column: 1/-1; min-height: 0; margin: 0; font-size: 10px; }
- .gb-write { font-size: 10px !important; }
+ .gb-workspace { min-height: 0; }
  .gb-collection { max-width: 650px; }
  .gb-cabinet-wrap { padding: 0 18px; margin: 0 auto 22px; perspective: 1100px; }
  .gb-card-stage { inset-inline: 18px; transform: rotateX(32deg); }
@@ -176,8 +161,8 @@
  .gb-empty-invite em { font-size: 7px; }.gb-empty-invite svg { width: 26px; height: 16px; }
 }
 @media (max-height: 500px) and (min-width: 751px) {
- .gb-workspace { grid-template-columns: 145px minmax(0,1fr); gap: 30px; padding-top: 25px; }
- .gb-heading h1 { font-size: 32px; }.gb-collection { max-width: 510px; }
+ .gb-workspace { padding-top: 25px; }
+ .gb-collection { max-width: 510px; }
  .gb-cabinet { --depth: 20px; }.gb-directory { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .gb-postcard.is-new { animation: none; } }
