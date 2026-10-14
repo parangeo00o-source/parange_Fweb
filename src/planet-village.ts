@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import type { ResidentModel } from './planet-resident'
 import { createPlanetSinkhole } from './planet-sinkhole'
 
-export type VillageState = { following: string | null; followingId:string|null; holding: string | null; meeting: boolean; count: number; sinkhole:boolean; overSinkhole:boolean; expelled:{id:string;name:string}|null; latest:{id:string;name:string;portrait:string;trait:string}|null; persistent?:boolean }
+export type VillageState = { following: string | null; followingId:string|null; holding: string | null; meeting: boolean; count: number; sinkhole:boolean; overSinkhole:boolean; expelled:{id:string;name:string}|null; latest:{id:string;name:string;portrait:string;trait:string;designIndex?:number}|null; persistent?:boolean }
 export type VillageObstacle = { normal: THREE.Vector3; radius: number }
 type Resident = {
   model: ResidentModel; normal: THREE.Vector3; tangent: THREE.Vector3
@@ -16,6 +16,7 @@ type Options = {
   select: (id: string) => void; onChange: (state: VillageState) => void
   prepare?: (model:ResidentModel)=>boolean; onRemove?: (model:ResidentModel)=>void
   underlays?:THREE.Mesh[]
+  illustratedPick?:(x:number,y:number)=>string|null|undefined
 }
 
 export function createPlanetVillage(options: Options) {
@@ -40,7 +41,7 @@ export function createPlanetVillage(options: Options) {
     const latest=residents.at(-1)?.model
     return {following:follow?.model.name??null,followingId:follow?.model.id??null,holding:held?.resident.model.name??null,meeting,count:residents.length,
       sinkhole:sinkhole.open,overSinkhole:held?.overSinkhole??false,expelled,
-      latest:latest?{id:latest.id!,name:latest.name,portrait:latest.portrait,trait:latest.trait}:null}
+      latest:latest?{id:latest.id!,name:latest.name,portrait:latest.portrait,trait:latest.trait,designIndex:latest.designIndex}:null}
   }
   const notify=()=>options.onChange(state())
   const tangentAt=(normal:THREE.Vector3)=>{
@@ -80,6 +81,8 @@ export function createPlanetVillage(options: Options) {
     ndc.set((x-bounds.left)/bounds.width*2-1,-(y-bounds.top)/bounds.height*2+1);ray.setFromCamera(ndc,camera)
   }
   const pick=(x:number,y:number)=>{
+    const illustrated=options.illustratedPick?.(x,y)
+    if(illustrated!==undefined)return residents.find(r=>r.model.id===illustrated)??null
     setRay(x,y)
     const occlusion=ray.intersectObject(terrain,false)[0]?.distance??Infinity
     let chosen:Resident|null=null,nearest=occlusion+.012
@@ -300,6 +303,7 @@ export function createPlanetVillage(options: Options) {
     add,update,toggleMeeting,refresh:notify,
     get residents(){return residents},get state(){return state()},
     get sinkhole(){return sinkhole},
+    get fallingResident(){return falling?.resident??null},
     safePosition:(point:THREE.Vector3)=>nearestSafe(point),
     reset:()=>{resetPointer(true);setFollow(null);globeTargetZoom=1;world.rotation.set(-.08,.30,-.10)},
     setEnabled:(value:boolean)=>{enabled=value;if(!value){resetPointer(true);setFollow(null)}},

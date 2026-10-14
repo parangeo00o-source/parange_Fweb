@@ -1,0 +1,167 @@
+/* Neon Walk print palette, enabled by selectMode only for the neon edition.
+   Color-only overrides: world art, geometry and motion stay intact.
+   The explicit scope wins over the legacy per-edition colors without !important. */
+.planet-screen.planet-sky-game.planet-acid-ui {
+  --ui-paper: #fffdef;
+  --ui-ink: #38264f;
+  --ui-muted: #695776;
+  --ui-purple: #aa36c8;
+  --ui-pink: #f58bd9;
+  --ui-yellow: #f4f44a;
+  --ui-mint: #8ce9b5;
+  --ui-lilac: #e6d3f1;
+  --retro-ink: var(--ui-ink);
+  --retro-paper: var(--ui-paper);
+  --retro-orange: var(--ui-purple);
+  --retro-blue: #6552bc;
+  --retro-pink: var(--ui-pink);
+}
+
+/* Letterpress-like title: alternating poster inks over violet registration shadows. */
+.planet-screen.planet-sky-game.planet-acid-ui .planet-logo-row > span {
+  color: var(--ui-pink);
+  -webkit-text-stroke-color: var(--ui-purple);
+  text-shadow: 1px 2px var(--ui-purple), 3px 5px #743595, 4px 6px #fffdef9c;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-logo-row > span:nth-child(3n+1) { color: var(--ui-mint); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-logo-row > span:nth-child(3n) { color: var(--ui-yellow); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-brand-words small {
+  color: var(--ui-paper); text-shadow: 0 1px 3px var(--ui-ink), 0 1px 6px var(--ui-ink);
+}
+.planet-screen.planet-sky-game.planet-acid-ui.is-neon .planet-brand-words small { color: var(--ui-ink); text-shadow: none; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-spot-card h2 {
+  color: var(--ui-paper); -webkit-text-stroke-color: var(--ui-purple);
+  text-shadow: 1px 3px var(--ui-purple), 3px 5px #743595;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-spot-card h2 em {
+  color: var(--ui-yellow); -webkit-text-stroke-color: var(--ui-purple);
+  text-shadow: 1px 3px var(--ui-purple), 3px 5px #743595;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-spot-card p {
+  color: var(--ui-paper); text-shadow: 0 1px 3px var(--ui-ink);
+}
+.planet-screen.planet-sky-game.planet-acid-ui.is-neon .planet-spot-card p { color: var(--ui-muted); text-shadow: none; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-spot-card .planet-card-index {
+  color: var(--ui-ink); background: var(--ui-mint); border-color: var(--ui-purple); box-shadow: 0 2px #74359550;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-spot-sticker {
+  color: var(--ui-ink); background: var(--ui-yellow); border-color: var(--ui-purple);
+  box-shadow: 2px 3px var(--ui-purple); text-shadow: none;
+}
+
+/* Paper surfaces remain readable against all three worlds. */
+.planet-screen.planet-sky-game.planet-acid-ui :is(.planet-guide, .planet-resident-card, .planet-follow-status, .planet-mode-tabs, .planet-toast) {
+  color: var(--ui-ink); background: var(--ui-paper); border-color: var(--ui-purple);
+  box-shadow: 3px 4px #aa36c852; text-shadow: none;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-mode-tabs .planet-mode-tab {
+  color: var(--ui-muted); background: transparent;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-mode-tabs .planet-mode-tab:hover { color: var(--ui-ink); background: var(--ui-lilac); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-mode-tabs .planet-mode-tab[aria-selected=true] {
+  color: var(--ui-ink); background: var(--ui-yellow);
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-mode-tab i { color: inherit; }
+.planet-screen.planet-sky-game.planet-acid-ui :is(.planet-close, .planet-studio-close) {
+  color: var(--ui-ink); background: var(--ui-pink); border-color: var(--ui-purple); box-shadow: 0 4px #743595;
+}
+.planet-screen.planet-sky-game.planet-acid-ui :is(.planet-close, .planet-studio-close):hover { color: var(--ui-ink); background: var(--ui-yellow); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-meeting {
+  color: var(--ui-ink); background: var(--ui-mint); border-color: var(--ui-purple); box-shadow: 0 4px #743595;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-meeting :is(small, span) { color: inherit; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-meeting:not(:disabled):hover { background: #b4f4ca; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-meeting[aria-pressed=true] { background: var(--ui-yellow); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-meeting:disabled {
+  color: var(--ui-muted); background: #dcebd7; border-color: #b7a8c2; box-shadow: 0 4px #aa96b7;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-guide b { color: var(--ui-ink); background: var(--ui-mint); box-shadow: 0 2px #53a487; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-resident-card :is(.planet-card-index, small) { color: var(--ui-muted); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-resident-name { color: var(--ui-ink); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-resident-avatar {
+  background: var(--ui-lilac); border-color: var(--ui-purple); box-shadow: 0 3px #aa36c84d;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-resident-empty { color: var(--ui-yellow); text-shadow: 1px 2px var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-join-primary {
+  color: var(--ui-ink); border-color: var(--ui-purple); background: linear-gradient(#ffb5e9, var(--ui-pink));
+  box-shadow: inset 0 3px #ffdeef, inset 0 -3px #e774cd, 0 6px #9336b4, 0 8px var(--ui-paper), 0 12px 20px #38264f26;
+  text-shadow: none;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-join-primary:hover { background: linear-gradient(#ffcaee, #fa9be1); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-join-primary:active { box-shadow: inset 0 2px #ffdeef, 0 2px #9336b4, 0 4px var(--ui-paper); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-join-icon { color: var(--ui-ink); background: var(--ui-yellow); border-color: var(--ui-purple); box-shadow: inset 0 2px #fffca9; }
+.planet-screen.planet-sky-game.planet-acid-ui :is(.planet-join-label, .planet-join-label small, .planet-join-arrow) { color: var(--ui-ink); text-shadow: none; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-follow-status button { color: var(--ui-ink); background: var(--ui-mint); border-color: var(--ui-purple); box-shadow: 0 2px #aa36c850; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-follow-status.is-danger { color: #922738; background: #fff0ed; border-color: #ce546d; box-shadow: 0 4px #ce546d60; }
+.planet-screen.planet-sky-game.planet-acid-ui :is(button, a, input):focus-visible { outline-color: #7532a4; }
+.planet-screen.planet-sky-game.planet-acid-ui.is-night :is(button, a, input):focus-visible { outline-color: var(--ui-yellow); }
+
+/* Move-in studio: keep the existing checks, panel arrangement and photo preview. */
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio {
+  color: var(--ui-ink); background-color: var(--ui-paper);
+  background-image: radial-gradient(ellipse at 50% 30%, #fffdef70, transparent 72%), conic-gradient(#fffdef 25%, #f0f0dc 0 50%, #fffdef 0 75%, #f0f0dc 0);
+  background-size: auto, 112px 112px;
+  border-color: var(--ui-paper); outline-color: var(--ui-purple);
+}
+.planet-screen.planet-sky-game.planet-acid-ui.is-neon .planet-studio-console { background-color: var(--ui-mint); border-color: var(--ui-purple); box-shadow: 7px 7px #aa36c85c; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio-heading .planet-card-index { color: var(--ui-ink); background: var(--ui-mint); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio-heading h2 {
+  color: var(--ui-pink); -webkit-text-stroke-color: var(--ui-purple); text-shadow: 3px 5px #743595;
+}
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio-heading h2 em { color: var(--ui-yellow); text-shadow: 3px 5px #743595; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio-heading::before { color: var(--ui-yellow); -webkit-text-stroke-color: var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio-heading::after { color: var(--ui-pink); -webkit-text-stroke-color: var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui :is(.planet-studio-heading p, .planet-studio-privacy, .planet-player-note, .planet-building p) { color: var(--ui-muted); }
+.planet-screen.planet-sky-game.planet-acid-ui :is(.planet-studio-panels > section, .planet-name-entry) { color: var(--ui-ink); background: var(--ui-paper); border-color: var(--ui-purple); box-shadow: 5px 7px #aa36c86b; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio-panels header { color: var(--ui-ink); background: var(--ui-mint); border-color: var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio-panels header b { color: var(--ui-ink); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio-panels header i { background: var(--ui-pink); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio-panels footer { color: var(--ui-muted); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-camera-viewport { background: #514163; border-color: var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-camera-empty { color: var(--ui-paper); background-color: #6552a3; background-image: radial-gradient(#ffffff14 1px, transparent 1px); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-camera-empty > span { color: var(--ui-yellow); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-player-stickers > span { color: var(--ui-ink); background: var(--ui-pink); border-color: var(--ui-purple); box-shadow: inset 0 0 0 4px #ffceef, 3px 4px var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-player-stickers b { color: var(--ui-ink); background: var(--ui-yellow); border-color: var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-player-stickers i { color: var(--ui-mint); -webkit-text-stroke-color: var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-player-step { color: #843096; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-name-entry small { color: var(--ui-muted); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-name-entry input { color: var(--ui-ink); background: #fffef8; border-color: var(--ui-purple); box-shadow: inset 2px 3px #e9dced; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-name-entry input::placeholder { color: #766482; }
+.planet-screen.planet-sky-game.planet-acid-ui :is(.planet-name-entry button, .planet-camera-retry, .planet-studio-retry) { color: var(--ui-ink); background: var(--ui-yellow); border-color: var(--ui-purple); box-shadow: inset 0 3px #fffba7, 3px 4px var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-name-entry button:disabled { color: var(--ui-muted); background: #e6dfda; border-color: #ac9bb6; box-shadow: inset 0 3px #f5f0ea, 2px 3px #aa96b7; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-player-note > span { color: #a23591; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-studio .planet-studio-status { color: var(--ui-ink); background: #f5f7c9; border-color: var(--ui-purple); box-shadow: 2px 3px #aa36c860; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-status-dot { background: #389e72; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-countdown { color: var(--ui-yellow); -webkit-text-stroke-color: var(--ui-purple); text-shadow: 5px 7px #743595; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-building { color: var(--ui-ink); background: var(--ui-paper); border-color: var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-building h3 { color: var(--ui-ink); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-building-orbit span { color: var(--ui-ink); background: var(--ui-pink); border-color: var(--ui-purple); box-shadow: 3px 4px var(--ui-purple); }
+
+/* Resident conversation and arrival cards use the same palette, not scene filters. */
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue { color: var(--ui-ink); background: var(--ui-paper); border-color: var(--ui-purple); box-shadow: 5px 7px var(--ui-pink), 5px 7px 0 4px var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue::before { background: var(--ui-paper); border-color: var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue-name { color: var(--ui-ink); background: var(--ui-yellow); border-color: var(--ui-purple); box-shadow: 3px 4px var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui :is(.planet-dialogue-channel, .planet-dialogue footer > span) { color: var(--ui-muted); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue footer { background-image: repeating-linear-gradient(90deg, #dcc6e7 0 8px, transparent 8px 16px); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue footer i { color: #36775d; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue button { color: var(--ui-ink); border-color: var(--ui-purple); box-shadow: 2px 3px var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue-exit { background: var(--ui-mint); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue-next { background: var(--ui-pink); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue-next span { color: var(--ui-ink); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-dialogue.is-typing .planet-dialogue-text::after { color: var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui :is(.planet-dialogue, .planet-studio) button:not(:disabled):active { box-shadow: 0 1px var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-arrival-caption { color: var(--ui-ink); background: var(--ui-paper); border-color: var(--ui-purple); box-shadow: 4px 5px var(--ui-pink); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-arrival-caption h2 { color: var(--ui-ink); text-shadow: none; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-arrival-caption :is(p, small) { color: var(--ui-muted); text-shadow: none; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-arrival-caption .planet-card-index { color: var(--ui-ink); background: var(--ui-mint); border-color: var(--ui-purple); box-shadow: 2px 3px var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-reveal-sticker { color: var(--ui-ink); background: var(--ui-yellow); border-color: var(--ui-purple); box-shadow: 3px 4px var(--ui-purple); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-unlock-header b { color: var(--ui-paper); text-shadow: 0 1px 3px var(--ui-ink); }
+.planet-screen.planet-sky-game.planet-acid-ui.is-neon .planet-unlock-header b { color: var(--ui-ink); text-shadow: none; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-unlock-header i { color: var(--ui-pink); -webkit-text-stroke-color: var(--ui-purple); text-shadow: 2px 3px var(--ui-paper), 4px 6px #743595; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-unlock-header i:first-child { color: var(--ui-yellow); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-reveal-star { color: var(--ui-yellow); -webkit-text-stroke-color: var(--ui-purple); text-shadow: 3px 4px #743595; }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-reveal-star:nth-child(3n) { color: var(--ui-pink); }
+.planet-screen.planet-sky-game.planet-acid-ui .planet-reveal-star:nth-child(3n+1) { color: var(--ui-mint); }
+@media (max-width: 720px) {
+  .planet-screen.planet-sky-game.planet-acid-ui .planet-studio { background-size: auto, 76px 76px; }
+}

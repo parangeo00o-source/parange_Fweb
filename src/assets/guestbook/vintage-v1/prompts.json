@@ -1,0 +1,207 @@
+{
+  "method": "built-in image_gen",
+  "version": 1,
+  "notes": "25 original portrait postcard illustrations inspired by user-provided vintage references; not scans of original cards. Display derivatives preserve composition.",
+  "cards": [
+    {
+      "id": 0,
+      "name": "Teddy Greetings",
+      "file": "card-01.jpg",
+      "thumbnail": "thumb-01.jpg",
+      "prompt": "Use case: illustration-story. Asset type: finished vintage postcard artwork for a website, one card only, portrait 2:3. Create an original 1940s lithographed greeting postcard: two warm brown teddy bears with expressive hand-painted eyes, rosy cheeks, one pink ribbon and one navy polka-dot bow, carrying small baskets of red and blue garden flowers. Charming period proportions, delicate fur stippling and layered ink, genuine aged cream paper with subtle print wear, softly scalloped illustrated border. Rich brown, faded coral, cornflower blue, butter cream. Small elegant handwritten caption exactly 'For you'. Full-bleed FLAT FRONT card art filling image, no tabletop, no mockup, no perspective, no cast shadow around card, no watermark. Detailed antique illustration, not modern vector, not plastic 3D. User reference teddy greeting cards are mood/style guidance, create a fresh composition.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-036fe7da-dffa-4854-8f34-0e2119f8344d.png"
+    },
+    {
+      "id": 1,
+      "name": "Letter Kitten",
+      "file": "card-02.jpg",
+      "thumbnail": "thumb-02.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A fluffy black-and-white kitten with amber eyes and a faded pink neck ribbon reaching up to post a cream envelope into a tall scarlet British pillar postbox. Pale sage wash at top fading to ivory below, delightful 1930s painted illustration and fine whiskers. Elegant small bottom caption 'From me to you'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-c422032d-3eae-4b3a-a535-6ff2718a4743.png"
+    },
+    {
+      "id": 2,
+      "name": "Birthday Pup",
+      "file": "card-03.jpg",
+      "thumbnail": "thumb-03.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A chubby playful black-and-white spaniel puppy with large blue eyes holding a striped pastel toy rattle, mint green background with spaced tiny coral polka dots. Airy 1950s children's birthday greeting card, cream border. Top text 'Happy little day!' in irregular charming black hand lettering.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-436e8d18-3378-47cc-9d62-aea99d6bef20.png"
+    },
+    {
+      "id": 3,
+      "name": "Starlight Wishes",
+      "file": "card-04.jpg",
+      "thumbnail": "thumb-04.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: Small cream spotted terrier with blue satin ribbon standing on a gently arched butter-yellow grassy hill under near-black navy starry sky. Flowers on the hill, delicate stippled vintage ink. Lower cream half contains beautifully balanced flowing handwriting 'Sending you / a little starlight'. Fine 1930s print aesthetic.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-9286e6b8-f3da-4340-9ce4-a8e049899c87.png"
+    },
+    {
+      "id": 4,
+      "name": "Forget Me Not",
+      "file": "card-05.jpg",
+      "thumbnail": "thumb-05.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: Edwardian embossed-style botanical postcard. Blue silk ribbon suspends a lace-edged heart filled with tiny blue forget-me-nots, deep rose-pink anemones, sage clovers cascade diagonally, a small intricately engraved fish below, faded teal fictional postage stamp in corner, age-speckled warm ivory. Flourished dark blue handwritten caption 'Forget me not'. Very fine engraved floral details.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-bdd8615d-5e30-4c2a-a2df-3bae700e812e.png"
+    },
+    {
+      "id": 5,
+      "name": "Wishes Express",
+      "file": "card-06.jpg",
+      "thumbnail": "thumb-06.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A small white-and-tan puppy in a green cap and coral jacket pulling a green wooden wagon stacked impossibly high with cream, yellow, red and sage envelopes. Powder blue background, scalloped ivory margin, joyful 1950s printed greeting illustration with furry detail. Top left short ink script 'A wagon of wishes'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-f2c4e1c6-40ae-4964-838c-23d845a494b6.png"
+    },
+    {
+      "id": 6,
+      "name": "Patchwork Puppy",
+      "file": "card-07.jpg",
+      "thumbnail": "thumb-07.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A soft little handmade patchwork fabric puppy standing on blush pink. Cream cotton patterned with tiny red strawberries and green leaves, blue gingham floppy ears and paws, visible fine stitched seams. Delicate blue scalloped embroidery border, 1940s nursery illustration. Fine calligraphy caption 'Made with love'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-5730625b-1332-41d5-8074-6f81b856d4f5.png"
+    },
+    {
+      "id": 7,
+      "name": "Postal Archive",
+      "file": "card-08.jpg",
+      "thumbnail": "thumb-08.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A beautifully restrained authentic antique postcard reverse design on pale honey cream paper. Fine faded vermilion letterpress typography 'POST CARD' at top, slender central vertical divider, three address lines at right, scalloped empty stamp box top right with tiny text 'POSTAGE'. Subtle paper fibers and foxing, tiny decorative printer's ornaments, elegant wide blank correspondence field. No animal, no illustration scene. Heritage printed stationery, entirely flat.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-c28f9ed3-f161-4908-9a3d-fca7295cbdf9.png"
+    },
+    {
+      "id": 8,
+      "name": "Teddy Hello",
+      "file": "card-09.jpg",
+      "thumbnail": "thumb-09.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A small honey-brown teddy bear in cream gardening overalls holding a pale blue envelope against its chest, flowers spilling from its two pockets. Pale icy blue background bordered by tiny painted pink, violet, yellow and blue meadow flowers. Tender hand-painted storybook watercolor and fine fur texture, antique greeting. Top curved handwritten caption 'Just a little hello'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-401eff20-d580-4077-85bf-5dbea80f195f.png"
+    },
+    {
+      "id": 9,
+      "name": "Clover Letter",
+      "file": "card-10.jpg",
+      "thumbnail": "thumb-10.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: Sparse exquisite 1900s Art Nouveau postcard, curving long olive-green clover stems and white daisies with golden centers diagonally across pale ivory paper, tiny blue forget-me-nots, fine double gold-ochre diagonal rules, a vermilion wax-seal illustration near lower left. Airy elegant negative space. Thin ornate calligraphy 'Good wishes' in center. Delicate flat botanical chromolithograph, not a lush bouquet.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-fa3229fb-ec22-4bc3-b4da-f63b5da51c8a.png"
+    },
+    {
+      "id": 10,
+      "name": "Midnight Lace",
+      "file": "card-11.jpg",
+      "thumbnail": "thumb-11.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: An exquisite intricate ivory antique bobbin-lace oval frame on faded deep indigo blue, delicate mesh, tiny floral threads, scalloped loops, little ivory dotted stars inside. A small engraved white rabbit at the bottom of frame. Large quiet navy center with fine ivory handwriting 'Thinking of you'. Elegant Victorian textile print postcard, crisp detailed lace, restrained color.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-ca8f9f92-7a1d-45b8-96ae-73cf195bc3b7.png"
+    },
+    {
+      "id": 11,
+      "name": "Rabbit Post",
+      "file": "card-12.jpg",
+      "thumbnail": "thumb-12.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: Cream 1920s stationery postcard with three different navy blue engraved rabbits hopping along the bottom, one sitting, one mid-leap, one running, fine fur lines. Top 'POST CARD' in small restrained navy serif capitals, central divider and short fine address rules at right, a decorative empty stamp frame. Sparse sophisticated ivory/navy composition, no flowers, minimal age marks.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-9316fa6e-4744-4359-bb64-18a4642b4c50.png"
+    },
+    {
+      "id": 12,
+      "name": "Summer Lake",
+      "file": "card-13.jpg",
+      "thumbnail": "thumb-13.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: 1960s travel souvenir postcard: bold tomato-red ground with six perfectly circular little hand-tinted photographic views of a tranquil European lakeside holiday, sailboat, grassy bank, bathing pier, swans, picnic, lakeside trees. Arrange 2 columns x3 rows on a portrait card. Beautiful faded cyan skies and olive green grass, fine analog print halftone. Small cream centered caption 'Greetings from the lake'. Flat photographic collage travel card, no cartoon characters.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-ad0644fc-a616-4e51-97a2-3d08a15d6c6d.png"
+    },
+    {
+      "id": 13,
+      "name": "Lemon Post",
+      "file": "card-14.jpg",
+      "thumbnail": "thumb-14.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A huge warm lemon-yellow fruit-shaped vintage postcard illustration nearly filling an ivory portrait canvas, with lightly speckled citrus paper texture and fine ochre outline, a tiny leaf at top. Printed gray-green 'POST CARD' over fine divider and two address rules inside lemon silhouette, small rectangular postage box. 1910 novelty stationery, playful yet very simple, no faces, no other fruits.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-75995510-b41e-4328-9e6f-590ca59a106b.png"
+    },
+    {
+      "id": 14,
+      "name": "Post Post Post",
+      "file": "card-15.jpg",
+      "thumbnail": "thumb-15.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: Artful 1950s screenprinted postal collage on faded ledger-paper cream: a cobalt-blue street mailbox near lower right, a spiraling diagonal trail of hand-stamped black outlined envelopes, handwritten coral-red headline 'Post! Post! Post!' across top. Faint ruled bookkeeping columns beneath, rough uneven woodcut ink edges, flat graphic print, bold purposeful vintage composition. No animals.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-19ebc876-5ab9-4f4f-b056-5707a135fe3d.png"
+    },
+    {
+      "id": 15,
+      "name": "Mouse Messenger",
+      "file": "card-16.jpg",
+      "thumbnail": "thumb-16.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A charming tiny gray field mouse in a faded coral scarf carrying a cream envelope almost its own size, walking past violets and daisies. Fine whiskers, big rounded ears with rosy centers, delicate watercolor fur, 1930s nursery book sensibility. Soft butter-yellow field with blue scalloped border. Small penned text 'A note for you'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-d6813923-0ea8-45fd-bd2f-6da73687cdee.png"
+    },
+    {
+      "id": 16,
+      "name": "Bluebird Ribbon",
+      "file": "card-17.jpg",
+      "thumbnail": "thumb-17.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: Two delicately hand-painted sky-blue swallows in flight carrying the ends of a dusty rose ribbon tied around a tiny sealed letter, ivory clouds on pale mint, bottom clusters of pink apple blossoms. Early 1900s lithographic Valentine, beautiful feathers and fine botanical linework. Ornate small navy script 'Across the miles'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-debc7056-3bfa-4daa-8899-8b8ce12e80f0.png"
+    },
+    {
+      "id": 17,
+      "name": "Strawberry Picnic",
+      "file": "card-18.jpg",
+      "thumbnail": "thumb-18.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: 1930s kitchen-garden greeting postcard, a watercolor wicker basket spilling ripe tiny red strawberries, white strawberry blossoms and curling leaves, pale pink gingham cloth along bottom, cream background, small blue ribbon on basket. Decorative faded red double border, warm sunlit illustration. Small elegant script 'Sweet little moments'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-4205e869-b91a-4536-bf15-0cea80ffc527.png"
+    },
+    {
+      "id": 18,
+      "name": "Violet Keepsake",
+      "file": "card-19.jpg",
+      "thumbnail": "thumb-19.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: Edwardian floral greeting card dominated by a lavish bouquet of purple pansies and violets with detailed velvety petals and muted green leaves tied in lilac satin bow, oval pale lavender medallion on soft cream paper, fine ornamental gold-ochre corners. Rich botanical chromolithography. Hand calligraphy 'Always remembered'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-32c9eb6b-f693-476c-bcab-1c4237197b2d.png"
+    },
+    {
+      "id": 19,
+      "name": "Kitten Tea",
+      "file": "card-20.jpg",
+      "thumbnail": "thumb-20.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A 1940s hand-painted cream-and-ginger kitten peeking over a blue-and-white floral teacup, little paws resting on rim, a pink ribbon around its neck, soft pale peach background and small blue forget-me-not corner sprays. Expressive round eyes, delicate fur brushwork and porcelain floral pattern. Short flowing caption 'A cup of kindness'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-925ac157-8b48-404e-b08f-e1e7d40cbfc1.png"
+    },
+    {
+      "id": 20,
+      "name": "Lucky Clover",
+      "file": "card-21.jpg",
+      "thumbnail": "thumb-21.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A cheerful small white rabbit in pale blue ribbon beside an oversized four-leaf clover, little red toadstools and tiny cream daisies along lower edge, airy faded mint green background, fine gold dotted oval frame. 1930s painted good-luck card, soft expressive features, delicate fur texture. Flowing text 'A little luck'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-2490a3a5-9acb-409f-9f80-7de431be9a86.png"
+    },
+    {
+      "id": 21,
+      "name": "Butterfly Cabinet",
+      "file": "card-22.jpg",
+      "thumbnail": "thumb-22.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: Antique natural history postcard on parchment cream: three exquisitely engraved butterflies in different sizes, pale blue, burnt orange and butter yellow, arranged vertically with tiny botanical violets and fine scientific ruled ornaments. No specimen pins or death imagery, wings spread gracefully. Small restrained serif title 'WINGS OF SPRING'. Detailed period hand-colored etching, plenty of ivory space.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-c7326d44-6b93-4f87-a961-a8f99e2a47cd.png"
+    },
+    {
+      "id": 22,
+      "name": "Seaside Hello",
+      "file": "card-23.jpg",
+      "thumbnail": "thumb-23.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: 1950s hand-tinted seaside holiday postcard: red-and-cream striped lighthouse on a grassy headland, pale turquoise sea, a tiny cream sailboat, gulls, golden sky. Illustrated scenic image surrounded by thin navy line and cream border, small red cursive caption 'Wish you were here'. Authentic faded travel print, richly detailed watercolor lithography, no modern objects.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-8a4264af-a28e-46e7-909c-bbdbd48c39df.png"
+    },
+    {
+      "id": 23,
+      "name": "Rose Envelope",
+      "file": "card-24.jpg",
+      "thumbnail": "thumb-24.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: Edwardian romantic stationery postcard: an opened ivory envelope holding pink garden roses, rosebuds, forget-me-nots and a cream letter with a simple crimson wax heart seal. Dusty rose backdrop and narrow ornate cream lace edging. Fine chromolithograph petal details, letter angled naturally but whole art is flat printed card. Elegant handwritten text 'With love'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-2391b658-4c76-48c1-bb19-8cdf5cc0016a.png"
+    },
+    {
+      "id": 24,
+      "name": "Moonlit Teddy",
+      "file": "card-25.jpg",
+      "thumbnail": "thumb-25.jpg",
+      "prompt": "Use case: illustration-story. Asset: ONE finished vintage postcard front for a website. Portrait 2:3 full bleed flat scanned card, artwork fills canvas, no mockup, tabletop, surrounding margins, perspective, watermark, signatures or brand names. Original mid-century/Edwardian greeting-card art, hand-painted lithographic detail, finely drawn expressive animals or delicate botanical engraving as specified. Matte aged ivory paper, subtle fibers and softly worn edges, rich but faded ink; NO modern vector/flat clipart, NO plastic 3D, NO heavy brown grunge. Beautiful period-authentic composition with exceptional fine detail. Only the specified short English text. Subject/design: A golden-brown vintage teddy bear with dusty blue bow sitting on a cream crescent moon over tiny pale golden stars, deep muted petrol blue night background, small coral floral corner ornaments, 1940s nursery greeting-card illustration. Exquisite fur brushwork, sweet thoughtful expression, airy magical composition. Fine cream handwritten caption 'Until we meet again'.",
+      "source": "/Users/choiyoonji/.codex/generated_images/01a11586-a0b8-7e00-911e-0172e0d083cd/exec-666ac35e-3c55-408e-a903-976c5becf0d6.png"
+    }
+  ]
+}

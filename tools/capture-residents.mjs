@@ -25,6 +25,8 @@ try {
       await residentPortrait(index);await new Promise(requestAnimationFrame);preview.render()
     },index)
     await page.screenshot({path:join(output,`${String(index+1).padStart(2,'0')}-${kind}.png`)})
+    await page.evaluate(async()=>{const {preview}=await import('/src/resident-preview.ts');preview.setComparison(true);preview.render()})
+    await page.screenshot({path:join(output,`${String(index+1).padStart(2,'0')}-${kind}-four-views.png`)})
   }
   if(errors.length)throw Error(errors.join('\n'))
   console.log(JSON.stringify({output,views:views.length,residents:kinds.length,errors}))

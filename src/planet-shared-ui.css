@@ -1,0 +1,26 @@
+/* Shared hierarchy for all three editions; loaded after mode-specific styles. */
+.planet-sky-game .planet-logo-row{font-size:clamp(36px,4vw,58px)}
+.planet-sky-game .planet-logo-row+.planet-logo-row{font-size:clamp(44px,5vw,72px)}
+.planet-sky-game .planet-spot-card h2{font-size:clamp(27px,3.25vw,46px)}
+.planet-sky-game .planet-meeting{top:158px;font-size:15px}
+.planet-screen .planet-mode-tabs .planet-mode-tab{font-family:var(--game-display);font-size:12px}
+@media(max-width:720px){
+  .planet-sky-game .planet-logo-row{font-size:34px}
+  .planet-sky-game .planet-logo-row+.planet-logo-row{font-size:42px}
+  .planet-sky-game .planet-brand-words small{font-size:7px;margin-top:10px}
+  .planet-sky-game .planet-mode-tabs{top:135px;right:15px;max-width:calc(100% - 30px);gap:1px}
+  .planet-screen .planet-mode-tabs .planet-mode-tab{padding:7px 7px;font-size:10px;gap:3px}
+  .planet-sky-game .planet-meeting{top:197px;right:15px;padding:9px 12px;font-size:12px}
+  .planet-sky-game .planet-spot-card h2{font-size:22px}
+}
+@media(max-width:360px){
+  .planet-screen .planet-mode-tabs .planet-mode-tab{padding:7px 5px;font-size:9px}
+  .planet-sky-game .planet-spot-card h2{font-size:19px}
+}
+@media(max-height:500px) and (min-width:721px){
+  .planet-sky-game .planet-logo-row{font-size:36px}
+  .planet-sky-game .planet-logo-row+.planet-logo-row{font-size:44px}
+  .planet-sky-game .planet-spot-card h2{font-size:25px}
+  .planet-sky-game .planet-mode-tabs{top:76px}
+  .planet-sky-game .planet-meeting{top:148px}
+}

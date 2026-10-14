@@ -48,7 +48,7 @@ export function createPlanetBiomes(world:THREE.Group,radius:number,surface:Surfa
   for(let i=0;i<=6;i++)for(let side=-1;side<=1;side++){
     const t=i/6,width=Math.pow(Math.sin(t*Math.PI),.8)*.28
     lv.push(side*width,Math.sin(t*Math.PI)*.17-Math.abs(side)*width*.32,t-.5)
-    lc.push(...new THREE.Color(side===0?'#b2e577':side<0?'#75be52':'#4f9b42').toArray())
+    lc.push(...new THREE.Color(side===0?'#a4da65':side<0?'#60b94d':'#319453').toArray())
     if(i<6&&side<1){const j=i*3+side+1;li.push(j,j+3,j+1,j+1,j+3,j+4)}
   }
   leaf.setAttribute('position',new THREE.Float32BufferAttribute(lv,3));leaf.setAttribute('color',new THREE.Float32BufferAttribute(lc,3));leaf.setIndex(li);leaf.computeVertexNormals()
@@ -57,16 +57,24 @@ export function createPlanetBiomes(world:THREE.Group,radius:number,surface:Surfa
   const leafWind=(mat:THREE.Material)=>{
     mat.onBeforeCompile=shader=>{
       shader.uniforms.uBiomeWind=windTime
-      shader.vertexShader='uniform float uBiomeWind;\n'+shader.vertexShader
+      shader.vertexShader='uniform float uBiomeWind;varying vec3 vLeafSurface;\n'+shader.vertexShader
       shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
         float phase=0.0;
         #ifdef USE_INSTANCING
           phase=instanceMatrix[3].x*4.0+instanceMatrix[3].z*3.0;
         #endif
         transformed.y+=sin(uBiomeWind+phase+position.z*2.0)*.032*pow(max(0.0,position.z+.5),2.0);
+        vLeafSurface=position;
+      `)
+      shader.fragmentShader='varying vec3 vLeafSurface;\n'+shader.fragmentShader
+      shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+        float leafDetail=1.0-smoothstep(.01,.06,length(fwidth(vLeafSurface)));
+        float vein=1.0-smoothstep(.003,.018,abs(vLeafSurface.x));
+        float ribs=pow(.5+.5*cos(vLeafSurface.z*54.0-abs(vLeafSurface.x)*42.0),12.0);
+        diffuseColor.rgb*=1.0+leafDetail*(vein*.085+ribs*.028);
       `)
     }
-    mat.customProgramCacheKey=()=> 'storybook-leaf-wind-v1'
+    mat.customProgramCacheKey=()=> 'storybook-leaf-wind-v2'
   }
   leafWind(leafMat)
   const leafDepth=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,side:THREE.DoubleSide});leafWind(leafDepth)
@@ -74,7 +82,7 @@ export function createPlanetBiomes(world:THREE.Group,radius:number,surface:Surfa
   for(let i=0;i<cp.count;i++){
     const n=new THREE.Vector3().fromBufferAttribute(cp,i),lobe=1+.045*Math.sin(n.x*15+n.z*8)*Math.sin(n.y*11)
     cp.setXYZ(i,n.x*lobe,n.y*lobe,n.z*lobe)
-    cc.push(...new THREE.Color('#176640').lerp(new THREE.Color('#78c448'),THREE.MathUtils.smoothstep(n.y,-.8,.9)).toArray())
+    cc.push(...new THREE.Color('#145c43').lerp(new THREE.Color('#6abd48'),THREE.MathUtils.smoothstep(n.y,-.8,.9)).toArray())
   }
   crown.setAttribute('color',new THREE.Float32BufferAttribute(cc,3));crown.computeVertexNormals()
   const crownMat=material('#ffffff',.96,true)
@@ -87,7 +95,7 @@ export function createPlanetBiomes(world:THREE.Group,radius:number,surface:Surfa
     const arch=Math.sin(t*Math.PI)*.17-t*t*.36
     const rib=(1-s*s)*Math.sin(t*Math.PI)*.10
     bv.push(s*width,arch+rib+(layer===0?1:-1)*(.012+.016*Math.sin(t*Math.PI)),t-.5)
-    const tint=layer===0?new THREE.Color('#287444').lerp(new THREE.Color('#85bc50'),.24+.50*(1-Math.abs(s))+.22*t):new THREE.Color('#246442')
+    const tint=layer===0?new THREE.Color('#1b7249').lerp(new THREE.Color('#79c14d'),.24+.50*(1-Math.abs(s))+.22*t):new THREE.Color('#195a40')
     bc.push(...tint.toArray())
     if(row<rows&&col<columns){const j=layer*layerSize+row*stride+col
       if(layer===0)bi.push(j,j+stride,j+1,j+1,j+stride,j+stride+1)

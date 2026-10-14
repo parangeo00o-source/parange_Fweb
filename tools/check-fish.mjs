@@ -15,7 +15,7 @@ try {
     const {waterSwell}=await import('/src/planet-water.ts')
     const app=createParangePlanetExperience();app.open();const w=app.world;w.close()
     window.fishReview={app,w,T}
-    if(!document.querySelector('.planet-day-toggle').textContent.includes('햇살 산책'))throw Error('Old day label')
+    if(!document.querySelector('[data-mode="day"]').textContent.includes('Sunlight Walk'))throw Error('Old day label')
     const e=w.environment,f=e.fish
     if(f.fish.length<10)throw Error(`Too few validated fish patrols: ${f.fish.length}`)
     let maxAirborne=0,sawDuet=false,sawSingle=false,sawSplash=false,maxSpeed=0

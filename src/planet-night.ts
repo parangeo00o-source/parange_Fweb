@@ -71,7 +71,10 @@ export function createPlanetNight(scene:THREE.Scene,camera:THREE.PerspectiveCame
         #include <colorspace_fragment>
       }`})
   const sky=new THREE.Mesh(new THREE.PlaneGeometry(1,1),material)
-  sky.name='moonlit-night-sky';sky.frustumCulled=false;sky.renderOrder=-20;sky.visible=false;scene.add(sky)
+  // Draw after opaque geometry (but before transparent water/glass). Existing
+  // depth now rejects sky fragments hidden by the planet before its expensive
+  // cloud/meteor shader runs. Same depth, colours, stars and animation.
+  sky.name='moonlit-night-sky';sky.frustumCulled=false;sky.renderOrder=1000;sky.visible=false;scene.add(sky)
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)')
   let night=false,meteorsStarted:number|null=null
   return {sky,setNight:(value:boolean)=>{

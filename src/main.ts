@@ -93,11 +93,11 @@ const dice: Dice[] = Array.from({ length: 48 }, (_, index) => {
   // existing drawing-board destination.
   const isToothGemDie = index === 4
   const isElephantDrawingDie = parangeLetterByDice.get(index) === 'A' && !isToothGemDie
-  const isFramingBlueprintDie = parangeLetterByDice.get(index) === 'R'
+  const isGuestbookDie = parangeLetterByDice.get(index) === 'R'
   const destination = isToothGemDie
     ? { route: '#tooth-gem', label: 'Tooth Gem' }
-    : isFramingBlueprintDie
-    ? { route: '#framing-blueprint', label: 'Framing Blueprint' }
+    : isGuestbookDie
+    ? { route: '#guestbook', label: 'Guestbook' }
     : isElephantDrawingDie
     ? { route: '#elephant-drawing', label: 'Elephant Drawing' }
     : index === 47
@@ -188,6 +188,7 @@ type ExperienceLoader = () => Promise<Experience>
 // destination at its boundary and keep the imported module alive after first
 // use, preserving its existing behaviour on subsequent visits.
 const experienceLoaders: Record<string, ExperienceLoader> = {
+  Guestbook: async () => (await import('./guestbook')).createGuestbookExperience(() => closeColorScreen(true)),
   Lemonade: async () => (await import('./lemonade')).createLemonadeExperience(),
   'PARANGE PLANET': async () => (await import('./parange-planet')).createParangePlanetExperience(),
   WaterTouch: async () => (await import('./water-touch')).createWaterTouchExperience(),
@@ -195,7 +196,6 @@ const experienceLoaders: Record<string, ExperienceLoader> = {
   'Glass Bird': async () => (await import('./bird-impact')).createBirdImpactExperience(),
   Bluefish: async () => (await import('./bluefish')).createBluefishExperience(),
   'Elephant Drawing': async () => (await import('./elephant-drawing')).createElephantDrawingExperience(),
-  'Framing Blueprint': async () => (await import('./framing-blueprint')).createFramingBlueprintExperience(),
   '고무 인간': async () => (await import('./rubber-human')).createRubberHumanExperience(),
   Shampoo: async () => (await import('./shampoo')).createShampooExperience(),
   'Tooth Gem': async () => (await import('./tooth-gem')).createToothGemExperience(),
@@ -618,7 +618,7 @@ const handleMotionPreferenceChange = () => {
 if (typeof reducedMotion.addEventListener === 'function') reducedMotion.addEventListener('change', handleMotionPreferenceChange)
 else reducedMotion.addListener(handleMotionPreferenceChange)
 
-const openColorScreen = (destination: Dice) => {
+const openColorScreen = (destination: Pick<Dice, 'label' | 'color'>) => {
   hideCatCursor()
   const experience = loadExperience(destination.label)
   if (experience) {
@@ -633,6 +633,7 @@ const openColorScreen = (destination: Dice) => {
       if (request === experienceRequest) {
         console.error('Unable to load experience:', error)
         colorScreenOpen = false
+        document.querySelector<HTMLElement>('.stage')!.inert = false
       }
     })
     return
@@ -647,6 +648,7 @@ const openColorScreen = (destination: Dice) => {
 
 const closeColorScreen = (restoreHistory = false) => {
   if (!colorScreenOpen) return
+  const wasGuestbook = document.querySelector<HTMLElement>('.guestbook-screen')?.hidden === false
   experienceRequest += 1
   activeExperience?.close()
   activeExperience = null
@@ -654,14 +656,28 @@ const closeColorScreen = (restoreHistory = false) => {
   colorScreen.setAttribute('aria-hidden', 'true')
   colorScreenOpen = false
   document.title = 'Dice Field'
-  if (restoreHistory && history.state?.diceId) history.back()
+  document.querySelector<HTMLElement>('.stage')!.inert = false
+  if (wasGuestbook) document.querySelector<HTMLElement>('.dice[data-route="#guestbook"]')?.focus()
+  if (restoreHistory && (history.state?.guestbook || history.state?.diceId)) history.back()
+  else if (restoreHistory && location.hash === '#guestbook') history.replaceState(null, '', location.pathname + location.search)
+}
+
+const openGuestbook = () => {
+  closeColorScreen()
+  document.querySelector<HTMLElement>('.stage')!.inert = true
+  document.title = 'Guestbook · Little hellos | Dice Field'
+  openColorScreen({ label: 'Guestbook', color: '#f6f3e9' })
 }
 
 colorScreenClose.addEventListener('click', () => closeColorScreen(true))
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') closeColorScreen(true)
 })
-window.addEventListener('popstate', () => closeColorScreen())
+window.addEventListener('popstate', () => {
+  if (location.hash === '#guestbook') openGuestbook()
+  else closeColorScreen()
+})
+if (location.hash === '#guestbook') openGuestbook()
 
 const navigateTo = (element: HTMLElement) => {
   if (navigating) return
@@ -680,7 +696,8 @@ const navigateTo = (element: HTMLElement) => {
     history.pushState({ diceId: destination.id }, '', destination.route)
     window.dispatchEvent(new CustomEvent('dice:navigate', { detail: destination }))
     document.title = `${destination.label} | Dice Field`
-    openColorScreen(destination)
+    if (destination.label === 'Guestbook') openGuestbook()
+    else openColorScreen(destination)
     state.clickStartedAt = null
     state.clickScale = 1
     state.clickSpin = 0

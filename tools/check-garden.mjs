@@ -176,6 +176,10 @@ try {
     const scene=w.world.parent.clone(true);scene.background=new T.Color('#32a7cf')
     scene.getObjectByName('island-sky-bubbles').visible=false
     const renderer=new T.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight)
+    // Render targets belong to their WebGL context: regenerate the production
+    // probe instead of reading an empty PMREM in this second renderer.
+    const {createIslandReflection}=await import('/src/planet-art-direction.ts')
+    scene.environment=createIslandReflection(renderer).texture
     renderer.toneMapping=T.NeutralToneMapping;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap
     Object.assign(renderer.domElement.style,{position:'fixed',inset:'0',zIndex:'9999999'});document.body.append(renderer.domElement)
     const camera=new T.PerspectiveCamera(38,innerWidth/innerHeight,.05,30)

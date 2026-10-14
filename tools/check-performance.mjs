@@ -29,7 +29,7 @@ try {
       renderer.setPixelRatio(`)})
   })
   await page.goto(process.env.REVIEW_URL || 'https://localhost:5173')
-  await page.evaluate(()=>{window.__realNow=performance.now.bind(performance);window.__metrics={frames:0,matrices:0,renderMs:0}})
+  await page.evaluate(()=>{window.__realNow=performance.now.bind(performance);window.__metrics={frames:0,matrices:0,multiplies:0,renderMs:0}})
   await page.clock.install({time:new Date('2026-10-08T00:00:00Z')})
   await page.clock.pauseAt(new Date('2026-10-08T00:00:01Z'))
   await page.evaluate(async()=>{
@@ -37,13 +37,15 @@ try {
     const T=await import('/node_modules/.vite/deps/three.js')
     const update=T.Object3D.prototype.updateMatrix
     T.Object3D.prototype.updateMatrix=function(){window.__metrics.matrices++;return update.call(this)}
+    const multiply=T.Matrix4.prototype.multiplyMatrices
+    T.Matrix4.prototype.multiplyMatrices=function(a,b){window.__metrics.multiplies++;return multiply.call(this,a,b)}
     const {createParangePlanetExperience}=await import('/src/parange-planet.ts')
     window.app=createParangePlanetExperience();window.app.open();window.T=T
   })
   const results=[]
   const sample=async label=>{
     await page.clock.runFor(32)
-    await page.evaluate(()=>{window.__metrics={frames:0,matrices:0,renderMs:0};window.__capture=true;window.__image=null})
+    await page.evaluate(()=>{window.__metrics={frames:0,matrices:0,multiplies:0,renderMs:0};window.__capture=true;window.__image=null})
     await page.clock.runFor(160)
     const data=await page.evaluate(()=>{
       const geometries=new Set();window.app.world.world.parent.traverse(o=>{if(o.geometry)geometries.add(o.geometry)})
@@ -53,8 +55,8 @@ try {
         pixelRatio:window.__renderer.getPixelRatio(),shadowSize:window.app.world.world.parent.getObjectByName('planet-sun-moon-key').shadow.mapSize.toArray()}
     })
     if(data.image)await writeFile(join(output,`${label}.png`),Buffer.from(data.image.png.split(',')[1],'base64'))
-    const {frames,matrices,renderMs,calls,triangles}=data.metrics
-    results.push({label,frames,matrices,matricesPerFrame:frames?matrices/frames:matrices,renderMsPerFrame:frames?renderMs/frames:0,calls,triangles,hash:data.image?.hash??null,pixelRatio:data.pixelRatio,shadowSize:data.shadowSize,geometryBytes:data.geometryBytes,vertices:data.vertices})
+    const {frames,matrices,multiplies,renderMs,calls,triangles}=data.metrics
+    results.push({label,frames,matrices,matricesPerFrame:frames?matrices/frames:matrices,multipliesPerFrame:frames?multiplies/frames:multiplies,renderMsPerFrame:frames?renderMs/frames:0,calls,triangles,hash:data.image?.hash??null,pixelRatio:data.pixelRatio,shadowSize:data.shadowSize,geometryBytes:data.geometryBytes,vertices:data.vertices})
   }
   await sample('empty-day')
   await page.evaluate(async()=>{
@@ -74,8 +76,13 @@ try {
   await sample('covered-studio')
   await page.locator('.planet-studio-close').evaluate(el=>el.click())
   await sample('restored-night')
+  await page.locator('[data-mode=neon]').evaluate(el=>el.click())
+  await page.evaluate(async()=>{const {loadSkyArtwork}=await import('/src/neon-sky-art.ts');await loadSkyArtwork()})
+  await sample('sixteen-neon')
+  await page.evaluate(()=>app.world.world.rotation.y+=.7)
+  await sample('rotated-neon')
   await page.evaluate(()=>window.app.close())
-  await page.evaluate(()=>{window.__metrics={frames:0,matrices:0,renderMs:0}})
+  await page.evaluate(()=>{window.__metrics={frames:0,matrices:0,multiplies:0,renderMs:0}})
   await page.clock.runFor(160)
   assert.equal(await page.evaluate(()=>window.__metrics.frames),0,'Closed experience still renders')
   await page.evaluate(async()=>{
@@ -96,6 +103,19 @@ try {
     cacheStaticMeshTransforms(joint,new Set([moving]));joint.rotation.y=.71;moving.rotation.x=.42;joint.updateMatrixWorld(true)
     const expected=new T.Matrix4().multiplyMatrices(joint.matrixWorld,new T.Matrix4().makeTranslation(.1,.2,.3))
     if(fixed.matrixAutoUpdate||!joint.matrixAutoUpdate||!moving.matrixAutoUpdate||!fixed.matrixWorld.equals(expected))throw Error('Cached meshes no longer inherit live animation')
+    cacheStaticMeshTransforms(joint,new Set([moving]),true)
+    joint.updateMatrixWorld(true)
+    let multiplications=window.__metrics.multiplies
+    joint.updateMatrixWorld(true)
+    if(window.__metrics.multiplies-multiplications!==1)throw Error('Unchanged static leaf matrix was multiplied again')
+    joint.rotation.y=.94;joint.updateMatrixWorld(true)
+    if(!fixed.matrixWorld.equals(new T.Matrix4().multiplyMatrices(joint.matrixWorld,fixed.matrix)))throw Error('Parent rotation did not invalidate cache')
+    fixed.position.x=.7;fixed.updateMatrix();joint.updateMatrixWorld(true)
+    if(!fixed.matrixWorld.equals(new T.Matrix4().multiplyMatrices(joint.matrixWorld,fixed.matrix)))throw Error('Explicit local edit did not invalidate cache')
+    const other=new T.Group();other.position.y=3;other.add(fixed);other.updateMatrixWorld(true)
+    if(!fixed.matrixWorld.equals(new T.Matrix4().multiplyMatrices(other.matrixWorld,fixed.matrix)))throw Error('Reparenting did not invalidate cache')
+    fixed.matrixAutoUpdate=true;fixed.position.z=2;other.updateMatrixWorld(true)
+    if(!fixed.matrixWorld.equals(new T.Matrix4().multiplyMatrices(other.matrixWorld,fixed.matrix)))throw Error('Re-enabled animation stayed cached')
     geometry.dispose();before.dispose();fixed.geometry.dispose();fixed.material.dispose()
   })
   assert.deepEqual(errors,[])
@@ -108,8 +128,9 @@ try {
       assert.equal(result.hash,before.hash,`Rendered pixels changed: ${result.label}`)
       assert.ok((await readFile(join(output,`${result.label}.png`))).equals(await readFile(join(dirname(process.env.PERF_BASELINE),`${result.label}.png`))),`Captured image changed: ${result.label}`)
       assert.equal(result.calls,before.calls);assert.equal(result.triangles,before.triangles)
-      assert.ok(result.matricesPerFrame<before.matricesPerFrame,`Matrix work not reduced: ${result.label}`)
-      assert.ok(result.geometryBytes<before.geometryBytes,`Geometry buffers not reduced: ${result.label}`)
+      assert.ok(result.matricesPerFrame<=before.matricesPerFrame,`Local matrix work increased: ${result.label}`)
+      assert.ok(result.multipliesPerFrame<before.multipliesPerFrame,`World matrix work not reduced: ${result.label}`)
+      assert.ok(result.geometryBytes<=before.geometryBytes,`Geometry buffers increased: ${result.label}`)
     }
   }
   const report={results,errors,output}

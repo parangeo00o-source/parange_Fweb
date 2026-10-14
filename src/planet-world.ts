@@ -10,6 +10,10 @@ import {createPlanetEnvironment,PLANET_RADIUS,type PlanetLandmark} from './plane
 import {createPlanetBubbles} from './planet-bubbles'
 import {createPlanetNight} from './planet-night'
 import {createArrivalCapsule,capsulePose,arrivalDuration,type CapsulePose} from './planet-capsule'
+import {createIslandReflection,islandPixelRatio} from './planet-art-direction'
+import {createNeonBackgroundLayer} from './planet-neon-background-layer'
+import {createNeonMaterialStyle} from './planet-neon-materials'
+export type PlanetMode='day'|'night'|'neon'
 
 const R=PLANET_RADIUS,up=new THREE.Vector3(0,1,0),clamp=THREE.MathUtils.clamp
 
@@ -19,28 +23,25 @@ export const createPlanetWorld = (canvas:HTMLCanvasElement,landmarks:PlanetLandm
   const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(34,1,.1,80)
   const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true})
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));renderer.setClearColor(0x000000,0)
+  renderer.setPixelRatio(islandPixelRatio(window.innerWidth,window.innerHeight,window.devicePixelRatio||1));renderer.setClearColor(0x000000,0)
   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NeutralToneMapping;renderer.toneMappingExposure=1
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap
   const world=new THREE.Group();world.name='parange-storybook-world';world.rotation.set(-.08,.30,-.10);scene.add(world)
-  const ambient=new THREE.HemisphereLight('#d4edff','#8ba576',1.05)
+  const ambient=new THREE.HemisphereLight('#dcefff','#8aafa8',1.12)
   ambient.name='planet-hemisphere'
-  const sun=new THREE.DirectionalLight('#fff3ce',2.1);sun.position.set(-4,7,6);sun.castShadow=true
+  const sun=new THREE.DirectionalLight('#fff4df',2.65);sun.position.set(-4,7,6);sun.castShadow=true
   sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-4.4,right:4.4,top:4.4,bottom:-4.4,near:1,far:22})
   sun.shadow.normalBias=.012;sun.shadow.bias=-.0001;sun.shadow.radius=4
   sun.name='planet-sun-moon-key'
-  const fill=new THREE.DirectionalLight('#d3edff',.85);fill.position.set(3,2,7);scene.add(ambient,sun,fill)
-  const reflectionCanvas=document.createElement('canvas');reflectionCanvas.width=512;reflectionCanvas.height=256
-  const reflection=reflectionCanvas.getContext('2d')!,sky=reflection.createLinearGradient(0,0,0,256)
-  sky.addColorStop(0,'#6bc1e7');sky.addColorStop(.35,'#d5f2f6');sky.addColorStop(.5,'#fff9e7');sky.addColorStop(.7,'#a4bd89');sky.addColorStop(1,'#789066')
-  reflection.fillStyle=sky;reflection.fillRect(0,0,512,256)
-  const reflectionTexture=new THREE.CanvasTexture(reflectionCanvas);reflectionTexture.colorSpace=THREE.SRGBColorSpace;reflectionTexture.mapping=THREE.EquirectangularReflectionMapping
-  const pmrem=new THREE.PMREMGenerator(renderer),environmentLight=pmrem.fromEquirectangular(reflectionTexture)
-  scene.environment=environmentLight.texture;scene.environmentIntensity=.45;reflectionTexture.dispose();pmrem.dispose()
+  const fill=new THREE.DirectionalLight('#c2e3ff',1.05);fill.position.set(3,2,7);scene.add(ambient,sun,fill)
+  const environmentLight=createIslandReflection(renderer)
+  scene.environment=environmentLight.texture;scene.environmentIntensity=.48
   const environment=createPlanetEnvironment(world,landmarks)
   const bubbles=createPlanetBubbles(scene,camera)
   const nightSky=createPlanetNight(scene,camera)
   const {terrain,clearing,obstacles,targets,underlays,surface:field}=environment
+  let mode:PlanetMode='day',neon:ReturnType<typeof createNeonBackgroundLayer>|null=null
+  let neonMaterials:ReturnType<typeof createNeonMaterialStyle>|null=null
   const store=createResidentStore()
   let restoring=true,lastSaved=0
   const prepareResident=(model:ResidentModel)=>{
@@ -53,6 +54,7 @@ export const createPlanetWorld = (canvas:HTMLCanvasElement,landmarks:PlanetLandm
     else if(!name)model.name=store.identity('').name
     else model.name=name
     model.group.userData.residentId=model.id
+    neonMaterials?.include(model.group)
     return true
   }
   const persist=()=>{
@@ -96,6 +98,7 @@ export const createPlanetWorld = (canvas:HTMLCanvasElement,landmarks:PlanetLandm
     const bounds=new THREE.Box3().setFromObject(model.group)
     arrival={model,normal:findLanding(),started:performance.now(),onLand,onFlight,flying:false,capsule:createArrivalCapsule(scene),onPose,onReady,
       center:bounds.getCenter(new THREE.Vector3()),size:bounds.getSize(new THREE.Vector3()),getFrame}
+    if(neonMaterials)neonMaterials.include(scene)
     model.group.visible=false;scene.add(model.group);world.visible=false
     return true
   }
@@ -107,11 +110,15 @@ export const createPlanetWorld = (canvas:HTMLCanvasElement,landmarks:PlanetLandm
   let active=false, covered=false, frame=0, fitDistance=14
   const resize=()=>{
     const width=canvas.clientWidth||window.innerWidth,height=canvas.clientHeight||window.innerHeight
-    renderer.setSize(width,height,false);camera.aspect=width/height
+    const pixelRatio=islandPixelRatio(width,height,window.devicePixelRatio||1)
+    // Apply size and density together: raising DPR on the old large viewport
+    // first would briefly request an oversized drawing buffer during resize.
+    renderer.setDrawingBufferSize(width,height,pixelRatio);camera.aspect=width/height
     // Bounding sphere includes the tallest trees; initial view always has margin.
     const limitingFov=Math.min(THREE.MathUtils.degToRad(34/2),Math.atan(Math.tan(THREE.MathUtils.degToRad(34/2))*camera.aspect))
     fitDistance=4.08/Math.sin(limitingFov)/.80
     camera.updateProjectionMatrix()
+    neon?.resize()
   }
   let lastTime=0
   const render=(now:number)=>{
@@ -132,17 +139,19 @@ export const createPlanetWorld = (canvas:HTMLCanvasElement,landmarks:PlanetLandm
       const viewport=canvas.getBoundingClientRect(), stage=arrival.getFrame?.()??{left:viewport.left,top:viewport.top+viewport.height*.18,width:viewport.width,height:viewport.height*.57}
       const planeHeight=8*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)),planeWidth=planeHeight*camera.aspect
       const depthMargin=1+arrival.size.z/Math.max(arrival.size.y,1)*.25
-      const scale=.78*Math.min(planeWidth*stage.width/viewport.width/Math.hypot(arrival.size.x,arrival.size.z),planeHeight*stage.height/viewport.height/arrival.size.y)/depthMargin
+      const stageWidth=planeWidth*stage.width/viewport.width,stageHeight=planeHeight*stage.height/viewport.height
+      const radius=Math.min(stageWidth,stageHeight)*.37
+      // Fit the complete 3D bound, including ears/tails, inside the closed ball.
+      // Keep that scale through the reveal so there is no sudden inflation.
+      const scale=Math.min(.78*Math.min(stageWidth/Math.hypot(arrival.size.x,arrival.size.z),stageHeight/arrival.size.y)/depthMargin,
+        radius*.86/(arrival.size.length()*.5))
       const rotation=new THREE.Quaternion().setFromAxisAngle(up,pose.turn)
+      rotation.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),pose.wobble*.35*(1-pose.release)))
       const stageCenter=new THREE.Vector3(((stage.left-viewport.left+stage.width/2)/viewport.width-.5)*planeWidth,
         (.5-(stage.top-viewport.top+stage.height/2)/viewport.height)*planeHeight,camera.position.z-4)
-      // The resident stays fully opaque and at its final size. Growing a tiny
-      // body inside a fading transparent shell caused the ambiguous ghosting.
-      const revealScale=scale
-      const start=stageCenter.clone().addScaledVector(up,-(1-pose.release)*planeHeight*stage.height/viewport.height*.13)
-        .sub(arrival.center.clone().applyQuaternion(rotation).multiplyScalar(revealScale))
-      arrival.capsule.update(age,pose,stageCenter,Math.min(planeWidth*stage.width/viewport.width,planeHeight*stage.height/viewport.height)*.27,-planeWidth/2,reduced,arrival.size.z*scale*.55)
-      if(age<duration){model.group.visible=pose.release>0;model.group.position.copy(start);model.group.scale.setScalar(revealScale);model.group.quaternion.copy(rotation)}
+      const seat=arrival.capsule.update(age,pose,stageCenter,radius,-planeWidth/2,reduced)
+      const start=seat.clone().sub(arrival.center.clone().applyQuaternion(rotation).multiplyScalar(scale))
+      if(age<duration){model.group.visible=true;model.group.position.copy(start);model.group.scale.setScalar(scale);model.group.quaternion.copy(rotation)}
       else{
         if(!arrival.flying){
           // Freeze the visible pose before the caption changes height for flight.
@@ -158,12 +167,17 @@ export const createPlanetWorld = (canvas:HTMLCanvasElement,landmarks:PlanetLandm
         if(t>=1){village.add(model,arrival.normal);village.setEnabled(true);const landed=arrival.onLand;arrival=null;landed()}
       }
     }
-    environment.update(now)
-    bubbles.update(now,world.visible)
-    nightSky.update(now,world.visible,bubbles.burstComplete)
+    // These visual effects are absolute-time functions, so catch up exactly on
+    // the next visible frame. Keep village simulation/persistence running.
+    if(world.visible&&(!covered||arrival))environment.update(now)
+    // Neon already has its own illustrated sky objects; do not double them
+    // with the basic edition's glass bubbles and night-sky particles.
+    bubbles.update(now,world.visible&&mode!=='neon')
+    nightSky.update(now,world.visible&&mode!=='neon',bubbles.burstComplete)
     // An opaque capture/build screen needs no GPU work. Keep simulation/time
     // intact, and always render arrivals for the first-frame cover handoff.
     if(!covered||arrival){
+      if(mode==='neon'&&world.visible)neon!.render(now)
       renderer.render(scene,camera)
       const ready=arrival?.onReady
       if(arrival)arrival.onReady=undefined
@@ -178,15 +192,32 @@ export const createPlanetWorld = (canvas:HTMLCanvasElement,landmarks:PlanetLandm
   }
   document.addEventListener('visibilitychange',syncVisibility)
   window.addEventListener('pagehide',persist)
+  const setNight=(night:boolean)=>{
+    ambient.intensity=night?.62:1.12;ambient.color.set(night?'#668cd5':'#dcefff');ambient.groundColor.set(night?'#233556':'#8aafa8')
+    sun.intensity=night?1.65:2.65;sun.color.set(night?'#8fb6ff':'#fff4df');sun.position.set(night?5:-4,7,night?2:6)
+    scene.environmentIntensity=night?.10:.48;fill.intensity=night?.28:1.05;fill.color.set(night?'#718cd7':'#c2e3ff')
+    environment.setNight(night);bubbles.setNight(night);nightSky.setNight(night)
+  }
+  const setMode=(value:PlanetMode)=>{
+    mode=value
+    if(value==='neon'&&!neon){
+      neon=createNeonBackgroundLayer(canvas);neon.resize()
+      neonMaterials=createNeonMaterialStyle();neonMaterials.include(world)
+    }
+    neon?.setVisible(value==='neon');setNight(value==='night')
+    neonMaterials?.setEnabled(value==='neon')
+    if(value==='neon'){
+      ambient.color.set('#fffdf4');ambient.groundColor.set('#d8cce4');ambient.intensity=1.7
+      sun.color.set('#fff9ee');sun.intensity=1.9
+      fill.color.set('#e6faf5');fill.intensity=.8;scene.environmentIntensity=.12
+    }
+  }
   return {
     open:()=>{active=true;lastTime=performance.now();resize();camera.position.set(0,0,fitDistance);village.resume();cancelAnimationFrame(frame);frame=document.hidden?0:requestAnimationFrame(render)},
     close:()=>{active=false;cancelAnimationFrame(frame);frame=0;cancelArrival();village.suspend();persist()},
-    setNight:(night:boolean)=>{
-      ambient.intensity=night?.62:1.05;ambient.color.set(night?'#668cd5':'#d4edff');ambient.groundColor.set(night?'#233556':'#8ba576')
-      sun.intensity=night?1.65:2.1;sun.color.set(night?'#8fb6ff':'#fff3ce');sun.position.set(night?5:-4,7,night?2:6)
-      scene.environmentIntensity=night?.10:.45;fill.intensity=night?.28:.85;fill.color.set(night?'#718cd7':'#d3edff')
-      environment.setNight(night);bubbles.setNight(night);nightSky.setNight(night)
-    },
+    setNight:(night:boolean)=>setMode(night?'night':'day'),
+    setMode,
+    get mode(){return mode},
     presentResident,
     prepareResident,
     cancelArrival,

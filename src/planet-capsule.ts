@@ -7,12 +7,13 @@ export function capsulePose(age:number,reduced=false) {
   if(reduced)return {phase:age<2600?'revealed':'flight',roll:1,wobble:0,open:1,release:1,turn:0,burst:0,fade:1}
   const roll=1-Math.pow(1-clamp(age/1250,0,1),3)
   return {
-    phase:age<1250?'rolling':age<1900?'settling':age<2100?'opening':age<5600?'revealed':'flight',
+    phase:age<1250?'rolling':age<1900?'settling':age<2850?'opening':age<5600?'revealed':'flight',
     roll,wobble:age>=1250&&age<1900?Math.sin((age-1250)*.017)*Math.exp(-(age-1250)/240)*.19:0,
-    // Release overlaps the opening: no empty, fully-open capsule waiting beat.
-    open:ease((age-1900)/480),release:ease((age-2100)/450),
-    turn:Math.PI*2*ease((age-2650)/2600),
-    burst:Math.sin(Math.PI*clamp((age-2020)/650,0,1)),fade:age<2800?1:0,
+    // The resident is inside from frame one. Open the lid before lifting out;
+    // the bowl drops away continuously rather than teleporting behind them.
+    open:ease((age-1900)/850),release:ease((age-2250)/950),
+    turn:Math.PI*2*ease((age-3350)/2000),
+    burst:Math.sin(Math.PI*clamp((age-2250)/900,0,1)),fade:1-ease((age-3200)/300),
   }
 }
 export type CapsulePose=ReturnType<typeof capsulePose>
@@ -55,8 +56,8 @@ export function createArrivalCapsule(scene:THREE.Scene) {
   // Dense tinted resin like the reference's blue/green game ball, rather than
   // a nearly invisible soap bubble. Keep some translucency during the opening.
   const reflectionMap=capsuleReflectionEnvironment()
-  const glass=new THREE.MeshPhysicalMaterial({color:'#289cbd',transparent:true,opacity:.76,roughness:.24,metalness:0,ior:1.46,clearcoat:.9,clearcoatRoughness:.23,side:THREE.DoubleSide,depthWrite:false,envMap:reflectionMap,envMapIntensity:1.35})
-  const green=glass.clone();green.color.set('#16975b');green.opacity=.88
+  const glass=new THREE.MeshPhysicalMaterial({color:'#289cbd',transparent:true,opacity:.62,roughness:.24,metalness:0,ior:1.46,clearcoat:.9,clearcoatRoughness:.23,side:THREE.DoubleSide,depthWrite:false,envMap:reflectionMap,envMapIntensity:1.35})
+  const green=glass.clone();green.color.set('#16975b');green.opacity=.74
   for(const material of [glass,green]){
     // The world's three small lights light the character, but made pinprick
     // dots on this glossy shell. Let broad environment reflection dominate it.
@@ -99,33 +100,36 @@ export function createArrivalCapsule(scene:THREE.Scene) {
     return add(group,'capsule-star-spark',starGeometry,material)
   })
   const light=new THREE.PointLight('#fff3b4',0,5,2);light.name='capsule-opening-light';light.position.set(1,2,3);group.add(light)
+  const occupantCenter=new THREE.Vector3()
   let disposed=false
-  return {group,update:(age:number,pose:CapsulePose,center:THREE.Vector3,radius:number,leftEdge:number,reduced:boolean,rearClearance=radius)=>{
-    if(disposed)return
+  return {group,update:(age:number,pose:CapsulePose,center:THREE.Vector3,radius:number,leftEdge:number,reduced:boolean)=>{
+    if(disposed)return occupantCenter.copy(center)
     group.visible=pose.phase!=='flight';group.position.copy(center);group.scale.setScalar(radius)
     shell.visible=!reduced&&pose.fade>0
     const entryX=leftEdge-center.x-radius*1.5
-    shell.position.set(entryX*(1-pose.roll)/radius,-.08+Math.abs(pose.wobble)*.4,0)
+    const seatY=-.22+Math.abs(pose.wobble)*.4
+    shell.position.set(entryX*(1-pose.roll)/radius,seatY,0)
+    // This is also the resident's world-space centre. Never toggle visibility
+    // at the seam: the transparent shell is what reveals the resident.
+    occupantCenter.copy(center).add(new THREE.Vector3(shell.position.x,seatY,0).multiplyScalar(radius*(1-pose.release)))
     shell.rotation.z=-entryX/radius*(1-pose.roll)+pose.wobble
-    hinge.rotation.x=-pose.open*1.92
-    // Clear the character's depth BEFORE revealing it. The shell then leaves
-    // downwards at its original opacity; it never dissolves through the body.
-    const clearBack=ease((age-1940)/150),depart=ease((age-2350)/450)
-    shell.position.z=-(1+rearClearance/radius+.15)*clearBack
-    shell.position.y-=depart*4.2
+    hinge.rotation.x=-pose.open*2.2
+    shell.position.y-=pose.release*3.4
+    glass.opacity=.62*pose.fade;green.opacity=.74*pose.fade;rim.opacity=pose.fade;white.opacity=.48*pose.fade
     shadow.visible=shell.visible;shadow.position.set(shell.position.x,-1.11,-.12);shadowMaterial.opacity=.24*pose.fade*(1-pose.release)
-    glow.position.z=-rearClearance/radius-.25
+    glow.position.z=-1.2
     glowMaterial.opacity=reduced?0:pose.burst*.65;glow.scale.setScalar(2.4+pose.burst*2.2)
     light.intensity=2.5+(reduced?0:pose.burst*(1-pose.release))
-    const ageBurst=clamp((age-2020)/900,0,1)
+    const ageBurst=clamp((age-2250)/900,0,1)
     sparks.forEach((spark,i)=>{
       const a=i*2.39996,d=.25+ageBurst*(1.2+(i%5)*.17)
-      spark.visible=!reduced&&age>2020&&ageBurst<1
+      spark.visible=!reduced&&age>2250&&ageBurst<1
       spark.position.set(Math.cos(a)*d,Math.sin(a)*d-ageBurst*ageBurst*.4,.3+(i%3)*.06)
       spark.rotation.z=a+ageBurst*2;spark.scale.setScalar((.045+(i%3)*.022)*(1-ageBurst*.45))
       ;(spark.material as THREE.MeshBasicMaterial).opacity=Math.sin(Math.PI*ageBurst)
     })
     bottom.userData.open=pose.open;group.userData.phase=pose.phase
+    return occupantCenter
   },dispose:()=>{
     if(disposed)return;disposed=true;group.removeFromParent();group.clear()
     geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());glowMap.dispose();reflectionMap.dispose()

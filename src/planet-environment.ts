@@ -7,6 +7,7 @@ import {createPlanetBiomes} from './planet-biomes'
 import {createPlanetStarLamps} from './planet-star-lamps'
 import {createPlanetFish} from './planet-fish'
 import {cacheStaticMeshTransforms,indexExactGeometry} from './planet-performance'
+import {bakeIslandContact} from './planet-art-direction'
 import type {VillageObstacle} from './planet-village'
 
 export type PlanetLandmark={id:string;lat:number;lon:number;color:string}
@@ -30,7 +31,7 @@ export function createPlanetEnvironment(world:THREE.Group,landmarks:PlanetLandma
     return {height,bank}
   }
   const terrainGeometry=new THREE.SphereGeometry(radius,192,144),positions=terrainGeometry.attributes.position
-  const colors:number[]=[],grass=new THREE.Color('#46a546'),lightGrass=new THREE.Color('#8cc74d'),sand=new THREE.Color('#f0dda7')
+  const colors:number[]=[],grass=new THREE.Color('#39a854'),lightGrass=new THREE.Color('#98cf51'),sand=new THREE.Color('#f4e0b3')
   for(let i=0;i<positions.count;i++){
     const n=new THREE.Vector3().fromBufferAttribute(positions,i).normalize(),sample=surface(n)
     const shade=.25+.18*Math.sin(n.x*6+n.z*3)*Math.cos(n.y*5)
@@ -138,9 +139,11 @@ export function createPlanetEnvironment(world:THREE.Group,landmarks:PlanetLandma
   }
   world.userData.environmentVersion='island-coast-v4'
   const starLamps=createPlanetStarLamps(world,radius,surface,clearing,pathNormals,obstacles)
+  const rooted=(world.userData.biomePlacements as Array<{normal:number[];size:number}>).map(p=>({normal:new THREE.Vector3(...p.normal as [number,number,number]),radius:p.size*.105,strength:.25}))
+  bakeIslandContact(terrainGeometry,[...rooted,...homeSites.map(s=>({normal:s.normal,radius:.145*(landmarkScale[s.spot.id]??.72),strength:.23}))])
   // Ripples and individual droplets animate their own transforms. Everything
   // else moves through parent Groups or vertex shaders, not local mesh TRS.
-  cacheStaticMeshTransforms(world,new Set(fish.fish.flatMap(f=>[f.ripple,...f.drops.children])))
+  cacheStaticMeshTransforms(world,new Set(fish.fish.flatMap(f=>[f.ripple,...f.drops.children])),true)
   const geometries=new Set<THREE.BufferGeometry>()
   world.traverse(node=>{if(node instanceof THREE.Mesh)geometries.add(node.geometry)})
   geometries.forEach(indexExactGeometry)

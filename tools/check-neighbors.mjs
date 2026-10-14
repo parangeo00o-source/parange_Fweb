@@ -25,7 +25,7 @@ try {
     const next=createDialogueDeck(),cycle=Array.from({length:100},next)
     if(new Set(cycle).size!==100||next()===cycle[99])throw Error('Dialogue repeats within its shuffled cycle')
     const village=window.testApp.world.village
-    if(village.residents.map(r=>r.model.name).join()!=='주민 1,주민 2')throw Error('Legacy names not migrated')
+    if(village.residents.map(r=>r.model.name).join()!=='Neighbor 1,Neighbor 2')throw Error('Legacy names not migrated')
     const {createResidentRig}=await import('/src/resident-model.ts')
     const model={...createResidentRig(2),name:'  Mochi  ',customName:true,trait:'A little explorer',mapped:false,portrait:''}
     village.add(model,village.safePosition(new window.testThree.Vector3(.1,.8,.7).normalize()))

@@ -20,7 +20,8 @@ export function createConsoleArchitecture(world:THREE.Group,sites:Site[],radius:
   const mat=(color:string,stone=false)=>{
     const key=color+stone
     if(!materials.has(key)){
-      const material=new THREE.MeshPhysicalMaterial({color,roughness:stone?.74:.34,metalness:0,clearcoat:stone?.06:.38,clearcoatRoughness:.30})
+      const glass=color==='#073a68'
+      const material=new THREE.MeshPhysicalMaterial({color,roughness:stone?.80:glass?.19:.30,metalness:0,clearcoat:stone?.03:glass?.65:.42,clearcoatRoughness:glass?.18:.28,envMapIntensity:stone?.32:glass?.85:.55})
       paintedFinish(material,stone?'stone':'paint');materials.set(key,material)
     }
     return materials.get(key)!
@@ -54,8 +55,8 @@ export function createConsoleArchitecture(world:THREE.Group,sites:Site[],radius:
       new Set([...flat,...geometries]).forEach(g=>g.dispose())
     }
   }
-  const ring=(g:THREE.Object3D,r:number,tube:number,y:number,color:string)=>{
-    const mesh=piece(g,new THREE.TorusGeometry(r,tube,8,32),color,[0,y,0]);mesh.rotation.x=Math.PI/2;return mesh
+  const ring=(g:THREE.Object3D,r:number,tube:number,y:number,color:string,segments=32)=>{
+    const mesh=piece(g,new THREE.TorusGeometry(r,tube,8,segments),color,[0,y,0]);mesh.rotation.x=Math.PI/2;return mesh
   }
   const label=(g:THREE.Object3D,text:string,pos:number[],width:number,bg='#0756b1')=>{
     const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128
@@ -79,7 +80,10 @@ export function createConsoleArchitecture(world:THREE.Group,sites:Site[],radius:
     piece(g,new THREE.LatheGeometry(profile.getPoints(64).map(p=>new THREE.Vector2(Math.max(0,p.x),p.y)),48),color,[0,y,0])
     ring(g,r+.020,.015,y+.019,'#ffce72')
     for(const t of [.50,.64,.77]){
-      const p=profile.getPoint(t);ring(g,p.x,.0035,y+p.y,color)
+      // Keep the moulded seam outside the roof: coplanar rings shimmered into
+      // dotted black lines when the globe was viewed at a shallow angle.
+      const p=profile.getPoint(t),tangent=profile.getTangent(t)
+      ring(g,p.x+tangent.y*.005,.0028,y+p.y-tangent.x*.005,color,96)
     }
     piece(g,sphere,'#ffcd1b',[0,y+height+.025,0],[.05,.055,.05])
   }

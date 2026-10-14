@@ -90,7 +90,7 @@ try {
   await page.emulateMedia({reducedMotion:'reduce'})
   await page.waitForTimeout(150)
   if(await page.evaluate(()=>window.nightApp.world.world.parent.getObjectByName('moonlit-night-sky').material.uniforms.uTime.value!==0))throw Error('Reduced motion does not freeze the sky')
-  await page.locator('.planet-day-toggle').click();await page.waitForTimeout(200)
+  await page.locator('[data-mode="day"]').click();await page.waitForTimeout(200)
   await page.waitForTimeout(200)
   await page.evaluate(()=>{
     const scene=window.nightApp.world.world.parent

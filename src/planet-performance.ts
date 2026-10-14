@@ -1,11 +1,37 @@
 import * as THREE from 'three'
 
+const worldCached=new WeakSet<THREE.Object3D>()
+
+/** A static leaf needs a new world matrix only when its parent actually moves.
+ * Three's scene-wide forced update otherwise multiplies every fixed rock,
+ * building and leaf again on every frame. Animated parents still invalidate
+ * this cache immediately; raycasting/updateWorldMatrix remain untouched. */
+function cacheStaticLeafWorldMatrix(node:THREE.Object3D){
+  if(node.children.length||worldCached.has(node))return
+  worldCached.add(node)
+  const update=node.updateMatrixWorld,parentMatrix=new THREE.Matrix4()
+  let parent:THREE.Object3D|null=null,ready=false
+  node.updateMatrixWorld=function(force?:boolean){
+    if(this.matrixAutoUpdate||this.children.length||!this.matrixWorldAutoUpdate){
+      ready=false;update.call(this,force);return
+    }
+    const sameParent=ready&&parent===this.parent&&(!parent||parentMatrix.equals(parent.matrixWorld))
+    if(sameParent&&!this.matrixWorldNeedsUpdate)return
+    update.call(this,force||!sameParent)
+    parent=this.parent;if(parent)parentMatrix.copy(parent.matrixWorld)
+    ready=true
+  }
+}
+
 /** Cache only authored mesh-local transforms. Parent/joint world transforms,
  * shaders, materials and shadows remain live; animated meshes must opt out. */
-export function cacheStaticMeshTransforms(root:THREE.Object3D,animated:ReadonlySet<THREE.Object3D>=new Set()) {
+export function cacheStaticMeshTransforms(root:THREE.Object3D,animated:ReadonlySet<THREE.Object3D>=new Set(),cacheWorld=false) {
   root.traverse(node=>{
     if(!(node instanceof THREE.Mesh)||animated.has(node))return
     node.updateMatrix();node.matrixAutoUpdate=false
+    // Continuously animated resident joints do not benefit from parent-matrix
+    // comparisons; reserve world caching for predominantly static scenery.
+    if(cacheWorld)cacheStaticLeafWorldMatrix(node)
   })
 }
 

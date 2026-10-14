@@ -51,8 +51,11 @@ try {
         const rear=headPoint(residentSculpts[kind],residentDesigns[index].head,0,y,-r)
         assert(Math.abs(rear.z+r*residentDesigns[index].head[2])<1e-7,`${kind}: dented rear skull`)
       }
-      const speciesParts={fox:['fox-brush','pointed-ear-shell'],bear:['folded-hood','chest-badge'],rabbit:['long-ear','wrap-dress-lapel'],cat:['curled-cat-tail','cat-whisker-mark'],penguin:['penguin-round-belly','scarf-wrap'],koala:['ear-shell','muzzle-volume'],frog:['eye-turret','frog-throat'],elephant:['curled-trunk','ear-shell'],raccoon:['striped-raccoon-tail'],deer:['antler-inner-tine','deer-tail'],dog:['floppy-ear','dog-chest-frame'],duck:['upper-bill','left-wing-feather'],sheep:['forehead-wool-curl','sheep-drooping-ear'],mouse:['mouse-tail','whisker'],otter:['otter-cheeks','otter-tail'],capybara:['capybara-round-belly','nostril']}
+      const speciesParts={fox:['fox-brush','pointed-ear-shell'],bear:['folded-hood','chest-badge'],rabbit:['long-ear','wrap-dress-lapel'],cat:['curled-cat-tail','cat-whisker-mark'],penguin:['penguin-round-belly','scarf-wrap'],koala:['ear-shell','muzzle-volume'],frog:['eye-turret','sculpted-head'],elephant:['curled-trunk','ear-shell'],raccoon:['striped-raccoon-tail'],deer:['antler-connected-branches','deer-pointed-ear','deer-tail'],dog:['floppy-ear','dog-chest-frame'],duck:['upper-bill','left-wing-feather'],sheep:['forehead-wool-curl','sheep-drooping-ear'],mouse:['mouse-tail','whisker'],otter:['sculpted-head','otter-tail'],capybara:['capybara-round-belly','nostril']}
       for(const part of speciesParts[kind])assert(rig.group.getObjectByName(part),`${kind}: missing original-design detail ${part}`)
+      if(kind==='frog')assert(head.geometry.userData.continuousThroat&&!rig.group.getObjectByName('frog-throat'),'Frog throat must be one surface with its head')
+      if(kind==='otter')assert(head.geometry.userData.continuousCheeks&&!rig.group.getObjectByName('otter-cheeks'),'Otter cheeks must be one surface with its head')
+      if(kind==='sheep')assert(rig.group.getObjectByName('continuous-wool-cap')&&!rig.group.getObjectByName('back-wool-lock'),'Sheep fleece must have a continuous rear volume')
       for(const side of ['left','right']){
         assert(!rig.group.getObjectByName(`${side}-boot-cuff`),`${kind}: stacked ankle rings returned`)
         assert(!rig.group.getObjectByName(`${side}-sole`),`${kind}: detached sole disc returned`)
@@ -66,7 +69,7 @@ try {
       if(kind==='frog')assert(rig.group.getObjectByName('right-glove').material.color.getHexString()==='65c519'&&rig.group.getObjectByName('left-boot').material.color.getHexString()==='65c519','Frog original asymmetric colours missing')
       if(kind==='dog')assert(residentDesigns[index].boots==='#e9a02a','Dog original amber footwear lost')
       if(kind==='capybara')assert(rig.group.getObjectByName('capybara-backpack'),'Capybara rear outfit detail missing')
-      if(kind==='deer')assert(rig.group.getObjectByName('antler-rounded-tip'),'Deer antler tips missing')
+      if(kind==='deer')assert(rig.group.getObjectByName('antler-connected-branches').geometry.userData.connectedBranches,'Deer antlers must be joined surfaces')
       rig.group.traverse(node=>{
         if(node.name==='eye-gloss')assert(node.scale.z<=.016,`${kind}: protruding eyes`)
         if(node.name==='ear-shell'){

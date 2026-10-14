@@ -3,6 +3,8 @@ import { residentDesigns } from './resident-designs'
 import type { ResidentDesign } from './resident-designs'
 import { headFront, headPoint, residentSculpts } from './resident-sculpt'
 import { cacheStaticMeshTransforms } from './planet-performance'
+import { residentProfile } from './resident-profile'
+import { residentAntlerGeometry } from './resident-antlers'
 
 type XYZ = [number, number, number]
 type Paint = (x: number, y: number, z: number) => THREE.Color
@@ -43,9 +45,9 @@ export function createResidentRig(index: number): ResidentRig {
     let result = materialPool.get(key)
     if (!result) {
       result = new THREE.MeshPhysicalMaterial({ color, vertexColors: painted,
-        roughness: finish === 'fur' ? .39 : finish === 'eye' ? .24 : .38,
-        envMapIntensity:finish==='eye'?.12:.30,
-        metalness: 0, clearcoat: finish === 'fur' ? .10 : finish === 'eye' ? .02 : .12, clearcoatRoughness: .40 })
+        roughness: finish === 'fur' ? .44 : finish === 'eye' ? .17 : .29,
+        envMapIntensity:finish==='eye'?.72:finish==='fur'?.28:.52,
+        metalness: 0, clearcoat: finish === 'fur' ? .08 : finish === 'eye' ? .42 : .32, clearcoatRoughness: finish==='eye'?.20:.32 })
       if(finish==='fur')furFinish(result)
       materialPool.set(key, result)
     }
@@ -110,9 +112,11 @@ export function createResidentRig(index: number): ResidentRig {
     segments = 36, sides = 20) => {
     const curve = new THREE.CatmullRomCurve3(points.map(point => new THREE.Vector3(...point)))
     const frames = curve.computeFrenetFrames(segments, false)
+    const length=curve.getLength(),capStart=Math.min(.16,radius(0)/length),capEnd=Math.min(.16,radius(1)/length)
+    const cap=(t:number,span:number)=>span>1e-6&&t<span?Math.sqrt(Math.max(0,1-(1-t/span)**2)):1
     const positions: number[] = [], colors: number[] = [], indices: number[] = []
     for (let i = 0; i <= segments; i++) {
-      const t = i / segments, center = curve.getPointAt(t), r = i === 0 || i === segments ? 0 : radius(t)
+      const t = i / segments, center = curve.getPointAt(t), r = i === 0 || i === segments ? 0 : radius(t)*cap(t,capStart)*cap(1-t,capEnd)
       for (let j = 0; j <= sides; j++) {
         const angle = j / sides * Math.PI * 2
         const point = center.clone().addScaledVector(frames.normals[i], Math.cos(angle) * r)
@@ -138,9 +142,10 @@ export function createResidentRig(index: number): ResidentRig {
     result.rotation.x = Math.PI / 2; return result
   }
   const loft = (name: string, parent: THREE.Object3D, shade: THREE.Material, profile: Array<[number,number]>, depth: number, paint?: Paint) => {
-    const curve = new THREE.SplineCurve(profile.map(([radius,y]) => new THREE.Vector2(radius,y)))
+    const curve = residentProfile(profile)
     const sampled = curve.getPoints(56).map(point => new THREE.Vector2(Math.max(0,point.x),point.y))
     const geometry = new THREE.LatheGeometry(sampled, 64)
+    smoothSculptNormals(geometry)
     if (paint) {
       // The same spline supplies the garment UV colour mask and real volume.
       // Neck opening, armhole trim and waist bands remain continuous on the back.
@@ -174,7 +179,7 @@ export function createResidentRig(index: number): ResidentRig {
     mesh('penguin-round-belly',belly,bellyShade,jacket,[0,.155,0],[.273,.32,.231])
   }else loft('garment-shell', jacket, suit, dress
     ? [[0,-.052],[sculpt.hem,-.052],[sculpt.hem+.008,-.022],[sculpt.hem,.035],[sculpt.waist,.25],[sculpt.chest,.38],[.145,.44],[0,.448]]
-    : [[0,.055],[sculpt.hem-.018,.055],[sculpt.hem,.084],[sculpt.hem,.14],[sculpt.waist,.26],[sculpt.chest,.37],[.151,.438],[0,.45]], .79,
+    : [[0,.055],[sculpt.hem-.018,.055],[sculpt.hem,.084],[sculpt.hem,.14],[sculpt.waist,.26],[sculpt.chest,.37],[.151,.438],[0,.45]], .87,
     (x,y,z) => {
       if (dress) return y < .025 ? trimColor : suitColor
       if (design.kind === 'frog') return z > .045 && Math.abs(x) < .14 && y>.15 ? trimColor : suitColor
@@ -187,18 +192,20 @@ export function createResidentRig(index: number): ResidentRig {
       const armhole=1-((Math.abs(x)-sculpt.chest-.01)/.070)**2-((y-.345)/.112)**2
       return suitColor.clone().lerp(trimColor,THREE.MathUtils.smoothstep(Math.min(armhole,Math.abs(z)-.045),-.012,.012))
     })
-  if(!penguin&&design.kind!=='frog')ring('rolled-hem', jacket, design.kind==='mouse'?trim:design.kind==='cat'?cream:trim, sculpt.hem-.003, .006, [0,dress ? -.027 : .09,0], [1,.79,1])
+  if(!penguin&&design.kind!=='frog')ring('rolled-hem', jacket, design.kind==='mouse'?trim:design.kind==='cat'?cream:trim, sculpt.hem-.003, .006, [0,dress ? -.027 : .09,0], [1,dress?.79:.87,1])
   ellipsoid('neck', jacket, fur, [0,.462,0], [.125,.082,.113])
   if (dress) {
     for (const side of [-1,1]) {
       line('wrap-dress-lapel', jacket, trim, [[side*.115,.424,.10],[side*.06,.325,.143],[0,.267,.152]], .024)
     }
-  } else if (design.kind !== 'cat') {
+  } else if (design.kind !== 'cat' && !penguin) {
     ring('padded-collar', jacket, suit, .16, .037, [0,.429,0], [1,.82,1])
     if (design.kind==='bear') {
       // Folded hood has its own rear volume and stitched rim.
-      ellipsoid('folded-hood', jacket, suit, [0,.378,-.139], [.223,.082,.092])
-      line('hood-seam', jacket, trim, [[-.17,.38,-.188],[0,.342,-.221],[.17,.38,-.188]], .005)
+      sculptedVolume('folded-hood',jacket,suit,[0,.390,-.136],(x,y,z)=>[
+        x*.242,y*.115+.043*x*x,z*.141-.034*(1-y*y)])
+      sweep('hood-rolled-opening',jacket,suit,[[-.22,.423,-.067],[-.17,.46,-.15],[0,.434,-.257],[.17,.46,-.15],[.22,.423,-.067]],()=>.029,.85)
+      line('hood-seam', jacket, trim, [[-.17,.34,-.228],[0,.293,-.243],[.17,.34,-.228]], .004)
     }
     if(design.kind==='capybara'){
       const packShade=surfaceMaterial('capybara-pack',(_x,_y,z)=>suitColor.clone().lerp(trimColor,
@@ -206,15 +213,19 @@ export function createResidentRig(index: number): ResidentRig {
       sculptedVolume('capybara-backpack',jacket,packShade,[0,.31,-.19],(x,y,z)=>[x*.171,y*.184,z*.121])
       for(const side of [-1,1])line('pack-strap',jacket,trim,[[side*.14,.425,-.13],[side*.185,.405,-.03],[side*.18,.335,.09]],.015)
     }
-    if (design.kind==='bear') ellipsoid('chest-badge', jacket, gold, [0,.29,sculpt.waist*.79+.008], [.045,.056,.018])
+    if (design.kind==='bear') ellipsoid('chest-badge', jacket, gold, [0,.29,sculpt.waist*.87+.008], [.045,.056,.018])
     if (design.kind==='dog') {
       line('dog-chest-frame',jacket,trim,[[-.071,.327,.167],[0,.336,.176],[.071,.327,.167]],.020)
       line('dog-chest-frame',jacket,trim,[[-.071,.327,.167],[-.065,.254,.17],[0,.248,.181],[.065,.254,.17],[.071,.327,.167]],.015)
     }
   }
   if (design.kind === 'penguin') {
-    ring('scarf-wrap', jacket, suit, .203, .046, [0,.443,0], [1,.85,1])
-    const flap = ellipsoid('scarf-end', jacket, suit, [-.15,.327,-.176], [.061,.155,.028]); flap.rotation.z = -.32
+    // Broad folded fabric with a real hanging end, not a circular neck tube.
+    loft('scarf-wrap',jacket,suit,[[.174,.365],[.237,.364],[.258,.398],[.253,.479],[.225,.503],[.172,.482],[.174,.365]],.87)
+    const flap=sculptedVolume('scarf-end',jacket,suit,[-.184,.271,.122],(x,y,z)=>[
+      x*.071*(1+.12*y),y*.166,z*.028+.025*Math.sin(y*1.8)])
+    flap.rotation.z=-.22
+    line('scarf-fold',jacket,material('#079bbb'),[[-.19,.389,.133],[0,.379,.218],[.19,.389,.133]],.004)
   }
 
   const limbs: Limb[] = [], legs: Limb[] = []
@@ -239,13 +250,41 @@ export function createResidentRig(index: number): ResidentRig {
       // A single continuous paddle, not three visible sleeve/joint/glove balls.
       sculptedVolume(`${label}-flipper`,shoulder,fur,[0,-.174,.02],(x,y,z)=>[
         x*.118*(1-.22*y),y*.225,z*.086+.025*(1-y*y)])
-    }else{
+    }else if(design.kind!=='duck'){
       const mitten=ellipsoid(`${label}-glove`, wrist, design.kind==='frog'&&side>0?fur:gloves, [0,-.041,.019], isWing ? [.111*hand,.14*hand,.077*hand] : [.112*hand,.113*hand,.107*hand])
       if(isWing)mitten.rotation.z=-side*.23
     }
-    if(design.kind==='duck')for(let feather=0;feather<3;feather++){
-      const plume=ellipsoid(`${label}-wing-feather`,wrist,cream,[side*(.045+feather*.020),-.064+feather*.055,.041],[.097,.047,.056])
-      plume.rotation.z=-side*.3
+    if(design.kind==='duck'){
+      // Three soft feather tips flow into one palm. Authored outline avoids
+      // the star-shaped scallops produced by a radial sine displacement.
+      const outline=new THREE.Shape()
+      outline.moveTo(-.065,.10)
+      outline.bezierCurveTo(-.025,.17,.035,.20,.09,.19)
+      outline.bezierCurveTo(.15,.18,.17,.12,.105,.095)
+      outline.bezierCurveTo(.19,.125,.235,.08,.20,.035)
+      outline.bezierCurveTo(.185,.014,.15,.007,.125,.008)
+      outline.bezierCurveTo(.205,-.015,.19,-.09,.115,-.108)
+      outline.bezierCurveTo(.03,-.16,-.095,-.11,-.10,-.015)
+      outline.bezierCurveTo(-.105,.03,-.085,.075,-.065,.10)
+      // Inflate both faces around the silhouette. A bevelled extrusion still
+      // left a flat cookie-like palm and straight walls in a side view.
+      const contour=outline.getSpacedPoints(96),positions:number[]=[],indices:number[]=[]
+      for(let row=0;row<=32;row++){
+        const angle=row/32*Math.PI,r=Math.sin(angle)
+        for(let col=0;col<=96;col++){
+          const p=contour[col]
+          positions.push(.025+(p.x-.025)*r,.02+(p.y-.02)*r,.085*Math.cos(angle))
+          if(row<32&&col<96){
+            const a=row*97+col,b=a+97
+            indices.push(a,a+1,b,b,a+1,b+1)
+          }
+        }
+      }
+      const featherGeometry=new THREE.BufferGeometry()
+      featherGeometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3))
+      featherGeometry.setIndex(indices);smoothSculptNormals(featherGeometry)
+      const wing=mesh(`${label}-wing-feather`,featherGeometry,cream,wrist,[0,-.055,.025])
+      if(side<0)wing.rotation.y=Math.PI
     }
     if (!isWing&&design.kind==='fox') ellipsoid(`${label}-thumb`, wrist, gloves, [-side*.085,-.014,.073], [.041,.059,.039])
     limbs.push({ upper: shoulder, lower: elbow, end: wrist })
@@ -266,11 +305,12 @@ export function createResidentRig(index: number): ResidentRig {
           THREE.MathUtils.smoothstep(.14-Math.abs(y-.45-z*.18),-.015,.015)),'plastic'):design.kind==='frog'&&side<0?fur:boots
     const tallBoot=!['duck','penguin','frog','capybara'].includes(design.kind)
     sculptedVolume(`${label}-boot`,ankle,shoeShade,[0,0,0],(x,y,z)=>{
-      const upper=tallBoot?THREE.MathUtils.smoothstep(y,0,1):0
-      // One closed last flows from the broad toe into the ankle; no intersecting shaft.
-      return [x*.129*sw*(1+.10*z)*(1-.22*upper),
-        -.045+y*.105*sh+(y<0?.013*y*y:0)+(.185-.105*sh)*upper,
-        z*.167*sd*(1-.45*upper)+.058*(1-upper)]
+      const upper=tallBoot?THREE.MathUtils.smoothstep(y,-.20,1):0
+      // Broad, rounded instep/heel. The previous narrow neck + raised upper
+      // hemisphere formed a cone and a pinched horizontal highlight band.
+      return [x*.129*sw*(1+.065*z)*(1-.10*upper),
+        -.018+y*.125*sh+(tallBoot?.018:0)*upper+.010*y*y,
+        z*.167*sd*(1-.18*upper)+.046*(1-upper)]
     })
     // The rounded last already closes underneath. A second thin sole and a
     // separate ankle torus made every species look like stacked toy parts.
@@ -287,6 +327,7 @@ export function createResidentRig(index: number): ResidentRig {
     vertices.setXYZ(i,point.x,point.y,point.z)
   }
   smoothSculptNormals(headGeometry)
+  headGeometry.userData.sculptVersion='continuous-volume-v3'
   mesh('sculpted-head', headGeometry, surfaceMaterial(`${design.kind}-face`,headPaint(design)), head)
   const eyes: THREE.Group[] = []
   const eye = (x: number, y: number, z: number, size = 1, parent: THREE.Object3D = head) => {
@@ -303,9 +344,24 @@ export function createResidentRig(index: number): ResidentRig {
     const x = side*sculpt.eyes[0], y=sculpt.eyes[1]
     eye(x,y,headFront(sculpt,design.head,x,y)+.002)
   }
-  const muzzle = (width: number, height: number, depth: number, y = -.115, shade = cream) =>
-    ellipsoid('muzzle-volume', head, shade, [0,y,hz*.87], [width,height,depth])
-  const nose = (position: XYZ, size: XYZ = [.048,.03,.034]) => ellipsoid('nose', head, black, position, size)
+  const muzzles:{width:number;height:number;depth:number;y:number;z:number}[]=[]
+  const muzzle = (width: number, height: number, depth: number, y = -.115, shade = cream) => {
+    muzzles.push({width,height,depth,y,z:hz*.87})
+    return ellipsoid('muzzle-volume', head, shade, [0,y,hz*.87], [width,height,depth])
+  }
+  const nose = (position: XYZ, size: XYZ = [.048,.03,.034]) => {
+    const [x,y]=position
+    let surface=headFront(sculpt,design.head,x,y)
+    for(const m of muzzles){
+      const radius=1-(x/m.width)**2-((y-m.y)/m.height)**2
+      if(radius>=0)surface=Math.max(surface,m.z+m.depth*Math.sqrt(radius))
+    }
+    // Seat against the actual cheek/muzzle, not a fixed front Z that leaves
+    // the dog's, mouse's and raccoon's nose floating when viewed sideways.
+    const result=ellipsoid('nose', head, black, [x,y,surface+size[2]*.5], size)
+    result.userData.attachmentSurface=surface
+    return result
+  }
   const earPivots: THREE.Group[] = []
   const roundEar = (side: number, x: number, y: number, width: number, height: number, inside: THREE.Material, outer = fur) => {
     const ear = pivot(`ear-${side}`, head, [side*x,y,-.04]); ear.rotation.y = side*.2
@@ -314,12 +370,17 @@ export function createResidentRig(index: number): ResidentRig {
       const scallop=design.kind==='koala'?.075*Math.cos(Math.atan2(y,x)*5):0
       return outerColor.clone().lerp(innerColor,THREE.MathUtils.smoothstep(Math.min(.73+scallop-Math.hypot(x,y+.015),z-.17),-.018,.018))
     })
-    sculptedVolume('ear-shell',ear,shade,[0,0,0],(x,y,z)=>[
-      x*width,y*height,z*.118-(z>0?.025*(1-x*x-y*y)**2:0)])
+    // A substantial rear shell and a shallow front bowl, with a continuous
+    // rolled rim. Koala's cream tuft stays fuller than the recessed pink ears.
+    const cup=design.kind==='koala'?.038:.085
+    sculptedVolume('ear-shell',ear,shade,[0,0,0],(x,y,z)=>{
+      const tufts=design.kind==='koala'?1+.025*Math.cos(Math.atan2(y,x)*5)*(x*x+y*y)**2:1
+      return [x*width*tufts,y*height*tufts,z*.130-(z>0?cup*z**4:0)]
+    })
     earPivots.push(ear); return ear
   }
   const pointedEar = (side: number, tall: number, outerColor = furColor) => {
-    const ear = pivot(`ear-${side}`, head, [side*.211,.125,-.028]); ear.rotation.z = -side*.19
+    const ear = pivot(`ear-${side}`, head, [side*(design.kind==='cat'?.255:.211),design.kind==='cat'?.145:.125,-.028]); ear.rotation.z = -side*(design.kind==='cat'?.30:.19)
     // Closed, bowed triangular shells with recessed coloured inner cups.
     const insetColor=design.kind==='cat'?new THREE.Color('#f58ca8'):creamColor
     const shade=surfaceMaterial(`pointed-ear-${outerColor.getHexString()}`,(x,y,z)=>{
@@ -329,7 +390,7 @@ export function createResidentRig(index: number): ResidentRig {
     sculptedVolume('pointed-ear-shell',ear,shade,[0,0,0],(x,y,z)=>{
       const t=(y+1)/2, section=Math.sqrt(Math.max(0,1-y*y)), sine=Math.max(0,Math.sin(Math.PI*t))
       return [section>1e-6?x/section*.177*(1-t)**.65*sine**.30:0,t*tall,
-        (section>1e-6?z/section*.108*sine**.65:0)-.024*t*t-(z>0?.024*(1-x*x)*sine:0)]
+        (section>1e-6?z/section*.125*sine**.65:0)-.024*t*t-(z>0?.024*z*z*sine:0)]
     })
     earPivots.push(ear)
   }
@@ -342,14 +403,14 @@ export function createResidentRig(index: number): ResidentRig {
       nose([0,-.040,headFront(sculpt,design.head,0,-.040)+.012],[.035,.021,.023]); break
     }
     case 'bear':
-      roundEar(-1,.256,.24,.13,.14,cream); roundEar(1,.256,.24,.13,.14,cream)
+      roundEar(-1,.284,.235,.137,.143,material('#c58249','fur')); roundEar(1,.284,.235,.137,.143,material('#c58249','fur'))
       muzzle(.174,.121,.119,-.113); nose([0,-.068,.383],[.045,.029,.03]); break
     case 'rabbit':
       for (const side of [-1,1]) {
         const ear=pivot(`ear-${side}`,head,[side*.140,.210,-.025]); ear.rotation.z=-side*.27
         const shade=surfaceMaterial('rabbit-ear',(x,y,z)=>furColor.clone().lerp(new THREE.Color('#ef77a5'),
           THREE.MathUtils.smoothstep(Math.min(1-(x/.65)**2-((y-.04)/.76)**2,z-.3),-.025,.025)))
-        sculptedVolume('long-ear',ear,shade,[0,.203,0],(x,y,z)=>[x*.124*(1+.13*y),y*.270,z*.101-(z>0?.027*(1-x*x-y*y)**2:0)])
+        sculptedVolume('long-ear',ear,shade,[0,.203,0],(x,y,z)=>[x*.145*(1+.16*y),y*.274,z*.128-(z>0?.071*z**4:0)])
         earPivots.push(ear)
       }
       break
@@ -366,85 +427,92 @@ export function createResidentRig(index: number): ResidentRig {
       sweep('penguin-crest',head,fur,[[0,.25,-.06],[.01,.345,-.06],[.055,.358,-.097]],t=>.038*Math.sin(Math.PI*t))
       break
     case 'koala':
-      roundEar(-1,.332,.141,.222,.224,cream); roundEar(1,.332,.141,.222,.224,cream)
+      roundEar(-1,.370,.141,.226,.226,cream); roundEar(1,.370,.141,.226,.226,cream)
       muzzle(.128,.079,.075,-.130)
-      sculptedVolume('nose',head,black,[0,-.006,.313],(x,y,z)=>[x*.094*(1-.18*y),y*.124,z*.068]); break
+      sculptedVolume('nose',head,black,[0,-.006,headFront(sculpt,design.head,0,-.006)+.012],(x,y,z)=>[x*.094*(1-.18*y),y*.124,z*.068]); break
     case 'frog':
       for (const side of [-1,1]) {
         ellipsoid('eye-turret',head,fur,[side*.227,.197,-.002],[.153,.174,.143])
         ellipsoid('eye-sclera',head,cream,[side*.227,.219,.100],[.119,.139,.055])
         eye(side*.227,.242,.147)
       }
-      sculptedVolume('frog-throat',head,cream,[0,-.070,.085],(x,y,z)=>[x*.346,y*.113,z*.244])
-      line('frog-smile',head,secondary,[[-.28,-.03,.197],[0,-.057,.307],[.28,-.03,.197]],.0035)
+      // Cream throat is part of the closed head/colour mask, not an intersecting
+      // second flattened ellipsoid with a visible seam around the lower jaw.
+      headGeometry.userData.continuousThroat=true
       break
     case 'elephant':
-      roundEar(-1,.335,.055,.238,.277,cream); roundEar(1,.335,.055,.238,.277,cream)
-      trunk=pivot('trunk-joint',head,[0,-.024,.275])
-      sweep('curled-trunk',trunk,fur,[[0,.065,-.075],[0,-.045,.015],[0,-.130,.098],[0,-.146,.181],[0,-.112,.254],[0,-.054,.301],[0,.018,.319]],
-        t=>.109*(1-.42*t)*Math.sqrt(Math.max(0,1-Math.max(0,(t-.88)/.12)**2)),1,undefined,80,32)
+      roundEar(-1,.380,.055,.244,.277,cream); roundEar(1,.380,.055,.244,.277,cream)
+      trunk=pivot('trunk-joint',head,[0,-.024,.300])
+      sweep('curled-trunk',trunk,fur,[[0,.065,-.075],[0,-.030,.025],[0,-.100,.145],[0,-.076,.252],[0,.018,.335]],
+        t=>.102*(1-.43*t)*Math.sqrt(Math.max(0,1-Math.max(0,(t-.88)/.12)**2)),1,undefined,80,32)
       break
     case 'raccoon':
       pointedEar(-1,.29,secondaryColor);pointedEar(1,.29,secondaryColor)
       muzzle(.151,.099,.10,-.134); nose([0,-.086,.369],[.034,.024,.031]); break
     case 'deer':
       for (const side of [-1,1]) {
-        const ear=roundEar(side,.287,.163,.157,.087,cream); ear.rotation.z=side*.42
+        const ear=pivot(`ear-${side}`,head,[side*.25,.175,-.025]);ear.rotation.z=-side*.80
+        const leafShade=surfaceMaterial('deer-ear',(x,y,z)=>furColor.clone().lerp(creamColor,
+          THREE.MathUtils.smoothstep(Math.min(.72-Math.hypot(x,y),z-.24),-.025,.025)))
+        sculptedVolume('deer-pointed-ear',ear,leafShade,[0,.095,0],(x,y,z)=>[
+          x*.125*(1-.38*y),y*.180,z*.082-.016*Math.max(0,z)**3])
+        earPivots.push(ear)
         const antler=pivot(`antler-${side}`,head,[side*.145,.255,-.048])
-        sweep('antler-main',antler,secondary,[[0,0,0],[side*.025,.10,0],[side*.06,.195,0],[side*.044,.255,-.008]],t=>.049*(1-.24*t))
-        sweep('antler-branch',antler,secondary,[[side*.018,.078,0],[side*.09,.116,0],[side*.13,.176,.004]],t=>.040*(1-.35*t))
-        sweep('antler-inner-tine',antler,secondary,[[side*.032,.132,0],[-side*.019,.170,.005],[-side*.027,.212,.004]],t=>.030*(1-.3*t))
-        ellipsoid('antler-rounded-tip',antler,secondary,[side*.044,.246,-.008],[.037,.044,.037])
-        ellipsoid('antler-rounded-tip',antler,secondary,[side*.125,.171,.004],[.028,.035,.028])
-        ellipsoid('antler-rounded-tip',antler,secondary,[-side*.027,.207,.004],[.022,.029,.022])
+        const branches=mesh('antler-connected-branches',residentAntlerGeometry(),secondary,antler)
+        if(side<0)branches.rotation.y=Math.PI
       }
       muzzle(.112,.091,.075); nose([0,-.07,.318],[.041,.031,.029]); break
     case 'dog':
       for (const side of [-1,1]) {
-        const ear=pivot(`ear-${side}`,head,[side*.253,.201,-.025]); ear.rotation.z=side*.30
-        sculptedVolume('floppy-ear',ear,secondary,[side*.031,-.151,.006],(x,y,z)=>[
-          x*.118*(1-.22*y),y*.252,z*.099+.035*(1-y*y)])
+        const ear=pivot(`ear-${side}`,head,[side*.285,.192,-.025]); ear.rotation.z=side*.22
+        sculptedVolume('floppy-ear',ear,secondary,[side*.035,-.180,.006],(x,y,z)=>[
+          x*.144*(1-.24*y)+side*.020*(1-y*y),y*.292,z*.112+.038*(1-y*y)])
         earPivots.push(ear)
       }
-      muzzle(.156,.10,.075,-.128); nose([0,-.077,.355],[.048,.031,.029]); break
+      headGeometry.userData.continuousMuzzle=true
+      nose([0,-.077,.355],[.048,.031,.029]); break
     case 'duck':
-      sculptedVolume('upper-bill',head,secondary,[0,-.09,.325],(x,y,z)=>[x*.219*(1+.22*z),y*.078+.025*z*z-.014*z,z*.216])
-      ellipsoid('lower-bill',head,secondary,[0,-.136,.347],[.202,.022,.178])
-      line('bill-mouth',head,material('#b06b12'),[[-.19,-.133,.378],[0,-.137,.528],[.19,-.133,.378]],.003)
+      sculptedVolume('upper-bill',head,secondary,[0,-.098,.350],(x,y,z)=>[
+        x*.218*(1+.30*z),y*.082*(1-.18*z)+.053*x*x-.023*z+.014*z*z,z*.220])
+      sculptedVolume('lower-bill',head,secondary,[0,-.139,.350],(x,y,z)=>[
+        x*.212*(1+.24*z),y*.029+.043*x*x-.017*z,z*.211])
       for(let i=0;i<3;i++) {
         const crest=ellipsoid('duck-crest',head,fur,[.016+i*.024,.285+i*.013,-.039-i*.035],[.055,.076,.075]);crest.rotation.x=.55
       }
       break
     case 'sheep': {
-      // Full wool cap: the back is wool too, not just five frontal decorations.
-      for (let ringIndex=0;ringIndex<4;ringIndex++) {
-        const latitude=.24+ringIndex*.38, count=ringIndex===3?5:9
-        for(let j=0;j<count;j++) {
-          const angle=j/count*Math.PI*2+(ringIndex%2)*.22
-          const x=Math.sin(angle)*Math.cos(latitude)*.30, y=Math.sin(latitude)*.30, z=Math.cos(angle)*Math.cos(latitude)*.26
-          if(z>.14 && Math.abs(x)<.245 && y<.18) continue
-          ellipsoid('wool-lock',head,cream,[x,y,z],[.113,.115,.107])
-        }
+      // One closed cloud-like fleece volume, not rows of intersecting balls.
+      // Broad lobes join smoothly on the back and around the ears; the cream
+      // forehead curls remain individually authored like the original roster.
+      const lobes:THREE.Vector3[]=[]
+      for(const [latitude,count] of [[-.38,8],[.18,9],[.68,7],[1.1,4]])for(let j=0;j<count;j++){
+        const angle=(j+.5*latitude)/count*Math.PI*2
+        lobes.push(new THREE.Vector3(Math.sin(angle)*Math.cos(latitude),Math.sin(latitude),Math.cos(angle)*Math.cos(latitude)))
       }
+      sculptedVolume('continuous-wool-cap',head,cream,[0,.035,-.025],(x,y,z)=>{
+        let relief=0
+        for(const lobe of lobes)relief+=Math.exp((x*lobe.x+y*lobe.y+z*lobe.z-1)*38)
+        const scale=1+.25*relief,face=THREE.MathUtils.smoothstep(z,.18,.65)*(1-THREE.MathUtils.smoothstep(y,.18,.66))
+        return [x*.327*scale,y*.321*scale,z*.290*scale-.105*face]
+      })
       for (const side of [-1,1]) {
-        const ear=pivot(`ear-${side}`,head,[side*.302,.07,.015]);ear.rotation.z=side*.40
-        ellipsoid('sheep-drooping-ear',ear,pink,[side*.054,-.105,.025],[.101,.167,.074]);earPivots.push(ear)
-      }
-      for(let j=0;j<9;j++) {
-        const a=(j/8)*Math.PI+Math.PI/2
-        ellipsoid('back-wool-lock',head,cream,[Math.sin(a)*.29,-.076,Math.cos(a)*.258],[.09,.13,.1])
+        const ear=pivot(`ear-${side}`,head,[side*.302,.085,.015]);ear.rotation.z=side*.58
+        sculptedVolume('sheep-drooping-ear',ear,pink,[side*.035,-.116,.025],(x,y,z)=>[
+          x*.104*(1-.27*y)+side*.019*(1-y*y),y*.188,z*.071+.035*(1-y*y)])
+        earPivots.push(ear)
       }
       // The original has large, soft forehead curls, not a tiny bead necklace.
       for(let j=0;j<5;j++)ellipsoid('forehead-wool-curl',head,cream,[(j-2)*.094,.23+(.05-Math.abs(j-2)*.025),.184],[.116,.115,.095])
+      for(let j=0;j<3;j++)ellipsoid('crown-wool-curl',head,cream,[(j-1)*.118,.330+(j===1?.027:0),.052],[.132,.122,.125])
       break
     }
     case 'mouse':
-      roundEar(-1,.263,.239,.232,.252,pink); roundEar(1,.263,.239,.232,.252,pink)
+      roundEar(-1,.292,.212,.232,.252,pink); roundEar(1,.292,.212,.232,.252,pink)
       muzzle(.120,.077,.087,-.117,fur); nose([0,-.092,.326],[.017,.013,.017]); break
     case 'otter':
-      roundEar(-1,.249,.185,.07,.082,secondary); roundEar(1,.249,.185,.07,.082,secondary)
-      sculptedVolume('otter-cheeks',head,cream,[0,-.105,.168],(x,y,z)=>[x*.290,y*.143,z*.154])
-      nose([0,-.035,.335],[.038,.024,.026]); break
+      roundEar(-1,.299,.185,.07,.082,secondary); roundEar(1,.299,.185,.07,.082,secondary)
+      headGeometry.userData.continuousCheeks=true
+      nose([0,-.035,headFront(sculpt,design.head,0,-.035)+.016],[.038,.024,.026]); break
     case 'capybara':
       roundEar(-1,.215,.215,.054,.065,secondary); roundEar(1,.215,.215,.054,.065,secondary)
       // An elongated continuous head with a broad brown muzzle cap, rather
@@ -454,12 +522,21 @@ export function createResidentRig(index: number): ResidentRig {
         nostril.rotation.z=-side*.35
       }
       // Fur-coloured abdomen remains visible below the cropped green top.
-      ellipsoid('capybara-round-belly',pelvis,fur,[0,-.005,.027],[.260,.175,.190])
+      ellipsoid('capybara-round-belly',pelvis,fur,[0,-.005,.014],[.250,.175,.151])
       break
   }
   if (design.kind === 'otter' || design.kind === 'mouse') for (const side of [-1,1]) for(let j=0;j<3;j++) {
-    const spread=design.kind==='otter'?1.17:1
-    line('whisker',head,seam,[[side*.16,-.096-j*.024,.288],[side*.226*spread,-.075-j*.03,.30],[side*.29*spread,-.056-j*.038,.29]],.004)
+    // Densely follow the curved cheek. A three-point chord cut through the
+    // head between its anchors and broke the whisker into dotted fragments.
+    const points:XYZ[]=Array.from({length:17},(_,i)=>{
+      const t=i/16,x=side*THREE.MathUtils.lerp(.15,design.head[0]*(design.kind==='mouse'?.76:.80),t)
+      const y=THREE.MathUtils.lerp(-.096-j*.024,-.056-j*.038,t)-.006*Math.sin(Math.PI*t),d=.0005
+      const dx=(headFront(sculpt,design.head,x+d,y)-headFront(sculpt,design.head,x-d,y))/(2*d)
+      const dy=(headFront(sculpt,design.head,x,y+d)-headFront(sculpt,design.head,x,y-d))/(2*d)
+      const normal=new THREE.Vector3(-dx,-dy,1).normalize()
+      return new THREE.Vector3(x,y,headFront(sculpt,design.head,x,y)).addScaledVector(normal,.0025).toArray() as XYZ
+    })
+    line('whisker',head,seam,points,.004)
   }
 
   const tail = pivot('tail-base', pelvis, [0,.135,-.145])
@@ -475,11 +552,11 @@ export function createResidentRig(index: number): ResidentRig {
       sweep('striped-raccoon-tail',tail,colored,[[0,0,0],[0,.08,-.20],[.01,.23,-.40],[.025,.39,-.62]],
         t=>.205*Math.sin(Math.PI*t)**.45,1,t=>Math.floor(t*6)%2===0?secondaryColor:furColor,72,32); break
     case 'mouse':
-      sweep('mouse-tail',tail,pink,[[0,0,0],[0,-.022,-.19],[.058,.057,-.34],[.086,.264,-.37],[.067,.333,-.32]],
-        t=>.024*(1-t*.66),1,undefined,48,14); break
+      sweep('mouse-tail',tail,pink,[[0,0,0],[.05,0,-.17],[.15,.04,-.33],[.13,.14,-.33],[-.01,.20,-.22],[-.08,.29,-.23],[-.07,.35,-.36],[.03,.32,-.43]],
+        t=>.027*(1-t*.40),1,undefined,64,18); break
     case 'otter':
-      sweep('otter-tail',tail,fur,[[0,0,0],[0,-.008,-.21],[0,.054,-.37],[0,.173,-.50]],
-        t=>.116*(1-t)**.7, .76,undefined,40,24); break
+      sweep('otter-tail',tail,fur,[[0,0,0],[0,.005,-.20],[0,.067,-.37],[0,.169,-.51]],
+        t=>.146*(1-.48*t), .88,undefined,48,28); break
     case 'dog':
       sweep('dog-tail',tail,fur,[[0,0,0],[0,.012,-.17],[0,.098,-.29],[0,.185,-.3]],t=>.066*(1-t)**.5); break
     case 'deer':
@@ -618,11 +695,19 @@ function headPaint(design: ResidentDesign): Paint {
         const border=blend(fur,cream,Math.min(upper+.12-y,y-lower+.13))
         return blend(border,secondary,Math.min(upper-y,y-lower))
       }
-      case 'deer': return blend(fur,cream,1-((ax-.41)/.27)**2-((y+.04)/.65)**2)
-      case 'dog': return blend(fur,cream,Math.min(.10+.30*Math.exp(-(((y+.53)/.45)**2))-x,.85-.22*(x+.2)**2-y,z-.1))
+      case 'deer': {
+        const brow=.74-.92*Math.exp(-((x/.21)**2))-.38*ax*ax
+        return blend(fur,cream,brow-y+Math.min(0,z-.48)*2.3)
+      }
+      case 'dog': {
+        const face=1-(x/1.08)**2-((y+.13)/1.18)**2+Math.min(0,z-.50)*2
+        const base=blend(fur,cream,face)
+        const patch=1-((x-.78)/.48)**2-((y-.42)/.80)**2
+        return blend(base,fur,patch)
+      }
       case 'mouse': return fur
       case 'capybara': return blend(fur,secondary,z-.79)
-      case 'otter': return blend(fur,cream,-.20+ax*.18-y)
+      case 'otter': return blend(fur,cream,-.20+ax*.18-y+Math.min(0,z-.48)*1.8)
       case 'sheep': return z>.25 ? new THREE.Color('#efcda4') : cream
       default: return fur
     }

@@ -1,0 +1,61 @@
+.planet-mode-tabs{position:absolute;z-index:5;top:92px;right:38px;display:flex;gap:3px;padding:4px;border:1px solid #ffffffa6;border-radius:26px;background:#ffffffda;box-shadow:0 4px 18px #46677215}
+.planet-screen .planet-mode-tabs .planet-mode-tab{position:static;display:flex;align-items:center;gap:5px;border:0;border-radius:20px;background:transparent;color:#496271;padding:9px 12px;font:400 12px var(--game-font,sans-serif);cursor:pointer;box-shadow:none;white-space:nowrap;transition:background .2s,color .2s}
+.planet-mode-tab i{font-size:17px;font-style:normal}.planet-mode-tab small{font-size:8px;border:1px solid currentColor;border-radius:4px;padding:1px 3px}
+.planet-screen .planet-mode-tabs .planet-mode-tab[aria-selected=true]{background:#ffdf66;color:#3f412c}.planet-mode-tab:focus-visible{outline:3px solid #8462ea;outline-offset:3px}
+.is-night .planet-mode-tabs{background:#12213be8;border-color:#7183ba}.is-night .planet-mode-tabs .planet-mode-tab{color:#cfdbf9}.is-night .planet-mode-tabs .planet-mode-tab[aria-selected=true]{background:#53678f;color:#fff9d6}
+.is-joining .planet-mode-tabs{display:none}
+.planet-neon-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}.planet-neon-canvas[hidden]{display:none}
+.is-neon{--neon-ink:#282232;--neon-paper:#fffbee;background:var(--neon-paper)}
+.is-neon .planet-sky{visibility:hidden}.is-neon .planet-grain{opacity:.07}
+/* Use the shared capture → capsule → flight layers. The illustrated sky must
+   not cover the common reveal backdrop or remain behind the loading screen. */
+.is-neon.is-joining:not(.is-presenting) .planet-neon-canvas,
+.is-neon.is-revealing .planet-neon-canvas{visibility:hidden}
+.planet-sky-game.is-neon.is-revealing .planet-sky{visibility:visible;background:radial-gradient(ellipse at 50% 47%,#fffdef66,transparent 65%),repeating-conic-gradient(from -12deg at 50% 48%,#e6d3f1 0deg 15deg,#d0b8e6 15deg 30deg)}
+.is-neon .planet-mode-tabs{border:1.5px solid var(--neon-ink);background:var(--neon-paper);box-shadow:3px 3px 0 var(--neon-ink)}
+.planet-screen.is-neon .planet-mode-tabs .planet-mode-tab{color:var(--neon-ink)}.planet-screen.is-neon .planet-mode-tabs .planet-mode-tab[aria-selected=true]{background:#b7f52d;color:var(--neon-ink)}
+.is-neon .planet-brand{filter:none;transform:rotate(-4deg)}
+.is-neon .planet-logo-row>span{color:#ff51b8;-webkit-text-stroke:1px #282232;text-shadow:2px 2px 0 #b7f52d,3px 3px 0 #282232}
+.is-neon .planet-logo-row:nth-child(2)>span{color:#5bdedb;text-shadow:2px 2px 0 #ffcf35,3px 3px 0 #282232}
+.is-neon .planet-brand small,.is-neon .planet-coordinates,.is-neon .planet-coordinates b{color:var(--neon-ink);text-shadow:none}
+.is-neon .planet-spot-card{color:var(--neon-ink)}
+.is-neon .planet-spot-card h2{color:var(--neon-ink);text-shadow:none;-webkit-text-stroke:0}
+.is-neon .planet-spot-card h2 em{color:#ff51b8;-webkit-text-stroke:1px var(--neon-ink);text-shadow:3px 3px 0 #b7f52d}
+.planet-sky-game.is-neon .planet-spot-card p,.planet-sky-game.is-neon .planet-card-index{color:var(--neon-ink);text-shadow:none}
+.planet-sky-game.is-neon .planet-spot-card .planet-card-index{background:#c5b8f1;border:1px solid #282232;box-shadow:none;color:#282232}
+.planet-sky-game.is-neon .planet-resident-card .planet-card-index{color:#282232}
+.planet-sky-game.is-neon .planet-guide b{background:#5bdedb;color:#282232;box-shadow:none}
+.is-neon .planet-spot-sticker{background:#b7f52d;color:var(--neon-ink);border:1.5px solid var(--neon-ink);box-shadow:3px 3px 0 var(--neon-ink);text-shadow:none}
+.is-neon .planet-resident-card,.is-neon .planet-guide,.is-neon .planet-follow-status,.is-neon .planet-meeting,.is-neon .planet-close,.is-neon .planet-toast{background:var(--neon-paper);border:1.5px solid var(--neon-ink);color:var(--neon-ink);box-shadow:3px 3px 0 var(--neon-ink);backdrop-filter:none;text-shadow:none}
+.is-neon .planet-resident-avatar{background:#d5c8ff;border-color:var(--neon-ink)}
+.planet-screen.planet-sky-game.is-neon .planet-resident-avatar img{filter:brightness(1.08) saturate(.88)}
+.is-neon .planet-resident-card small,.is-neon .planet-resident-name,.is-neon .planet-guide b,.is-neon .planet-meeting small,.is-neon .planet-meeting span{color:var(--neon-ink)}
+.is-neon .planet-join-primary{background:#ff51b8;border:2px solid var(--neon-ink);box-shadow:5px 5px 0 var(--neon-ink);color:var(--neon-ink);text-shadow:none;filter:none}
+.is-neon .planet-join-label,.is-neon .planet-join-label small{color:var(--neon-ink);text-shadow:none}.is-neon .planet-join-icon{background:#b7f52d;color:var(--neon-ink);border:1px solid var(--neon-ink)}
+.is-neon .planet-studio{background:var(--neon-paper);color:var(--neon-ink)}
+.is-neon .planet-studio-console{background:#b7f52d;border-color:var(--neon-ink);box-shadow:7px 7px 0 var(--neon-ink)}
+.is-neon .planet-studio-heading h2,.is-neon .planet-studio-heading h2 em{color:#ff51b8;text-shadow:2px 2px 0 #282232;-webkit-text-stroke:1px #282232}
+.is-neon .planet-building{background:var(--neon-paper);color:var(--neon-ink)}
+.is-neon .planet-arrival{background:transparent}.is-neon .planet-arrival h2{color:#ff51b8;text-shadow:3px 3px 0 #282232;-webkit-text-stroke:1px #282232}
+.is-neon .planet-dialogue{background:var(--neon-paper);border-color:var(--neon-ink);color:var(--neon-ink);box-shadow:4px 4px 0 #b7f52d}
+.planet-sky-game.is-neon .planet-arrival-window{border-color:#aa36c880;box-shadow:inset 0 0 0 4px #aa36c830}
+.planet-sky-game.is-neon .planet-unlock-header b{color:#282232}.planet-sky-game.is-neon .planet-unlock-header i{color:#ff51b8;-webkit-text-stroke-color:#282232;text-shadow:3px 3px 0 #b7f52d}
+.planet-sky-game.is-neon .planet-arrival-caption{background:#fffbee;border-color:#282232;box-shadow:3px 3px 0 #9775f7}
+.planet-sky-game.is-neon .planet-arrival-caption :is(h2,p,small){color:#282232;text-shadow:none;-webkit-text-stroke:0}
+.planet-sky-game.is-neon .planet-reveal-sticker{background:#b7f52d;color:#282232;border-color:#282232;box-shadow:3px 3px 0 #282232}
+.planet-sky-game.is-neon .planet-reveal-backdrop{background:radial-gradient(ellipse at 50% 40%,#fffdef40,transparent 70%),#aa36c830;box-shadow:0 12px 0 #74359555}
+.planet-sky-game.is-neon .planet-reveal-backdrop::before{background:radial-gradient(circle,transparent 0 37%,#f58bd9 37% 44%,#e6d3f1 44% 51%,#f4f44a 51% 58%,#8ce9b5 58% 65%,#9eddd9 65% 72%,transparent 72%)}
+.planet-sky-game.is-neon .planet-arrival.is-flying .planet-arrival-window{border-color:transparent;box-shadow:none}
+@media(max-width:720px){.planet-mode-tabs{top:105px;right:15px;gap:1px;padding:3px}.planet-screen .planet-mode-tabs .planet-mode-tab{padding:7px 8px;font-size:10px;gap:3px}.planet-mode-tab i{font-size:14px}.planet-mode-tab small{font-size:7px}.is-neon .planet-brand{transform:rotate(-3deg)}.planet-sky-game .planet-meeting{top:152px}.planet-sky-game.is-neon .planet-spot-card h2{font-size:24px}.planet-sky-game.is-neon .planet-spot-card p{font-size:10px}}
+@media(max-width:360px){.planet-sky-game.is-neon .planet-spot-card h2{font-size:20px;line-height:1.1}.planet-sky-game.is-neon .planet-spot-card p{display:none}.planet-sky-game.is-neon .planet-spot-card .planet-card-index{font-size:7px;padding:4px 6px}}
+@media(prefers-reduced-motion:reduce){.planet-mode-tabs .planet-mode-tab{transition:none}}
+
+/* The expansion's second art pass: printed pink/lime with soft mint depth. */
+.planet-sky-game.is-neon{--neon-ink:#44354f;--neon-paper:#fffdf3}
+.planet-sky-game.is-neon .planet-logo-row>span{color:#ed84cc;-webkit-text-stroke-color:#674979;text-shadow:2px 2px 0 #d7ed83,3px 3px 0 #674979}
+.planet-sky-game.is-neon .planet-logo-row:nth-child(2)>span{color:#9eddd9;text-shadow:2px 2px 0 #efdfa4,3px 3px 0 #674979}
+.planet-screen.is-neon .planet-mode-tabs .planet-mode-tab[aria-selected=true]{background:linear-gradient(135deg,#e5f5aa,#cbe66f)}
+.planet-sky-game.is-neon .planet-join-primary{background:linear-gradient(135deg,#ffc6e5,#ef8acb);border-color:#674979;box-shadow:4px 5px 0 #aa8ec5}
+.planet-sky-game.is-neon .planet-join-icon,.planet-sky-game.is-neon .planet-spot-sticker{background:#e0ef9a}
+.planet-sky-game.is-neon .planet-spot-card h2 em{color:#ed84cc;text-shadow:2px 2px 0 #cee67c}
+.planet-sky-game.is-neon :is(.planet-guide,.planet-resident-card,.planet-follow-status,.planet-mode-tabs,.planet-meeting){background:#fffdf3eb;box-shadow:3px 4px 0 #a891ba}

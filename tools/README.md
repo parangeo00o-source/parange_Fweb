@@ -1,5 +1,27 @@
 # Resident model review
 
+### Console material / resolution review
+
+The island now uses one shared, filtered HDR sky/softbox probe, with warm sun and
+cool sky fill. Matte turf/stone, lacquered props, resident fur, clothing and eyes
+have distinct roughness and reflection responses. Fine pigment fades with pixel
+footprint to avoid distant glitter. Leaf veins stay on the closed leaf volumes;
+root/building contact shading is baked into terrain colours (no extra render pass).
+Lagoon caustics form moving intersecting cells while retaining the no-flare water,
+fish silhouettes, physical swell and night-only turquoise coastal emission.
+Roof seams follow the curved cap with sufficient radial samples to prevent
+surface intersections at oblique angles. Placement and interaction geometry stay
+unchanged. Retina rendering supports up to 2×, with a four-million-pixel budget
+recalculated on resize. This does not guarantee a frame rate or thermal behaviour
+on every device; physical-device profiling is still required before release.
+
+`node tools/check-art-direction.mjs` checks production HDR/material settings,
+opaque 16-species residents, baked contacts, retina buffer limits and exact daytime
+lighting restoration, and captures desktop/mobile day/night views. Use the same
+`PLAYWRIGHT_MODULE` and `REVIEW_URL` overrides as the other checks. Garden detail
+captures regenerate PMREM for their separate WebGL context so material review
+does not accidentally use an empty reflection texture.
+
 Run `npm run dev` and open `/tools/resident-preview.html` on the local Vite server.
 The preview has all 16 residents, front/side/back controls, orbiting, walking and
 an all-resident view. It calls the same `createResidentRig` factory as move-in;
@@ -28,16 +50,37 @@ its belly also covers the pelvis without a separate exposed hip ring. The
 elephant trunk follows a finer, smooth curl with a rounded tip. Capybara eyes sit
 farther to the sides of a narrower, deeper snout, with smaller ears.
 
-Rotation stability: head sections use shape-preserving Hermite slopes and a
-rounded rear hemisphere, rather than carrying the cheek contour onto the back.
-Regularised superellipse axes avoid pinched shading seams, and face attachments
-query the exact sculpt surface. Species limb proportions are baked into meshes
+Rotation stability: heads now use a single smooth Bernstein deformation envelope
+over a closed ellipsoid, instead of separately interpolated horizontal rings.
+Angular cheek/jaw deformation vanishes at both poles, preventing pinched chins and
+crown folds; the rear hemisphere stays rounded. Face attachments query the exact
+sculpt surface. Species limb proportions are baked into meshes
 and joint offsets before animation; rotating shoulders, elbows, hips and knees
 have unit scale, preventing inherited non-uniform scale from shearing hands and
 boots. Tests check rear-skull curvature and orthonormal joint transforms through
 normal, held and meeting motions. Original-roster details include wider koala
 ears with scalloped inner fur, larger mouse ears, rounded deer antler tips, the
 offset calico blaze and the capybara's green rear pack and straps.
+
+The 360-degree volume pass also replaces garment spline overshoot with a clamped
+cubic B-spline shared by geometry and painted trim, deepens jacket sections, and
+rounds shoe insteps/heels without separate ankle shafts. Pointed-ear front and
+rear surfaces meet continuously; round/rabbit ears have actual recessed bowls.
+Swept appendages close with rounded end envelopes. Frog throat and otter cheeks
+belong to their head surface rather than overlapping flattened ellipsoids.
+Noses seat against the actual muzzle surface and whisker roots follow the face,
+preventing fixed-depth attachments from floating in side views.
+Sheep fleece uses one continuous lobed rear cap plus the original large forehead
+curls (35 fewer meshes). Elephant trunk curvature is gentler through the curl.
+Palette/costume authority remains the first roster, not the alternate uniforms.
+
+`check-resident-volumes.mjs` checks all 16 heads for outward normals, pole
+convergence, matching seam normals, curvature continuity, attached eyes and
+non-flat/non-folding garment profiles. `check-residents.mjs` additionally checks
+all animated joints, original-design parts, ground contact and disposal. The
+development preview's **4면 비교** button shows front/side/back/three-quarter
+views together. `capture-residents.mjs` saves eight full-roster views and both
+single-angle and four-view reference comparisons for every species.
 
 The source-roster refinement rounds each species' crown/jaw sections, seats oval
 eyes on the actual face normal, thickens/recesses ear cups, and replaces raised
@@ -405,6 +448,18 @@ renders all 16 alongside original portraits and in front/side/back/three-quarter
 views. These are authored approximations, not exact reconstruction of source 3D
 assets from the raster reference.
 
+The species-detail pass widens the requested heads without scaling animated
+parents, shortens only the capybara torso depth, rounds/thickens the otter tail,
+and gives the mouse tail an S curve visible in profile. Dog muzzle volume is
+integrated into its head; dog/deer face masks wrap around curved cheeks. Ears,
+sheep crown curls, duck bill/three-tip wings, bear hood and penguin scarf are
+individually authored. Deer antlers use a cached closed smooth-union surface,
+including their branch junctions and rounded ends, instead of overlapping tubes.
+`check-resident-details.mjs` guards these species-specific changes and checks
+the antler mesh for open/non-manifold edges. `check-resident-volumes.mjs` checks
+head curvature, seam normals and face attachments for every species. The frog's
+existing proportions and original asymmetric costume are intentionally retained.
+
 ### Capsule arrival premiere
 
 `planet-capsule.ts` supplies a deterministic 5.6-second reveal timeline: left-to-
@@ -444,3 +499,85 @@ check delayed generation, the pre-render cover, desktop/day and mobile/night
 handoffs, successful landing, failure/retry, and cancellation both before and
 after capsule setup. It needs the same `PLAYWRIGHT_MODULE`/`REVIEW_URL` setup as
 the other browser checks and does not use real photos or existing user storage.
+
+Neon spatial/art regression: `node tools/check-neon-spatial.mjs` verifies full
+360° surface-normal alignment (no upright angle clamp), near-plane polygon
+clipping before perspective division, horizon-visible crowns with occluded roots,
+and a focused resident retained at close/extreme-close camera distances. It
+captures the globe, close/grazing views and four individually illustrated sky fish.
+The sky uses pearl paper, articulated fish/birds and independently animated
+pastel motifs; reduced motion is deterministic. Ground projection paths
+are cached while the camera is stationary. The check also reports cached render
+CPU time as a diagnostic, not an FPS or device-temperature guarantee.
+
+### Neon walk illustration edition
+
+The mode tabs now select day / night / neon. `planet-neon.ts` is a lazy Canvas 2D
+renderer sharing the existing globe camera, resident identities, simulation,
+fish, picking/drag controls and arrival timeline. It does not change the basic
+edition's meshes, materials or saved resident schema. Neon replaces WebGL draws
+instead of compositing an additional full renderer over them; its backing store
+is capped at 2× DPR and four million pixels. Shore polygons are clipped once,
+vector paths and the 16 portrait drawings are cached. `neon-illustration.ts`
+contains the shared character drawing entry point and emergency vector fallback.
+`neon-rig-sprites.ts` uses eight-view native-rendered atlases of the exact
+`createResidentRig` designs used in the basic editions, not redesigned vectors
+or AI replacement characters. `resident-neon-finish.ts` alters materials only;
+`tools/bake-neon-residents.mjs` exports 16 WebP atlases and validates unchanged
+alpha plus unclipped views. Signed yaw selects views; a continuous lower-body
+mesh animates feet/arms while faces remain rigid. Portraits use the same art.
+Neon entry waits for loading; no additional in-game WebGL pass is introduced.
+`neon-resident-art.ts` and its generated replacement PNGs are archived only.
+`neon-scenery.ts` contains
+18 individually drawn architectural/botanical prop types; `neon-paint.ts` shares
+ink, palette and paint primitives. `neon-scenery-paint.ts` adds shape-local glaze
+gradients and finer outlines to scenery only, leaving character art unchanged.
+Roofs have scalloped tile engraving, windows have reflected light and botanical
+crowns have clipped leaf pillows, tiny foliage and glazed fruit.
+World-scale scenery uses bounded 2× art tiles,
+switching to the vector original at close range. Ground gardens are projected
+on the sphere and cached alongside the shoreline. `neon-surface.ts` supplies
+pearly spherical lighting for grass/water, plus a restrained edge glaze. Layered
+sand/surf contours replace the old hard coastline; 1,400 equal-area sample points
+supply cached world-anchored grass flecks and short water glints, replacing the
+screen-wide water stripes. No added texture downloads, filter passes or timers.
+`neon-backdrop.ts` caches a
+quiet pearl-paper surface with two compact, mirrored feather fans and ghost musical
+graphics. `neon-sky-layout.ts` defines separate portrait/landscape compositions
+and a large/medium/small hierarchy. `neon-sky-art.ts` loads four transparent illustration
+atlases once, preserves aspect ratios, bends fish tails with affine strips, and
+animates birds with separate wing layers. `neon-background.ts` composes these
+with rising bubbles, bouncing notes, turning flowers and shimmering stars.
+No old chromatic plates, moving rings, extra animation loop or WebGL draw pass.
+Reduced motion caches one still composition at the existing 4 MP limit.
+`planet-neon.css` scopes the expansion palette, retaining existing UI wording.
+
+`node tools/check-neon.mjs` checks 16 distinct drawings, ordered/keyboard tabs,
+resident identity preservation, zero concurrent WebGL draws, following, meetings,
+320/390 px and landscape layouts, normal and reduced-motion capsule arrivals,
+landing and restoring original daylight. It captures roster, world, following,
+mobile and capsule-phase screenshots in a temporary directory. Use the same
+`PLAYWRIGHT_MODULE` and `REVIEW_URL` environment variables described above.
+
+`node tools/check-neon-art.mjs` captures a scenery contact sheet and the front/back
+of all 16 residents. It checks distinct assets and alpha bounds for every one of
+the 12 scenery palette variants so cached art cannot cut off leaves or bases.
+
+`node tools/check-neon-background.mjs` captures the isolated animated garden at
+1280, 390 and 844 px, plus desktop/mobile in-game views. It verifies opaque,
+deterministic reduced-motion output, the resolution budget, four distinct fish,
+tail and wing articulation at fixed positions, and an opaque asset-failure
+fallback. It also checks the new wing asset, size hierarchy, portrait recomposition,
+bubble clusters, and that the archived print plates are never requested.
+
+`node tools/check-neon-resident-art.mjs` checks the native bake manifest's 16
+unchanged silhouettes, 128 distinct direction frames, walking, deterministic
+stills, portrait caches and zero archived replacement-atlas downloads. It captures
+the active roster front/back. `tools/bake-neon-residents.mjs` regenerates the
+atlases and revalidates source-model silhouette alpha and frame-edge safety.
+
+`node tools/check-planet-shared-ui.mjs` checks English interface labels, removed
+tagline, enlarged logo, smaller slogan and tab/meeting separation in all three
+editions at desktop, 390/320 px mobile and landscape widths. Dialogue content
+remains Korean per the earlier request; saved custom names are not translated.
+Shared visual overrides live in `planet-shared-ui.css` after mode-specific CSS.

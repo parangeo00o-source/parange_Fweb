@@ -18,9 +18,9 @@ export function createResidentStore() {
         seen.add(item.id)
         residents.push({id:item.id,designIndex:item.designIndex,name:typeof item.name==='string'?normalizeResidentName(item.name):'',normal:item.normal})
       }
-      const highest=Math.max(0,...residents.map(r=>Number(/^주민 (\d+)$/.exec(r.name)?.[1])||0).filter(Number.isSafeInteger))
+      const highest=Math.max(0,...residents.map(r=>Number(/^(?:주민|Neighbor) (\d+)$/.exec(r.name)?.[1])||0).filter(Number.isSafeInteger))
       data={version:1,nextNumber:Math.max(highest+1,Number.isSafeInteger(saved.nextNumber)?saved.nextNumber:1,1),residents,expelled}
-      for(const resident of data.residents)if(!resident.name)resident.name=`주민 ${data.nextNumber++}`
+      for(const resident of data.residents)if(!resident.name)resident.name=`Neighbor ${data.nextNumber++}`
     }
   }catch {available=false}
   // Never let an older open tab overwrite a durable expulsion with its stale
@@ -42,7 +42,7 @@ export function createResidentStore() {
     isExpelled:(id:string)=>{try{mergeExpulsions()}catch{available=false}return data.expelled.includes(id)},
     identity:(requestedName:string)=>{
       try{mergeExpulsions()}catch{available=false}
-      const number=data.nextNumber++,name=normalizeResidentName(requestedName)||`주민 ${number}`
+      const number=data.nextNumber++,name=normalizeResidentName(requestedName)||`Neighbor ${number}`
       const id=crypto.randomUUID();write();return {id,name}
     },
     save:(residents:ResidentRecord[])=>{data.residents=residents.filter(r=>!data.expelled.includes(r.id));write()},

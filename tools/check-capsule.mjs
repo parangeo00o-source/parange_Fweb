@@ -15,7 +15,7 @@ try {
     const scene=new T.Scene(),capsule=createArrivalCapsule(scene),center=new T.Vector3(0,0,0)
     capsule.update(1400,capsulePose(1400),center,1,-3,false)
     const lid=capsule.group.getObjectByName('capsule-lid'),bottom=capsule.group.getObjectByName('capsule-bottom')
-    if(lid.material.opacity!==.76||bottom.material.opacity!==.88)throw Error('Dense blue/green capsule opacity was reset by animation')
+    if(lid.material.opacity!==.62||bottom.material.opacity!==.74)throw Error('Resident must be visible through the tinted shell')
     if(capsule.group.getObjectByName('capsule-orbit-band')||capsule.group.getObjectByName('capsule-reflection'))throw Error('Painted reflection strips returned')
     if(lid.material.envMap!==bottom.material.envMap||lid.material.envMap?.name!=='capsule-softbox-environment'||lid.material.envMap.type!==T.FloatType||lid.material.envMap.mapping!==T.EquirectangularReflectionMapping)throw Error('Capsule is missing its HDR reflection environment')
     if(!lid.material.envMap.image.data.some(v=>v>1))throw Error('Reflection lighting has no HDR range')
@@ -30,16 +30,12 @@ try {
     for(let age=0;age<=6500;age+=10){
       const pose=capsulePose(age);capsule.update(age,pose,center,1,-3,false)
       if(age<=1250){const x=capsule.group.children[0].position.x;if(x<previous)throw Error('Capsule reversed during roll');previous=x}
-      if(age<=2100&&pose.release!==0)throw Error('Character leaked before shell cleared')
-      if(age===2150&&!(pose.release>0&&pose.open<1))throw Error('Character must emerge while the lid is still opening')
-      if(pose.release>0&&age<2800){
-        capsule.group.updateMatrixWorld(true)
-        const shellBounds=new T.Box3().setFromObject(capsule.group.children[0])
-        if(shellBounds.max.z>=-1)throw Error('Shell overlaps the character reveal depth')
-      }
-      if(lid.material.opacity!==.76||bottom.material.opacity!==.88)throw Error('Shell fades through character')
-      if(age>=2380&&pose.open!==1)throw Error('Lid not fully opened')
-      if(age>=2550&&pose.release!==1)throw Error('Character emergence is delayed')
+      if(age<=2250&&pose.release!==0)throw Error('Resident lifted before the lid was open enough')
+      if(age===2400&&!(pose.release>0&&pose.open<1))throw Error('Character must emerge while the lid is still opening')
+      if(capsule.group.children[0].position.z!==0)throw Error('Shell teleported behind the resident')
+      if(age<=3200&&(lid.material.opacity!==.62||bottom.material.opacity!==.74))throw Error('Shell fades through character')
+      if(age>=2750&&pose.open!==1)throw Error('Lid not fully opened')
+      if(age>=3200&&pose.release!==1)throw Error('Character emergence is delayed')
       maxAngle=Math.max(maxAngle,pose.turn)
       capsule.group.updateMatrixWorld(true);capsule.group.traverse(n=>{if(n.matrixWorld.elements.some(v=>!Number.isFinite(v)))throw Error('Invalid capsule transform')})
     }
@@ -66,14 +62,24 @@ try {
   })
   let at=0
   const revealScales=[]
-  for(const [phase,time] of [['rolling',600],['settling',1400],['opening',2000],['revealed',2150],['revealed',2400],['revealed',2700]]){
+  for(const [phase,time] of [['rolling',600],['settling',1400],['opening',2000],['opening',2250],['opening',2500],['revealed',3000],['revealed',3350]]){
     await page.clock.fastForward(time-at);at=time
     const actual=await page.locator('.planet-arrival').getAttribute('data-phase')
     if(actual!==phase)throw Error(`Expected ${phase}, received ${actual}; ${errors.join('\n')}`)
     const state=await page.evaluate(()=>({visible:window.capsuleModel.group.visible,title:document.querySelector('.planet-arrival h2').textContent}))
-    if(['rolling','settling'].includes(phase)&&(state.visible||state.title.includes('Momo')))throw Error('Premature character reveal')
+    if(!state.visible)throw Error('Resident should already be inside the ball, not toggle on at release')
+    if(['rolling','settling'].includes(phase)&&state.title.includes('Momo'))throw Error('Premature name reveal')
     if(phase==='revealed'&&(!state.visible||!state.title.includes('Momo')))throw Error('Missing character reveal')
-    if(phase==='revealed')revealScales.push(await page.evaluate(()=>window.capsuleModel.group.scale.x))
+    revealScales.push(await page.evaluate(()=>window.capsuleModel.group.scale.x))
+    if(time===1400)await page.evaluate(async()=>{
+      const T=await import('/node_modules/.vite/deps/three.js'),scene=app.world.world.parent
+      const capsule=scene.getObjectByName('arrival-capsule'),shell=capsule.children[0]
+      scene.updateMatrixWorld(true)
+      const center=shell.getWorldPosition(new T.Vector3()),radius=capsule.scale.x,box=new T.Box3().setFromObject(capsuleModel.group)
+      for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){
+        if(new T.Vector3(x,y,z).distanceTo(center)>radius*.96)throw Error('Resident protrudes through the closed shell')
+      }
+    })
     await page.screenshot({path:join(output,`${phase}-${time}.png`)})
   }
   if(Math.max(...revealScales)-Math.min(...revealScales)>.00001)throw Error('Character grows out of a miniature instead of rising at full size')
