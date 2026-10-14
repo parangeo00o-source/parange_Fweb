@@ -183,31 +183,51 @@ type Experience = {
   getRecordingStream?: () => MediaStream | null
   getRecordingCanvas?: () => HTMLCanvasElement | null
 }
-type ExperienceLoader = () => Promise<Experience>
+type ExperienceFactory = () => Experience
+type ExperienceFactoryLoader = () => Promise<ExperienceFactory>
 // The home page does not need camera, WebGL, or MediaPipe code. Split each
-// destination at its boundary and keep the imported module alive after first
-// use, preserving its existing behaviour on subsequent visits.
-const experienceLoaders: Record<string, ExperienceLoader> = {
-  Guestbook: async () => (await import('./guestbook')).createGuestbookExperience(() => closeColorScreen(true)),
-  Lemonade: async () => (await import('./lemonade')).createLemonadeExperience(),
-  'PARANGE PLANET': async () => (await import('./parange-planet')).createParangePlanetExperience(),
-  WaterTouch: async () => (await import('./water-touch')).createWaterTouchExperience(),
-  Balloon: async () => (await import('./balloon')).createBalloonExperience(),
-  'Glass Bird': async () => (await import('./bird-impact')).createBirdImpactExperience(),
-  Bluefish: async () => (await import('./bluefish')).createBluefishExperience(),
-  'Elephant Drawing': async () => (await import('./elephant-drawing')).createElephantDrawingExperience(),
-  '고무 인간': async () => (await import('./rubber-human')).createRubberHumanExperience(),
-  Shampoo: async () => (await import('./shampoo')).createShampooExperience(),
-  'Tooth Gem': async () => (await import('./tooth-gem')).createToothGemExperience(),
-  'Heaven vs Hell': async () => (await import('./angel-devil')).createAngelDevilExperience(),
+// destination at its boundary and do not create a destination merely because
+// its die was hovered: creating one also creates canvases, DOM and (for the
+// planet) a WebGL renderer. A destination is therefore instantiated only
+// after its die is activated.
+const experienceFactoryLoaders: Record<string, ExperienceFactoryLoader> = {
+  Guestbook: async () => {
+    const { createGuestbookExperience } = await import('./guestbook')
+    return () => createGuestbookExperience(() => closeColorScreen(true))
+  },
+  Lemonade: async () => { const { createLemonadeExperience } = await import('./lemonade'); return createLemonadeExperience },
+  'PARANGE PLANET': async () => { const { createParangePlanetExperience } = await import('./parange-planet'); return createParangePlanetExperience },
+  WaterTouch: async () => { const { createWaterTouchExperience } = await import('./water-touch'); return createWaterTouchExperience },
+  Balloon: async () => { const { createBalloonExperience } = await import('./balloon'); return createBalloonExperience },
+  'Glass Bird': async () => { const { createBirdImpactExperience } = await import('./bird-impact'); return createBirdImpactExperience },
+  Bluefish: async () => { const { createBluefishExperience } = await import('./bluefish'); return createBluefishExperience },
+  'Elephant Drawing': async () => { const { createElephantDrawingExperience } = await import('./elephant-drawing'); return createElephantDrawingExperience },
+  '고무 인간': async () => { const { createRubberHumanExperience } = await import('./rubber-human'); return createRubberHumanExperience },
+  Shampoo: async () => { const { createShampooExperience } = await import('./shampoo'); return createShampooExperience },
+  'Tooth Gem': async () => { const { createToothGemExperience } = await import('./tooth-gem'); return createToothGemExperience },
+  'Heaven vs Hell': async () => { const { createAngelDevilExperience } = await import('./angel-devil'); return createAngelDevilExperience },
 }
+const preparedExperienceFactories = new Map<string, Promise<ExperienceFactory>>()
 const loadedExperiences = new Map<string, Promise<Experience>>()
-const loadExperience = (label: string) => {
-  const loader = experienceLoaders[label]
+// Downloading a module is safe after an intentional click; calling its factory
+// is not. Keep those two phases separate so canvas/WebGL/camera page setup
+// never overlaps ordinary home-page hovering or mouse movement.
+const prepareExperience = (label: string) => {
+  const loader = experienceFactoryLoaders[label]
   if (!loader) return null
+  let factory = preparedExperienceFactories.get(label)
+  if (!factory) {
+    factory = loader()
+    preparedExperienceFactories.set(label, factory)
+  }
+  return factory
+}
+const loadExperience = (label: string) => {
+  const factory = prepareExperience(label)
+  if (!factory) return null
   let experience = loadedExperiences.get(label)
   if (!experience) {
-    experience = loader()
+    experience = factory.then((create) => create())
     loadedExperiences.set(label, experience)
   }
   return experience
@@ -339,19 +359,32 @@ const shiftBounds = (bounds: VisualBounds, x: number, y: number) => {
 }
 let lastCollisionCheck = 0
 const resolveDiceCollisions = (now: number) => {
-  // Measuring six planes is more accurate than a radius estimate. It runs at
-  // 30fps only during a roll; ordinary resting dice never enter this path.
+  // Measuring six planes is more accurate than a radius estimate. Limit that
+  // measurement to rolling dice and their immediate neighbours: measuring all
+  // 48 containers and testing 1,128 pairs every 33ms was the main Safari
+  // hitch while the cursor rolled a small local group.
   if (now - lastCollisionCheck < 33) return
   lastCollisionCheck = now
-  const states = new Map(diceElements.map((element) => [element, diceStates.get(element)!]))
-  const engaged = new Set(diceElements.filter((element) => Boolean(states.get(element)?.lastRollAt)))
+  const engaged = new Set(diceElements.filter((element) => Boolean(diceStates.get(element)?.lastRollAt)))
   if (!engaged.size) return
-  const bounds = new Map(diceElements.map((element) => [element, boundsFor(element, states.get(element)!)]))
+  const rollingCenters = [...engaged].map((element) => diceCenters.get(element)).filter((center): center is DiceCenter => Boolean(center))
+  const diceSize = diceElements[0]?.getBoundingClientRect().width ?? 92
+  // This covers a rolling face, its 28px collision push, and the next grid
+  // neighbour. It preserves the visible chain reaction without involving
+  // distant dice.
+  const neighbourDistance = diceSize * 2.35 + 56
+  const candidates = diceElements.filter((element) => {
+    if (engaged.has(element)) return true
+    const center = diceCenters.get(element)
+    return Boolean(center && rollingCenters.some((rollingCenter) => Math.hypot(center.x - rollingCenter.x, center.y - rollingCenter.y) <= neighbourDistance))
+  })
+  const states = new Map(candidates.map((element) => [element, diceStates.get(element)!]))
+  const bounds = new Map(candidates.map((element) => [element, boundsFor(element, states.get(element)!)]))
   for (let pass = 0; pass < 4; pass += 1) {
-    for (let firstIndex = 0; firstIndex < diceElements.length; firstIndex += 1) {
-      const first = diceElements[firstIndex]
-      for (let secondIndex = firstIndex + 1; secondIndex < diceElements.length; secondIndex += 1) {
-        const second = diceElements[secondIndex]
+    for (let firstIndex = 0; firstIndex < candidates.length; firstIndex += 1) {
+      const first = candidates[firstIndex]
+      for (let secondIndex = firstIndex + 1; secondIndex < candidates.length; secondIndex += 1) {
+        const second = candidates[secondIndex]
         if (!engaged.has(first) && !engaged.has(second)) continue
         const a = bounds.get(first)!, b = bounds.get(second)!
         const overlapX = Math.min(a.right, b.right) - Math.max(a.left, b.left)
@@ -406,6 +439,17 @@ const renderTransform = (element: HTMLElement, now: number) => {
   // transform prevents nested 3D compositor layers from flashing on WebKit.
   element.style.transform = `translate3d(${state.pushX}px, ${state.pushY}px, 0) rotateX(${state.rollX}deg) rotateY(${state.rollY}deg) rotateZ(${state.clickSpin}deg) scale(${scale})`
   const isAnimating = Math.abs(state.targetRollX - state.rollX) > 0.05 || Math.abs(state.targetRollY - state.rollY) > 0.05 || Math.abs(state.targetPushX - state.pushX) > 0.05 || Math.abs(state.targetPushY - state.pushY) > 0.05 || state.clickStartedAt !== null || (state.lastRollAt > 0 && now - state.lastRollAt < 460) || state.collisionUntil > now
+  // Do not leave a transformed layer behind once a cursor has departed. Apart
+  // from returning each die to its exact grid coordinate, this releases the
+  // transient compositing layer on Safari.
+  if (!isAnimating && !state.hovered && !state.lastRollAt && state.collisionUntil <= now) {
+    state.rollX = state.rollY = state.targetRollX = state.targetRollY = 0
+    state.pushX = state.pushY = state.targetPushX = state.targetPushY = 0
+    state.clickSpin = 0
+    element.style.removeProperty('transform')
+    element.classList.remove('is-animating')
+    return false
+  }
   element.classList.toggle('is-animating', isAnimating)
   return isAnimating
 }
@@ -518,9 +562,15 @@ const clearIdleRoll = () => {
 
 const settleDice = () => {
   const now = performance.now()
-  activeDice.forEach((element) => {
+  // Pointer leave can happen between collision frames. Inspect every state,
+  // not only the currently scheduled subset, so no displaced neighbour is
+  // stranded away from its original cell.
+  diceElements.forEach((element) => {
     const state = diceStates.get(element)
     if (!state) return
+    state.hovered = false
+    const moved = state.lastRollAt > 0 || state.collisionUntil > now || state.clickStartedAt !== null || Math.abs(state.rollX) > .01 || Math.abs(state.rollY) > .01 || Math.abs(state.pushX) > .01 || Math.abs(state.pushY) > .01 || Math.abs(state.targetRollX) > .01 || Math.abs(state.targetRollY) > .01 || Math.abs(state.targetPushX) > .01 || Math.abs(state.targetPushY) > .01
+    if (!moved) return
     // Keep collision checks alive while the cube completes its current turn,
     // then ease every translation back to its grid coordinate.
     if (state.lastRollAt) {
@@ -532,6 +582,7 @@ const settleDice = () => {
     state.collisionUntil = 0
     state.targetPushX = 0
     state.targetPushY = 0
+    activeDice.add(element)
   })
   if (activeDice.size) scheduleUpdate()
 }
@@ -686,6 +737,10 @@ const navigateTo = (element: HTMLElement) => {
   if (!destination?.navigable || !state) return
   navigating = true
   hideCatCursor()
+  // Start only the selected module's download after the user clicks. The
+  // click animation overlaps this network/parse work, but its page factory
+  // still cannot allocate any UI, camera or renderer until navigation ends.
+  void prepareExperience(destination.label)?.catch(() => { /* Navigation reports the actual loading error. */ })
   element.classList.add('is-animating')
   state.clickStartedAt = performance.now()
   activateDice(element)
@@ -717,10 +772,6 @@ diceElements.forEach((element) => {
     const state = diceStates.get(element)
     if (!state) return
     const diceData = dice[Number(element.dataset.index)]
-    // Hovering an entry starts a quiet module prefetch. This usually makes the
-    // destination instant while still keeping unused experiences off the home
-    // page's initial download.
-    if (diceData?.navigable) void loadExperience(diceData.label)?.catch(() => { /* Navigation reports a real load error. */ })
     if (event.pointerType === 'mouse') {
       hoveredDie = element
       lastPointer = { x: event.clientX, y: event.clientY }
