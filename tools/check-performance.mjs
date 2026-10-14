@@ -116,6 +116,32 @@ try {
     if(!fixed.matrixWorld.equals(new T.Matrix4().multiplyMatrices(other.matrixWorld,fixed.matrix)))throw Error('Reparenting did not invalidate cache')
     fixed.matrixAutoUpdate=true;fixed.position.z=2;other.updateMatrixWorld(true)
     if(!fixed.matrixWorld.equals(new T.Matrix4().multiplyMatrices(other.matrixWorld,fixed.matrix)))throw Error('Re-enabled animation stayed cached')
+    const viewA=new T.Matrix4().makeTranslation(0,1,-4),viewB=new T.Matrix4().makeRotationY(.2)
+    const checkProduct=view=>{
+      fixed.modelViewMatrix.multiplyMatrices(view,fixed.matrixWorld)
+      const expected=new T.Matrix4().multiplyMatrices(view,fixed.matrixWorld)
+      if(!fixed.modelViewMatrix.equals(expected))throw Error('Cached camera product changed')
+      fixed.normalMatrix.getNormalMatrix(fixed.modelViewMatrix)
+      if(!fixed.normalMatrix.equals(new T.Matrix3().getNormalMatrix(expected)))throw Error('Cached normal matrix changed')
+    }
+    for(const view of [viewA,viewB,viewA,viewB])checkProduct(view)
+    viewA.makeRotationX(.6);checkProduct(viewA)
+    fixed.matrixWorld.makeScale(.7,1.2,.8);checkProduct(viewA);checkProduct(viewB)
+    fixed.modelViewMatrix.identity();fixed.normalMatrix.identity();checkProduct(viewA)
+    other.matrix.identity();other.updateMatrix()
+    if(other.matrix.elements[13]!==3)throw Error('Direct matrix edits did not invalidate the group cache')
+    // Deliberately collide two FNV buckets: only identical vertex bits may merge.
+    const a=[0x3f800000,0x40000000,0x40400000],b=[0x40800000,0x40000000,0]
+    const prefix=values=>Math.imul(Math.imul(2166136261^values[0],16777619)^values[1],16777619)>>>0
+    b[2]=(prefix(a)^prefix(b)^a[2])>>>0
+    const collision=new T.BufferGeometry(),raw=new Uint32Array(24*3)
+    for(let i=0;i<24;i++)raw.set(i%2?a:b,i*3)
+    collision.setAttribute('position',new T.Float32BufferAttribute(new Float32Array(raw.buffer),3))
+    indexExactGeometry(collision)
+    if(collision.attributes.position.count!==2||collision.index.getX(0)===collision.index.getX(1))throw Error('Hash collision welded different vertices')
+    const reconstructed=new Uint32Array(collision.attributes.position.array.buffer)
+    for(let i=0;i<24;i++)for(let c=0;c<3;c++)if(raw[i*3+c]!==reconstructed[collision.index.getX(i)*3+c])throw Error('Vertex bits changed in hash collision')
+    collision.dispose()
     geometry.dispose();before.dispose();fixed.geometry.dispose();fixed.material.dispose()
   })
   assert.deepEqual(errors,[])

@@ -64,8 +64,11 @@ try {
   assert.ok(!(await page.locator('.gb-top').textContent()).includes('PARANGE'))
   assert.equal(await page.locator('.gb-top').evaluate(e => getComputedStyle(e).borderBottomWidth), '0px')
   assert.equal(await page.locator('.gb-postcard').count(), 0)
+  assert.equal(await page.locator('.gb-empty-invite svg').count(), 0, 'Old mouse illustration is replaced')
+  assert.equal(await page.locator('.gb-empty-invite img').getAttribute('src'), await page.locator('.gb-title-mark img').getAttribute('src'), 'Invitation paper uses the new title mark')
+  await page.locator('.gb-empty-invite img').evaluate(img => img.decode())
   await page.screenshot({ path: join(output, 'empty.png') })
-  await page.locator('.gb-write').click()
+  await page.locator('.gb-empty-invite').click()
   await page.locator('[name=name]').fill('  윤지  ')
   await page.locator('[name=message]').fill('  좋은 하루의 조각을 두고 갑니다.\n다음 산책에서 또 만나요!  ')
   assert.equal(await page.locator('input[name=paper]').count(), 25)
@@ -126,6 +129,26 @@ try {
     assert.ok(cards.every(card => card.imageTransform.startsWith('matrix(0, 1, -1, 0,')), 'Portrait art rotates sideways without cropping')
   }
   await assertLandscapeCards()
+  const assertCompartmentClearance = async () => {
+    const corners = await page.locator('.gb-postcard').evaluateAll(cards => cards.map(card => {
+      const style = getComputedStyle(card), cell = card.parentElement
+      const w = parseFloat(style.width), h = parseFloat(style.height)
+      const matrix = new DOMMatrix(style.transform)
+      const [ox, oy] = style.transformOrigin.split(' ').map(parseFloat)
+      const points = [[0, 0], [w, 0], [0, h], [w, h]].map(([x, y]) => {
+        const p = matrix.transformPoint(new DOMPoint(x - ox, y - oy, 0))
+        return { x: p.x + card.offsetLeft + ox, y: p.y + card.offsetTop + oy, z: p.z }
+      })
+      return { points, width: cell.clientWidth, height: cell.clientHeight }
+    }))
+    assert.ok(corners.every(({ points, width, height }) => points.every(p => p.x > 3 && p.x < width - 3 && p.y > 3 && p.y < height - 3 && p.z >= -.1)), '3D card corners remain inside their compartment walls and above the floor')
+  }
+  await assertCompartmentClearance()
+  await page.locator('.gb-postcard').last().hover()
+  await page.waitForFunction(() => new DOMMatrix(getComputedStyle([...document.querySelectorAll('.gb-postcard')].at(-1)).transform).m43 > 6.9)
+  await assertCompartmentClearance()
+  await page.screenshot({ path: join(output, 'hover-clearance.png') })
+  await page.mouse.move(5, 5)
   const cabinet = await page.locator('.gb-cabinet').boundingBox()
   const front = await page.locator('.gb-front').boundingBox()
   assert.ok(cabinet.y > 0 && front.y + front.height < 768, 'Cabinet fits the opening desktop viewport')
@@ -141,6 +164,7 @@ try {
   for (const [width, height] of [[390, 844], [320, 640], [844, 390]]) {
     await page.setViewportSize({ width, height })
     await assertLandscapeCards()
+    await assertCompartmentClearance()
     await page.screenshot({ path: join(output, `mobile-${width}.png`) })
     assert.ok(await page.locator('.guestbook-screen').evaluate(e => e.scrollWidth <= e.clientWidth + 1), 'No horizontal overflow')
     await page.locator('.gb-postcard').first().click()

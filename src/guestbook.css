@@ -49,7 +49,7 @@
 .gb-paper-4 { background-color: #e6dfbe; background-image: repeating-linear-gradient(0deg, #76826818 0 1px, transparent 1px 14px), repeating-linear-gradient(90deg, #76826818 0 1px, transparent 1px 14px); }
 .gb-paper-5 { background-color: #f0e6d5; background-image: radial-gradient(ellipse at 91% 12%, #ad8c7640 0 3%, transparent 3.5%), radial-gradient(ellipse at 88% 17%, #8c9b7640 0 3%, transparent 3.5%), radial-gradient(ellipse at 95% 20%, #ab897540 0 3%, transparent 3.5%); }
 .gb-empty-invite { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0; border: 0; color: #ac6881; background: #f8f2e3; box-shadow: 2px 5px 4px #86704a35; transform: translateZ(3px) rotate(-4deg); }
-.gb-empty-invite svg { width: 56px; height: 25px; }
+.gb-empty-invite img { display: block; width: 88%; height: calc(100% - 14px); min-height: 0; object-fit: contain; }
 .gb-empty-invite em { font: italic 12px/1 Georgia, serif; }.gb-empty-invite span { margin-top: 7px; font-size: 8px; }
 .gb-caption { max-width: 835px; margin: 0 auto; display: flex; align-items: start; justify-content: space-between; gap: 20px; }
 .gb-caption strong { font: bold 19px/1.3 'Times New Roman', Times, serif; }.gb-caption p { font-size: 14px; color: #80745f; margin-top: 4px; }
@@ -94,13 +94,16 @@
 .guestbook-screen { --gb-ink: #242923; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 22px clamp(20px, 4vw, 64px); background: #f9f8f2; }
 .gb-top { border: 0; padding: 0; }
 .gb-top button { color: var(--gb-ink); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-.gb-workspace { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: clamp(25px, 4vw, 65px); max-width: 1440px; min-height: calc(100svh - 95px); margin: auto; align-items: center; }
+.gb-workspace { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: clamp(25px, 4vw, 65px); max-width: 1440px; min-height: calc(100svh - 95px); margin: auto; align-items: center; }
 .gb-heading { margin: 0; text-align: left; align-self: center; }
 .gb-heading h1 { font: 800 clamp(37px, 3.5vw, 52px)/.94 'Helvetica Neue', Helvetica, Arial, sans-serif; text-transform: uppercase; letter-spacing: -.065em; color: #242923; margin: 0 0 30px; }
+.gb-title-mark img { display: block; width: 100%; height: auto; }
 .gb-write { margin: 0; padding: 11px 0; width: 100%; display: flex; justify-content: space-between; border: 0; border-top: 1px solid #363a32; border-bottom: 1px solid #363a32; border-radius: 0; color: #242923; font-weight: 600 !important; }
 .gb-write span { margin: 0; }
 .gb-heading .gb-status { margin: 16px 0 0; text-align: left; font: 11px/1.6 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #74766b; min-height: 54px; }
 .gb-collection { width: 100%; max-width: min(1070px, calc((100svh - 205px) * 1.7)); justify-self: center; min-width: 0; }
+/* visibility preserves perspective/layout; opacity/filter would flatten 3D. */
+.gb-collection.is-preparing { visibility: hidden; pointer-events: none; }
 .gb-cabinet-wrap { width: 100%; max-width: none; padding: 0 28px; margin: 0 auto 30px; perspective: 1700px; perspective-origin: 50% 38%; }
 .gb-cabinet { --depth: 31px; --rail: 5px; aspect-ratio: 1.75; transform: rotateX(36deg); transform-origin: 50% 50%; }
 .gb-cabinet-cap { font-family: inherit; }
@@ -168,14 +171,15 @@
 
 /* File portrait prints sideways on their long edge, without cropping the art.
    Only cabinet thumbnails rotate; the picker and reader stay upright. */
-.gb-postcard { left: 50%; width: 82%; height: auto; aspect-ratio: 3 / 2; margin-left: 0; padding: 0; border: 0; border-radius: 2px; transform: translateX(-50%) translateZ(2px) rotateX(-76deg) rotateY(var(--card-turn)); background: #eee3cd; }
-.gb-postcard:hover, .gb-postcard:focus-visible { transform: translateX(-50%) translateZ(9px) rotateX(-69deg) rotateY(var(--card-turn)); }
+.gb-postcard { left: 50%; bottom: 27%; width: 68%; height: auto; aspect-ratio: 3 / 2; margin-left: 0; padding: 0; border: 0; border-radius: 2px; transform: translateX(-50%) translateZ(1px) rotateX(-64deg) rotateY(var(--card-turn)); background: #eee3cd; backface-visibility: hidden; }
+/* A short lift within the compartment's clearance, with no outward tilt. */
+.gb-postcard:hover, .gb-postcard:focus-visible { transform: translateX(-50%) translateZ(7px) rotateX(-64deg) rotateY(var(--card-turn)); box-shadow: 1px 5px 5px #65583f55; }
 .gb-postcard .gb-card-art { position: absolute; inset: 0; flex: none; height: 100%; }
 .gb-card-art img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .gb-postcard .gb-card-art img { position: absolute; left: 50%; top: 50%; width: 66.666667%; height: 150%; max-width: none; transform: translate(-50%, -50%) rotate(90deg); }
 .gb-postcard .gb-card-name { position: absolute; bottom: 0; left: 0; padding: 2px; background: #f7eedbcc; font-size: 5px; opacity: 0; transition: opacity .15s; }
 .gb-postcard:hover .gb-card-name, .gb-postcard:focus-visible .gb-card-name { opacity: 1; }
-@keyframes gb-file-card { from { transform: translateX(-50%) translateZ(65px) rotateX(-76deg) rotateY(var(--card-turn)); opacity: 0; } to { transform: translateX(-50%) translateZ(2px) rotateX(-76deg) rotateY(var(--card-turn)); opacity: 1; } }
+@keyframes gb-file-card { from { box-shadow: 0 0 0 2px #bba779; } to { box-shadow: 1px 2px 1px #65583f66; } }
 .gb-compose { width: min(980px, calc(100vw - 32px)); }
 .gb-compose form { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 0 32px; }
 .gb-compose-fields > label { display: block; margin-top: 12px; font-size: 12px; }
@@ -202,7 +206,7 @@
 .gb-read-paper { min-height: 100%; padding: 20px; background: #f6efdf; background-image: none; }
 .gb-read-footer { flex-wrap: wrap; }
 @media (max-width: 750px) {
- .gb-postcard { height: auto; width: 82%; left: 50%; padding: 0; }
+ .gb-postcard { height: auto; width: 68%; left: 50%; padding: 0; }
  .gb-compose form { grid-template-columns: 1fr; }
  .gb-compose legend span { font-size: 9px; }
  .gb-paper-options { max-height: 290px; gap: 10px; }

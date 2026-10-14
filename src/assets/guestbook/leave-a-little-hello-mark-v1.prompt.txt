@@ -1,0 +1,8 @@
+Tool: built-in image_gen (transparent background; attached reference as edit target)
+Use case: text-localization. Asset type: transparent website guestbook title mark.
+Keep the reference dachshund silhouette, pose, long body, floppy ear, expressive fine pen strokes, and gently imperfect vintage printed ink character.
+Preserve the muted sage/seafoam green ink. Replace all original words and address with only: "Leave A Little Hello".
+Use elegant bold slanted connected brush-script lettering beneath the dog with a gentle upward slant, balanced as one compact wide mark.
+No address, extra words, or border. Reconstruct crisp drawing detail without screenshot pixels.
+Genuinely transparent background, including inside the outline animal; green ink only.
+Tightly frame the complete dog and phrase with a small even safe margin. Legible at 230px wide.

@@ -1,13 +1,30 @@
 import './guestbook.css'
-import { guestbookMouse } from './guestbook-mark'
 import { DRAWER_SIZE, loadPostcards, savePostcard, canDeletePostcard, deletePostcard } from './guestbook-api'
 import { postcardArtwork, printNames } from './guestbook-art'
+import titleMark from './assets/guestbook/leave-a-little-hello-mark-v1.png'
 import type { Postcard, PostcardDraft } from './guestbook-api'
 
 const papers = printNames
 // Independent CSS 3D planes, from floor z=0 to divider tops z=--depth.
 const partitions = Array.from({ length: 6 }, (_, i) => `<i class="gb-wall-row" style="--division:${i}" aria-hidden="true"></i><i class="gb-rim-row" style="--division:${i}" aria-hidden="true"></i><i class="gb-wall-column" style="--division:${i}" aria-hidden="true"></i><i class="gb-rim-column" style="--division:${i}" aria-hidden="true"></i>`).join('')
 const dateLabel = (value: string) => new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value))
+
+// Decode the actual next drawer's images off-DOM. Commit the cards and cabinet
+// together, rather than showing empty 3D planes while lazy images trickle in.
+async function decodeDrawer(fragment: DocumentFragment, signal: AbortSignal) {
+  signal.throwIfAborted()
+  let onAbort: () => void = () => {}
+  try {
+    await new Promise<void>((resolve, reject) => {
+      onAbort = () => reject(signal.reason)
+      signal.addEventListener('abort', onAbort, { once: true })
+      Promise.all(Array.from(fragment.querySelectorAll('img'), image => {
+        image.loading = 'eager'
+        return image.decode()
+      })).then(() => resolve(), () => reject(new Error('The postcard images could not load. Please try Refresh.')))
+    })
+  } finally { signal.removeEventListener('abort', onAbort) }
+}
 
 export function createGuestbookExperience(onBack: () => void) {
   const screen = document.createElement('section')
@@ -16,7 +33,7 @@ export function createGuestbookExperience(onBack: () => void) {
   screen.setAttribute('aria-label', 'Guestbook')
   screen.innerHTML = `
     <header class="gb-top"><button type="button" class="gb-back">← Back home</button><button type="button" class="gb-refresh">Refresh ↻</button></header>
-    <div class="gb-workspace"><aside class="gb-heading"><h1>Leave a<br>little hello.</h1><button type="button" class="gb-write">Leave a postcard <span>↗</span></button><p class="gb-status" role="status" aria-live="polite"></p></aside>
+    <div class="gb-workspace"><aside class="gb-heading"><h1 class="gb-title-mark"><img src="${titleMark}" alt="Leave A Little Hello" width="1600" height="1024" decoding="async"></h1><button type="button" class="gb-write">Leave a postcard <span>↗</span></button><p class="gb-status" role="status" aria-live="polite"></p></aside>
     <div class="gb-collection">
     <div class="gb-cabinet-wrap"><div class="gb-cabinet"><div class="gb-cabinet-cap"><i></i><span>LITTLE HELLOS</span><i></i></div><div class="gb-grid" aria-label="Postcard cabinet"></div>${partitions}<i class="gb-outer-side gb-outer-left" aria-hidden="true"></i><i class="gb-outer-side gb-outer-right" aria-hidden="true"></i><div class="gb-front"><span class="gb-brass-label">No. 01</span><span class="gb-handle" aria-hidden="true"></span></div></div></div>
     <footer class="gb-caption"><strong class="gb-drawer-label">Drawer 01</strong><nav aria-label="Browse drawers"><button type="button" class="gb-prev" aria-label="Previous drawer">←</button><span class="gb-page">01</span><button type="button" class="gb-next" aria-label="Next drawer">→</button></nav></footer>
@@ -33,6 +50,7 @@ export function createGuestbookExperience(onBack: () => void) {
   document.body.append(screen)
   const get = <T extends HTMLElement>(selector: string) => screen.querySelector<T>(selector)!
   const grid = get<HTMLDivElement>('.gb-grid')
+  const collection = get<HTMLDivElement>('.gb-collection')
   const status = get<HTMLParagraphElement>('.gb-status')
   const compose = get<HTMLDialogElement>('.gb-compose')
   const read = get<HTMLDialogElement>('.gb-read')
@@ -54,6 +72,7 @@ export function createGuestbookExperience(onBack: () => void) {
   let selected: Postcard | null = null
   let deleting = false
   let newPostcardId: string | null = null
+  let hasReadyDrawer = false
 
   const openCompose = () => { compose.showModal(); name.focus() }
   const openPostcard = (entry: Postcard) => {
@@ -71,23 +90,22 @@ export function createGuestbookExperience(onBack: () => void) {
     read.showModal()
   }
 
-  const render = () => {
-    grid.replaceChildren()
-    const directory = get('.gb-directory')
-    directory.replaceChildren()
+  const prepareDrawer = (drawerEntries = entries, drawerPage = page) => {
+    const cells = document.createDocumentFragment()
+    const authors = document.createDocumentFragment()
     for (let index = 0; index < DRAWER_SIZE; index++) {
-      const entry = entries[index]
+      const entry = drawerEntries[index]
       const cell = document.createElement('div')
       cell.className = 'gb-cell'
       const number = document.createElement('span')
       number.className = 'gb-cell-number'
-      number.textContent = String(page * DRAWER_SIZE + index + 1).padStart(2, '0')
+      number.textContent = String(drawerPage * DRAWER_SIZE + index + 1).padStart(2, '0')
       cell.append(number)
       if (entry) {
         const card = document.createElement('button')
         card.type = 'button'
         card.className = `gb-postcard gb-paper-${entry.paper}${entry.id === newPostcardId ? ' is-new' : ''}`
-        card.style.setProperty('--card-turn', `${[-5, 3, -2, 5, -3][index % 5]}deg`)
+        card.style.setProperty('--card-turn', `${[-2, 1, -1, 2, -1][index % 5]}deg`)
         card.setAttribute('aria-label', `Read a postcard from ${entry.name}`)
         card.innerHTML = `<span class="gb-card-art">${postcardArtwork(entry.paper)}</span><span class="gb-card-name"></span>`
         card.querySelector('.gb-card-name')!.textContent = entry.name
@@ -97,47 +115,66 @@ export function createGuestbookExperience(onBack: () => void) {
         item.type = 'button'
         item.textContent = `${number.textContent} — ${entry.name}`
         item.addEventListener('click', () => openPostcard(entry))
-        directory.append(item)
-      } else if (index === entries.length) {
+        authors.append(item)
+      } else if (index === drawerEntries.length) {
         const invite = document.createElement('button')
         invite.type = 'button'
         invite.className = 'gb-empty-invite'
-        invite.innerHTML = `${guestbookMouse}<em>Your hello<br>belongs here.</em><span>Leave a note +</span>`
+        invite.setAttribute('aria-label', 'Leave a postcard')
+        invite.innerHTML = `<img src="${titleMark}" alt="Leave A Little Hello" width="1600" height="1024" decoding="async" draggable="false"><span>Leave a note +</span>`
         invite.addEventListener('click', openCompose)
         cell.append(invite)
       }
-      grid.append(cell)
+      cells.append(cell)
     }
-    const n = String(page + 1).padStart(2, '0')
-    get('.gb-drawer-label').textContent = `Drawer ${n}`
-    get('.gb-brass-label').textContent = `No. ${n}`
-    get('.gb-page').textContent = n
-    prev.disabled = page === 0
-    next.disabled = !hasNext
-    newPostcardId = null
+    return {
+      cells,
+      commit() {
+        grid.replaceChildren(cells)
+        get('.gb-directory').replaceChildren(authors)
+        const n = String(drawerPage + 1).padStart(2, '0')
+        get('.gb-drawer-label').textContent = `Drawer ${n}`
+        get('.gb-brass-label').textContent = `No. ${n}`
+        get('.gb-page').textContent = n
+        prev.disabled = page === 0
+        next.disabled = !hasNext
+        newPostcardId = null
+      },
+    }
   }
 
   const load = async (target = page) => {
     controller?.abort()
     controller = new AbortController()
     const id = ++requestId
+    const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(15000)])
+    collection.classList.toggle('is-preparing', !hasReadyDrawer)
+    collection.inert = !hasReadyDrawer
+    collection.setAttribute('aria-busy', 'true')
     status.textContent = 'Opening the drawer…'
     grid.setAttribute('aria-busy', 'true')
     prev.disabled = next.disabled = refresh.disabled = true
     try {
-      const result = await loadPostcards(target, AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]))
+      const result = await loadPostcards(target, signal)
       if (id !== requestId || !opened) return
       if (target > 0 && result.entries.length === 0) { await load(target - 1); return }
+      const drawer = prepareDrawer(result.entries, target)
+      await decodeDrawer(drawer.cells, signal)
+      if (id !== requestId || !opened) return
       page = target
       entries = result.entries
       hasNext = result.hasNext
-      render()
+      drawer.commit()
+      hasReadyDrawer = true
       status.textContent = entries.length ? 'Pick a postcard to read its story.' : 'An empty drawer, waiting for the first hello.'
     } catch (error) {
       if (id !== requestId || !opened || controller.signal.aborted) return
       status.textContent = error instanceof Error ? error.message : 'We could not open the drawer. Please try again.'
     } finally {
       if (id === requestId) {
+        collection.classList.remove('is-preparing')
+        collection.inert = false
+        collection.removeAttribute('aria-busy')
         grid.removeAttribute('aria-busy')
         prev.disabled = page === 0
         next.disabled = !hasNext
@@ -224,7 +261,7 @@ export function createGuestbookExperience(onBack: () => void) {
     }
   })
 
-  render()
+  prepareDrawer().commit()
   return {
     open() { opened = true; screen.hidden = false; get('.gb-back').focus(); void load() },
     close() { opened = false; controller?.abort(); requestId++; compose.close(); read.close(); screen.hidden = true },

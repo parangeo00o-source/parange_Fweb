@@ -9,12 +9,19 @@ const bounds: Array<[number,number,number,number]> = [
   [0,949,323,288], [324,947,320,290], [648,954,315,283], [959,965,312,272],
 ]
 let source: Promise<HTMLImageElement> | undefined
+const portraits=new Map<number,Promise<string>>()
 export const residentPortrait = async (index:number) => {
   if (!bounds[index]) throw new RangeError(`Unknown resident portrait: ${index}`)
+  const cached=portraits.get(index)
+  if(cached)return cached
+  const portrait=(async()=>{
   source ??= (async()=>{const image=new Image();image.src=atlasUrl;await image.decode();return image})()
     .catch(error=>{source=undefined;throw error})
   const image=await source, result=document.createElement('canvas');result.width=512;result.height=512
   const [x,y,width,height]=bounds[index], ratio=480/Math.max(width,height)
   result.getContext('2d')!.drawImage(image,x,y,width,height,(512-width*ratio)/2,(512-height*ratio)/2,width*ratio,height*ratio)
   return result.toDataURL('image/png')
+  })().catch(error=>{portraits.delete(index);throw error})
+  portraits.set(index,portrait)
+  return portrait
 }
