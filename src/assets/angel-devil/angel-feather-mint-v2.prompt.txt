@@ -1,0 +1,5 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: angel-feather.png
+Output: angel-feather-mint-v2.png
+
+Change the blue outlines of this small white feather to mint green. Keep everything else identical to this source image, including the clean transparent background and original feather shape. Flat illustration cutout, no glow.

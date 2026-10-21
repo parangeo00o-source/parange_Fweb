@@ -1,0 +1,37 @@
+{
+  "scope": "Birds 30% smaller than previous size, followed by a tracked neon polka-dot star halo",
+  "birdSizeScaleFromOriginal": 0.42,
+  "haloDurationMs": 2500,
+  "haloStarts": "Maximum departure time across all remaining birds; rescheduled on a new gesture",
+  "glassEnabled": false,
+  "browser": {
+    "passed": true,
+    "output": "/var/folders/1_/3f_r6y197637tbz4f74gx27r0000gn/T/parange-flock-HSkd2b",
+    "camera": "synthetic",
+    "haloChecks": {
+      "reducedStable": true,
+      "animated": true,
+      "followsHead": true,
+      "rescheduled": true,
+      "reset": true
+    },
+    "checks": [
+      "G route",
+      "head gesture",
+      "idle unchanged",
+      "no held repeats",
+      "rearm",
+      "flock then halo",
+      "offscreen cleanup",
+      "mobile/landscape",
+      "glass removed",
+      "hidden pause",
+      "track cleanup",
+      "late permission cancellation",
+      "reopen"
+    ]
+  },
+  "buildPassed": true,
+  "motionChecksPassed": true,
+  "limits": "Synthetic camera and landmarks, not physical camera sensitivity or thermal testing."
+}

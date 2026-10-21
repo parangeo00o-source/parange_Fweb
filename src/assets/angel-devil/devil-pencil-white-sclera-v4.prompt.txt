@@ -1,0 +1,7 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: devil-pencil-red-eyes-v3.png
+Output: devil-pencil-white-sclera-v4.png
+
+Use case: precise-object-edit. Edit ONLY the eyes of this transparent game character sprite. The user wants WHITE EYEBALLS (white sclera) with RED IRIS, not completely red eyes.
+Within the exact existing narrow elongated outline of EACH of the two eyes, make the sclera clearly white with very light neutral gray pencil shading. Preserve a distinct elongated ruby-red iris with a narrow dark pupil and small white catchlight inside each white eye. The visible WHITE sclera should occupy most of the eye opening around the smaller red iris, visibly white at small game-sprite sizes. In particular, the broad triangular part of the larger eye currently filled red must become WHITE. Both eyes must have white sclera and red irises. Keep their existing slanted shape, sharp black upper lid, gaze direction and determined expression. Do not enlarge the eyes or change the face.
+Everything outside the two eye interiors must remain unchanged: charcoal-black and graphite body, exact pencil grain, red horns and stars, wing, tail, hands, feet, pose, silhouette, proportions, scale, framing and transparent alpha. No new glow, no background, no restyling. Output the same complete transparent sprite, with white sclera and red irises.

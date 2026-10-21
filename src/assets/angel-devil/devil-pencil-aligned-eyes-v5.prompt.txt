@@ -1,0 +1,8 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: devil-pencil-white-sclera-v4.png
+Eye reference: angel-classic-v5.png
+Output: devil-pencil-aligned-eyes-v5.png
+
+Precise local eye correction on IMAGE 1 (devil). IMAGE 2 (angel) is the eye-shape reference only. Keep the devil's full body, material, colors, shape, pose and transparent background unchanged.
+REPLACE THE SMALL EYE ON THE VIEWER'S LEFT. Its current red iris is a short oval stuck at the upper-left corner with a long empty white point underneath: this is the defect. Make that red iris LONGER, shift it DOWN AND TO THE RIGHT, and extend its tapered lower tip close to the lower tip of the eye opening. The iris should follow the diagonal axis of the small eye, leaning down-right, just like the mirrored small eye of the angel reference. The iris must NOT sit at the extreme left edge. Show a slender WHITE sclera wedge on the LEFT of that iris, rather than a long white area below/right of it. Preserve a small white catchlight near the top of the red iris, and a slim dark pupil. This is a noticeably corrected iris position, not a repeat of the input eye.
+Keep the larger eye on the viewer's right intact. The resulting two eye irises should have harmonious matching proportions and coherent gaze, like the angel's mirrored eye pair. Retain white sclera and red irises. Do not make the iris circular or shrink it. Do not change any other part of the character. Output a single full-body transparent devil sprite.

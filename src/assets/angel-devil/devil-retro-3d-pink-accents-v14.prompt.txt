@@ -1,0 +1,8 @@
+Tool: built-in image_gen
+Edit target: devil-retro-3d-blended-v12.png (charcoal body before the unwanted pink wash)
+Output: devil-retro-3d-pink-accents-v14.png
+Runtime asset: devil-retro-3d-pink-accents-v14.lossless.png
+Packaging: tools/optimize-duel-pngs.mjs; lossless PNG recompression.
+
+Prompt:
+Precise selective color edit of the attached game character. ONLY shift existing red/crimson colored pixels toward cooler magenta pink, especially the two horns, colored irises, wing membranes and arrow-shaped tail tip. Preserve the existing shaded depth in these colored parts, but make their red hue noticeably more pink. All neutral black, charcoal and grey surfaces MUST remain exactly unchanged: head spikes, face, torso, hands, arms, legs and feet. Do not add any pink tint, reflected light, color wash or expanded colored areas to the charcoal body. Keep current grey eye whites and small star marks. Preserve exact pose, silhouette, geometry, framing, details and transparent background. This is a selective red-to-pink hue correction, not a new lighting treatment.

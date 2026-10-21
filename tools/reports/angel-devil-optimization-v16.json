@@ -1,0 +1,1319 @@
+{
+  "scope": "Angel/devil: subtle cloud magenta hue adjustment, then pixel-preserving optimization",
+  "baseline": "Captured after the requested cloud color edit and before optimization",
+  "validation": {
+    "build": true,
+    "combatPassed": true,
+    "identicalScenes": 32,
+    "totalScenes": 32
+  },
+  "assets": {
+    "beforeBytes": 5435329,
+    "afterBytes": 5027132,
+    "savedBytes": 408197,
+    "files": [
+      {
+        "name": "angel-retro-3d-blended-v9",
+        "before": 1246139,
+        "after": 1198504,
+        "saved": 47635,
+        "identicalScanlines": true
+      },
+      {
+        "name": "devil-retro-3d-blended-v12",
+        "before": 1049223,
+        "after": 1013435,
+        "saved": 35788,
+        "identicalScanlines": true
+      },
+      {
+        "name": "cloud-platform-retro-3d-blended-v6",
+        "before": 1190556,
+        "after": 1039671,
+        "saved": 150885,
+        "identicalScanlines": true
+      },
+      {
+        "name": "angel-feather-retro-3d-blended-v5",
+        "before": 741016,
+        "after": 727536,
+        "saved": 13480,
+        "identicalScanlines": true
+      },
+      {
+        "name": "hell-cloud-platform-soft-magenta-v16",
+        "before": 1208395,
+        "after": 1047986,
+        "saved": 160409,
+        "identicalScanlines": true
+      }
+    ]
+  },
+  "rendering": {
+    "hudGradientCreationsPerFrame": {
+      "before": 18,
+      "after": 0,
+      "condition": "warmed cache, unchanged layout/transform"
+    },
+    "impactDirections": "60 particle directions computed once per hit instead of per rendered frame",
+    "resolutionAndParticleCounts": "unchanged",
+    "measurements": [
+      {
+        "label": "1280-rest",
+        "before": {
+          "label": "1280-rest",
+          "msPerFrame": 5.722222222222222,
+          "counts": {
+            "drawImage": 180,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 5076,
+            "createLinearGradient": 288,
+            "lineTo": 990,
+            "fill": 4806,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "1280-rest",
+          "msPerFrame": 7.327777777746734,
+          "counts": {
+            "drawImage": 180,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 5076,
+            "lineTo": 990,
+            "fill": 4806,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "1280-angel-windup",
+        "before": {
+          "label": "1280-angel-windup",
+          "msPerFrame": 5.8111111110904154,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 5441,
+            "createLinearGradient": 296,
+            "lineTo": 2179,
+            "fill": 5279,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "1280-angel-windup",
+          "msPerFrame": 10.055555555555555,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 5441,
+            "lineTo": 2179,
+            "fill": 5279,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "1280-angel-punch",
+        "before": {
+          "label": "1280-angel-punch",
+          "msPerFrame": 5.683333333374725,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 5441,
+            "createLinearGradient": 296,
+            "lineTo": 2179,
+            "fill": 5279,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "1280-angel-punch",
+          "msPerFrame": 10.577777777798474,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 5441,
+            "lineTo": 2179,
+            "fill": 5279,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "1280-devil-punch",
+        "before": {
+          "label": "1280-devil-punch",
+          "msPerFrame": 5.8944444444237485,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 5473,
+            "createLinearGradient": 296,
+            "lineTo": 2399,
+            "fill": 5279,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "1280-devil-punch",
+          "msPerFrame": 15.061111111090415,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 5473,
+            "lineTo": 2399,
+            "fill": 5279,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "1280-devil-kick",
+        "before": {
+          "label": "1280-devil-kick",
+          "msPerFrame": 5.616666666645971,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 5473,
+            "createLinearGradient": 296,
+            "lineTo": 2399,
+            "fill": 5279,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "1280-devil-kick",
+          "msPerFrame": 12.88888888888889,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 5473,
+            "lineTo": 2399,
+            "fill": 5279,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "1280-feathers",
+        "before": {
+          "label": "1280-feathers",
+          "msPerFrame": 5.866666666645971,
+          "counts": {
+            "drawImage": 1188,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 5076,
+            "createLinearGradient": 288,
+            "lineTo": 990,
+            "fill": 4806,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "1280-feathers",
+          "msPerFrame": 12.955555555565903,
+          "counts": {
+            "drawImage": 1188,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 5076,
+            "lineTo": 990,
+            "fill": 4806,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "1280-embers",
+        "before": {
+          "label": "1280-embers",
+          "msPerFrame": 5.911111111080067,
+          "counts": {
+            "drawImage": 2016,
+            "beginPath": 2052,
+            "quadraticCurveTo": 432,
+            "stroke": 6264,
+            "lineTo": 2178,
+            "createLinearGradient": 288,
+            "fill": 4806,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "1280-embers",
+          "msPerFrame": 11.511111111069718,
+          "counts": {
+            "drawImage": 2016,
+            "beginPath": 2052,
+            "quadraticCurveTo": 432,
+            "stroke": 6264,
+            "lineTo": 2178,
+            "fill": 4806,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "1280-victory",
+        "before": {
+          "label": "1280-victory",
+          "msPerFrame": 6.077777777798474,
+          "counts": {
+            "drawImage": 1381,
+            "beginPath": 1602,
+            "quadraticCurveTo": 432,
+            "stroke": 5814,
+            "createLinearGradient": 288,
+            "lineTo": 1710,
+            "fill": 4806,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "1280-victory",
+          "msPerFrame": 6.766666666656318,
+          "counts": {
+            "drawImage": 1381,
+            "beginPath": 1602,
+            "quadraticCurveTo": 432,
+            "stroke": 5814,
+            "lineTo": 1710,
+            "fill": 4806,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "390-rest",
+        "before": {
+          "label": "390-rest",
+          "msPerFrame": 3.4944444444651404,
+          "counts": {
+            "drawImage": 180,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 1908,
+            "createLinearGradient": 288,
+            "lineTo": 990,
+            "fill": 1638,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "390-rest",
+          "msPerFrame": 3.538888888899237,
+          "counts": {
+            "drawImage": 180,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 1908,
+            "lineTo": 990,
+            "fill": 1638,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "390-angel-windup",
+        "before": {
+          "label": "390-angel-windup",
+          "msPerFrame": 3.5444444444340966,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 2273,
+            "createLinearGradient": 296,
+            "lineTo": 2179,
+            "fill": 2111,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "390-angel-windup",
+          "msPerFrame": 3.5222222222429185,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 2273,
+            "lineTo": 2179,
+            "fill": 2111,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "390-angel-punch",
+        "before": {
+          "label": "390-angel-punch",
+          "msPerFrame": 3.4388888888578446,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 2273,
+            "createLinearGradient": 296,
+            "lineTo": 2179,
+            "fill": 2111,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "390-angel-punch",
+          "msPerFrame": 3.772222222191178,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 2273,
+            "lineTo": 2179,
+            "fill": 2111,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "390-devil-punch",
+        "before": {
+          "label": "390-devil-punch",
+          "msPerFrame": 18.927777777788126,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 2305,
+            "createLinearGradient": 296,
+            "lineTo": 2399,
+            "fill": 2111,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "390-devil-punch",
+          "msPerFrame": 18.844444444454794,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 2305,
+            "lineTo": 2399,
+            "fill": 2111,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "390-devil-kick",
+        "before": {
+          "label": "390-devil-kick",
+          "msPerFrame": 19.21666666663562,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 2305,
+            "createLinearGradient": 296,
+            "lineTo": 2399,
+            "fill": 2111,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "390-devil-kick",
+          "msPerFrame": 18.933333333322985,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 2305,
+            "lineTo": 2399,
+            "fill": 2111,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "390-feathers",
+        "before": {
+          "label": "390-feathers",
+          "msPerFrame": 44.62777777776743,
+          "counts": {
+            "drawImage": 1188,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 1908,
+            "createLinearGradient": 288,
+            "lineTo": 990,
+            "fill": 1638,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "390-feathers",
+          "msPerFrame": 44.611111111111114,
+          "counts": {
+            "drawImage": 1188,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 1908,
+            "lineTo": 990,
+            "fill": 1638,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "390-embers",
+        "before": {
+          "label": "390-embers",
+          "msPerFrame": 48.32777777774673,
+          "counts": {
+            "drawImage": 2312,
+            "beginPath": 2320,
+            "quadraticCurveTo": 432,
+            "stroke": 3364,
+            "lineTo": 2446,
+            "createLinearGradient": 288,
+            "fill": 1638,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "390-embers",
+          "msPerFrame": 48.75,
+          "counts": {
+            "drawImage": 2312,
+            "beginPath": 2320,
+            "quadraticCurveTo": 432,
+            "stroke": 3364,
+            "lineTo": 2446,
+            "fill": 1638,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "390-victory",
+        "before": {
+          "label": "390-victory",
+          "msPerFrame": 36.79999999996895,
+          "counts": {
+            "drawImage": 1381,
+            "beginPath": 1602,
+            "quadraticCurveTo": 432,
+            "stroke": 2646,
+            "createLinearGradient": 288,
+            "lineTo": 1710,
+            "fill": 1638,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "390-victory",
+          "msPerFrame": 37.24444444446514,
+          "counts": {
+            "drawImage": 1381,
+            "beginPath": 1602,
+            "quadraticCurveTo": 432,
+            "stroke": 2646,
+            "lineTo": 1710,
+            "fill": 1638,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "371-rest",
+        "before": {
+          "label": "371-rest",
+          "msPerFrame": 14.238888888878542,
+          "counts": {
+            "drawImage": 180,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 1836,
+            "createLinearGradient": 288,
+            "lineTo": 990,
+            "fill": 1566,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "371-rest",
+          "msPerFrame": 14.222222222222221,
+          "counts": {
+            "drawImage": 180,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 1836,
+            "lineTo": 990,
+            "fill": 1566,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "371-angel-windup",
+        "before": {
+          "label": "371-angel-windup",
+          "msPerFrame": 17.700000000031043,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 2201,
+            "createLinearGradient": 296,
+            "lineTo": 2179,
+            "fill": 2039,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "371-angel-windup",
+          "msPerFrame": 18.099999999989652,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 2201,
+            "lineTo": 2179,
+            "fill": 2039,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "371-angel-punch",
+        "before": {
+          "label": "371-angel-punch",
+          "msPerFrame": 17.566666666677015,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 2201,
+            "createLinearGradient": 296,
+            "lineTo": 2179,
+            "fill": 2039,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "371-angel-punch",
+          "msPerFrame": 17.799999999968957,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 2201,
+            "lineTo": 2179,
+            "fill": 2039,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "371-devil-punch",
+        "before": {
+          "label": "371-devil-punch",
+          "msPerFrame": 17.7444444444134,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 2233,
+            "createLinearGradient": 296,
+            "lineTo": 2399,
+            "fill": 2039,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "371-devil-punch",
+          "msPerFrame": 17.727777777757083,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 2233,
+            "lineTo": 2399,
+            "fill": 2039,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "371-devil-kick",
+        "before": {
+          "label": "371-devil-kick",
+          "msPerFrame": 18.050000000020695,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 2233,
+            "createLinearGradient": 296,
+            "lineTo": 2399,
+            "fill": 2039,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "371-devil-kick",
+          "msPerFrame": 17.86111111111111,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 2233,
+            "lineTo": 2399,
+            "fill": 2039,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "371-feathers",
+        "before": {
+          "label": "371-feathers",
+          "msPerFrame": 44.12222222223257,
+          "counts": {
+            "drawImage": 1188,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 1836,
+            "createLinearGradient": 288,
+            "lineTo": 990,
+            "fill": 1566,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "371-feathers",
+          "msPerFrame": 42.861111111111114,
+          "counts": {
+            "drawImage": 1188,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 1836,
+            "lineTo": 990,
+            "fill": 1566,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "371-embers",
+        "before": {
+          "label": "371-embers",
+          "msPerFrame": 46.344444444454794,
+          "counts": {
+            "drawImage": 2288,
+            "beginPath": 2288,
+            "quadraticCurveTo": 432,
+            "stroke": 3260,
+            "lineTo": 2414,
+            "createLinearGradient": 288,
+            "fill": 1566,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "371-embers",
+          "msPerFrame": 46.716666666635625,
+          "counts": {
+            "drawImage": 2288,
+            "beginPath": 2288,
+            "quadraticCurveTo": 432,
+            "stroke": 3260,
+            "lineTo": 2414,
+            "fill": 1566,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "371-victory",
+        "before": {
+          "label": "371-victory",
+          "msPerFrame": 35.71666666668736,
+          "counts": {
+            "drawImage": 1381,
+            "beginPath": 1602,
+            "quadraticCurveTo": 432,
+            "stroke": 2574,
+            "createLinearGradient": 288,
+            "lineTo": 1710,
+            "fill": 1566,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "371-victory",
+          "msPerFrame": 36.30555555555556,
+          "counts": {
+            "drawImage": 1381,
+            "beginPath": 1602,
+            "quadraticCurveTo": 432,
+            "stroke": 2574,
+            "lineTo": 1710,
+            "fill": 1566,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "844-rest",
+        "before": {
+          "label": "844-rest",
+          "msPerFrame": 19.944444444444443,
+          "counts": {
+            "drawImage": 180,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 3780,
+            "createLinearGradient": 288,
+            "lineTo": 990,
+            "fill": 3510,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "844-rest",
+          "msPerFrame": 19.955555555565905,
+          "counts": {
+            "drawImage": 180,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 3780,
+            "lineTo": 990,
+            "fill": 3510,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "844-angel-windup",
+        "before": {
+          "label": "844-angel-windup",
+          "msPerFrame": 23.672222222201526,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 4145,
+            "createLinearGradient": 296,
+            "lineTo": 2179,
+            "fill": 3983,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "844-angel-windup",
+          "msPerFrame": 23.716666666687363,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 4145,
+            "lineTo": 2179,
+            "fill": 3983,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "844-angel-punch",
+        "before": {
+          "label": "844-angel-punch",
+          "msPerFrame": 23.62777777781917,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 4145,
+            "createLinearGradient": 296,
+            "lineTo": 2179,
+            "fill": 3983,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "844-angel-punch",
+          "msPerFrame": 23.788888888899237,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1684,
+            "quadraticCurveTo": 534,
+            "stroke": 4145,
+            "lineTo": 2179,
+            "fill": 3983,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "844-devil-punch",
+        "before": {
+          "label": "844-devil-punch",
+          "msPerFrame": 23.572222222211874,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 4177,
+            "createLinearGradient": 296,
+            "lineTo": 2399,
+            "fill": 3983,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "844-devil-punch",
+          "msPerFrame": 23.60000000004139,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 4177,
+            "lineTo": 2399,
+            "fill": 3983,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "844-devil-kick",
+        "before": {
+          "label": "844-devil-kick",
+          "msPerFrame": 23.51666666665632,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 4177,
+            "createLinearGradient": 296,
+            "lineTo": 2399,
+            "fill": 3983,
+            "fillRect": 224,
+            "createRadialGradient": 50,
+            "bezierCurveTo": 16
+          }
+        },
+        "after": {
+          "label": "844-devil-kick",
+          "msPerFrame": 23.51666666665632,
+          "counts": {
+            "drawImage": 294,
+            "beginPath": 1716,
+            "quadraticCurveTo": 488,
+            "stroke": 4177,
+            "lineTo": 2399,
+            "fill": 3983,
+            "fillRect": 224,
+            "createRadialGradient": 14,
+            "bezierCurveTo": 16,
+            "createLinearGradient": 8
+          }
+        }
+      },
+      {
+        "label": "844-feathers",
+        "before": {
+          "label": "844-feathers",
+          "msPerFrame": 46.90555555559695,
+          "counts": {
+            "drawImage": 1188,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 3780,
+            "createLinearGradient": 288,
+            "lineTo": 990,
+            "fill": 3510,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "844-feathers",
+          "msPerFrame": 47.25,
+          "counts": {
+            "drawImage": 1188,
+            "beginPath": 846,
+            "quadraticCurveTo": 432,
+            "stroke": 3780,
+            "lineTo": 990,
+            "fill": 3510,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "844-embers",
+        "before": {
+          "label": "844-embers",
+          "msPerFrame": 56.35000000004139,
+          "counts": {
+            "drawImage": 1998,
+            "beginPath": 2034,
+            "quadraticCurveTo": 432,
+            "stroke": 4950,
+            "lineTo": 2160,
+            "createLinearGradient": 288,
+            "fill": 3510,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "844-embers",
+          "msPerFrame": 56.94444444444444,
+          "counts": {
+            "drawImage": 1998,
+            "beginPath": 2034,
+            "quadraticCurveTo": 432,
+            "stroke": 4950,
+            "lineTo": 2160,
+            "fill": 3510,
+            "fillRect": 216
+          }
+        }
+      },
+      {
+        "label": "844-victory",
+        "before": {
+          "label": "844-victory",
+          "msPerFrame": 47.01111111106972,
+          "counts": {
+            "drawImage": 1381,
+            "beginPath": 1602,
+            "quadraticCurveTo": 432,
+            "stroke": 4518,
+            "createLinearGradient": 288,
+            "lineTo": 1710,
+            "fill": 3510,
+            "fillRect": 216,
+            "createRadialGradient": 36
+          }
+        },
+        "after": {
+          "label": "844-victory",
+          "msPerFrame": 47.311111111142154,
+          "counts": {
+            "drawImage": 1381,
+            "beginPath": 1602,
+            "quadraticCurveTo": 432,
+            "stroke": 4518,
+            "lineTo": 1710,
+            "fill": 3510,
+            "fillRect": 216
+          }
+        }
+      }
+    ],
+    "comparisons": [
+      {
+        "label": "1280-rest",
+        "identical": true,
+        "beforeMs": 5.722222222222222,
+        "afterMs": 7.327777777746734
+      },
+      {
+        "label": "1280-angel-windup",
+        "identical": true,
+        "beforeMs": 5.8111111110904154,
+        "afterMs": 10.055555555555555
+      },
+      {
+        "label": "1280-angel-punch",
+        "identical": true,
+        "beforeMs": 5.683333333374725,
+        "afterMs": 10.577777777798474
+      },
+      {
+        "label": "1280-devil-punch",
+        "identical": true,
+        "beforeMs": 5.8944444444237485,
+        "afterMs": 15.061111111090415
+      },
+      {
+        "label": "1280-devil-kick",
+        "identical": true,
+        "beforeMs": 5.616666666645971,
+        "afterMs": 12.88888888888889
+      },
+      {
+        "label": "1280-feathers",
+        "identical": true,
+        "beforeMs": 5.866666666645971,
+        "afterMs": 12.955555555565903
+      },
+      {
+        "label": "1280-embers",
+        "identical": true,
+        "beforeMs": 5.911111111080067,
+        "afterMs": 11.511111111069718
+      },
+      {
+        "label": "1280-victory",
+        "identical": true,
+        "beforeMs": 6.077777777798474,
+        "afterMs": 6.766666666656318
+      },
+      {
+        "label": "390-rest",
+        "identical": true,
+        "beforeMs": 3.4944444444651404,
+        "afterMs": 3.538888888899237
+      },
+      {
+        "label": "390-angel-windup",
+        "identical": true,
+        "beforeMs": 3.5444444444340966,
+        "afterMs": 3.5222222222429185
+      },
+      {
+        "label": "390-angel-punch",
+        "identical": true,
+        "beforeMs": 3.4388888888578446,
+        "afterMs": 3.772222222191178
+      },
+      {
+        "label": "390-devil-punch",
+        "identical": true,
+        "beforeMs": 18.927777777788126,
+        "afterMs": 18.844444444454794
+      },
+      {
+        "label": "390-devil-kick",
+        "identical": true,
+        "beforeMs": 19.21666666663562,
+        "afterMs": 18.933333333322985
+      },
+      {
+        "label": "390-feathers",
+        "identical": true,
+        "beforeMs": 44.62777777776743,
+        "afterMs": 44.611111111111114
+      },
+      {
+        "label": "390-embers",
+        "identical": true,
+        "beforeMs": 48.32777777774673,
+        "afterMs": 48.75
+      },
+      {
+        "label": "390-victory",
+        "identical": true,
+        "beforeMs": 36.79999999996895,
+        "afterMs": 37.24444444446514
+      },
+      {
+        "label": "371-rest",
+        "identical": true,
+        "beforeMs": 14.238888888878542,
+        "afterMs": 14.222222222222221
+      },
+      {
+        "label": "371-angel-windup",
+        "identical": true,
+        "beforeMs": 17.700000000031043,
+        "afterMs": 18.099999999989652
+      },
+      {
+        "label": "371-angel-punch",
+        "identical": true,
+        "beforeMs": 17.566666666677015,
+        "afterMs": 17.799999999968957
+      },
+      {
+        "label": "371-devil-punch",
+        "identical": true,
+        "beforeMs": 17.7444444444134,
+        "afterMs": 17.727777777757083
+      },
+      {
+        "label": "371-devil-kick",
+        "identical": true,
+        "beforeMs": 18.050000000020695,
+        "afterMs": 17.86111111111111
+      },
+      {
+        "label": "371-feathers",
+        "identical": true,
+        "beforeMs": 44.12222222223257,
+        "afterMs": 42.861111111111114
+      },
+      {
+        "label": "371-embers",
+        "identical": true,
+        "beforeMs": 46.344444444454794,
+        "afterMs": 46.716666666635625
+      },
+      {
+        "label": "371-victory",
+        "identical": true,
+        "beforeMs": 35.71666666668736,
+        "afterMs": 36.30555555555556
+      },
+      {
+        "label": "844-rest",
+        "identical": true,
+        "beforeMs": 19.944444444444443,
+        "afterMs": 19.955555555565905
+      },
+      {
+        "label": "844-angel-windup",
+        "identical": true,
+        "beforeMs": 23.672222222201526,
+        "afterMs": 23.716666666687363
+      },
+      {
+        "label": "844-angel-punch",
+        "identical": true,
+        "beforeMs": 23.62777777781917,
+        "afterMs": 23.788888888899237
+      },
+      {
+        "label": "844-devil-punch",
+        "identical": true,
+        "beforeMs": 23.572222222211874,
+        "afterMs": 23.60000000004139
+      },
+      {
+        "label": "844-devil-kick",
+        "identical": true,
+        "beforeMs": 23.51666666665632,
+        "afterMs": 23.51666666665632
+      },
+      {
+        "label": "844-feathers",
+        "identical": true,
+        "beforeMs": 46.90555555559695,
+        "afterMs": 47.25
+      },
+      {
+        "label": "844-embers",
+        "identical": true,
+        "beforeMs": 56.35000000004139,
+        "afterMs": 56.94444444444444
+      },
+      {
+        "label": "844-victory",
+        "identical": true,
+        "beforeMs": 47.01111111106972,
+        "afterMs": 47.311111111142154
+      }
+    ]
+  },
+  "limits": "Synthetic camera and controlled blendshapes; forced pixel readbacks and profiling affect raster timing. No physical-device FPS/temperature guarantee. No reduction in resolution, particle count, animation rate or camera inference rate.",
+  "captures": {
+    "before": "/var/folders/1_/3f_r6y197637tbz4f74gx27r0000gn/T/parange-duel-perf-kTNfrZ",
+    "after": "/var/folders/1_/3f_r6y197637tbz4f74gx27r0000gn/T/parange-duel-perf-HGu3Wf",
+    "combat": "/var/folders/1_/3f_r6y197637tbz4f74gx27r0000gn/T/parange-wink-rig-rWLNgZ"
+  }
+}

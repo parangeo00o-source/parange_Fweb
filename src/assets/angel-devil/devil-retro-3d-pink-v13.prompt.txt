@@ -1,0 +1,8 @@
+Tool: built-in image_gen
+Input: devil-retro-3d-blended-v12.png
+Output: devil-retro-3d-pink-v13.png
+Runtime asset: devil-retro-3d-pink-v13.lossless.png
+Packaging: tools/optimize-duel-pngs.mjs; identical PNG scanlines, dimensions and alpha.
+
+Final prompt:
+Color edit of the attached game mascot: increase the soft magenta-pink shading across its dark charcoal surfaces a little, blending smoothly into the existing shadows. Keep the charcoal base recognizable, and preserve the exact character, pose, face, hands, silhouette, star details, 3D style and transparent background. Change only color; no added objects.

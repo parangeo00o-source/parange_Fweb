@@ -1,0 +1,8 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: devil-pencil-aligned-eyes-v5.png
+Output: devil-pencil-gray-sclera-v6.png
+
+Use case: precise-object-edit. This is a tiny color adjustment to the eye whites ONLY of the supplied transparent devil sprite.
+Replace the bright white sclera in BOTH eyes with a subdued neutral smoky gray / soft graphite-gray tone, approximately #969695 in the middle, #737372 in shadow and no brighter than #b0b0ad in broad highlights. These are the areas around the red irises. The eye whites should feel grayish, softly shaded, and integrated with the character's charcoal and graphite palette, not stark white or glowing. Keep them lighter than the dark body so the eyes remain readable. Preserve the existing hand-drawn pencil grain in the gray sclera.
+CRITICAL INVARIANTS: preserve the exact recently corrected eye geometry, red iris positions, iris length and angle, coherent gaze direction, black pupils, outlines and expression. Keep the RED IRIS colors unchanged. Keep the tiny white catchlight dots inside the red irises, since those are specular dots rather than sclera. Do NOT move, resize or reshape either eye or iris.
+Do not change anything outside the sclera: body shape, charcoal-black colors, graphite highlights, red horns, stars, wing, tail, fists, feet, pencil texture, pose, composition, framing, dimensions and transparent alpha background. No new glow or background. Output the same full-body transparent sprite with only the whites of the eyes toned down to smoky neutral gray.

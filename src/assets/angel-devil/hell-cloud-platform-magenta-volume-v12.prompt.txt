@@ -1,0 +1,7 @@
+Tool: built-in image_gen
+Use case: precise-object-edit (color only)
+Input: hell-cloud-platform-soft-volume-v11.png
+Output: hell-cloud-platform-magenta-volume-v12.png
+
+Prompt:
+Edit only the color of this cloud sprite. Make it moderately brighter and predominantly rich magenta pink instead of dull black charcoal: luminous raspberry-pink upper surfaces, saturated magenta midtones occupying most of each cloud lobe, smoothly blended deep berry-plum shadows limited to the lower surfaces and creases. Keep a balanced dark devil-cloud character, but the overall impression should now be clearly magenta pink. Preserve the soft rounded 3D volume and continuous shading, exact silhouette, curls, framing, small star decorations and transparent background. No bright outlines, no neon rims, no glowing contour lines, no separate color patches. Broad soft lighting across surfaces. Keep all shapes and details unchanged. One cloud only.

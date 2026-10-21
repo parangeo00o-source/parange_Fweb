@@ -1,0 +1,5 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: devil-pencil-charcoal-v2.png
+Output: devil-pencil-red-eyes-v3.png
+
+Use case: precise-object-edit. Edit the supplied transparent game sprite. Change ONLY the two blue/cyan eye interiors to rich ruby/crimson RED, with deep burgundy shading and brighter red highlights. Preserve the small WHITE eye catchlights and black eye contours. Replace all blue coloration within both eyes with red. Keep absolutely everything else unchanged: exact eye shape, expression, charcoal-black body, graphite pencil texture, red horns, red stars, bat wing, tail, pose, silhouette, proportions, framing, scale, and transparent alpha background. This is an eye-color-only edit, not a redesign or restyle. No blue eyes, no added glow outside the eyes, no background. Output the same full-body sprite with red eyes.

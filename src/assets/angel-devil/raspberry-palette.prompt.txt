@@ -1,0 +1,10 @@
+Tool: built-in image_gen
+Runtime: matching .lossless.png siblings, produced by tools/optimize-duel-pngs.mjs
+
+Input: devil-retro-3d-blended-v12.png
+Output: devil-retro-3d-raspberry-v16.png
+Prompt: Recolor only the colored accents of this game character to raspberry rose, midway between magenta pink and red (midtone near #e73678). Pink highlights blend naturally into rose-red and crimson shadows. A little warmer/redder overall, while retaining pink. Leave neutral charcoal body and grey eye whites unchanged. Keep exact pose, hands, face, silhouette, stars, geometry, shading, framing and transparent background. No added objects or lighting.
+
+Input: hell-cloud-platform-soft-magenta-v16.png
+Output: hell-cloud-platform-raspberry-v17.png
+Prompt: Shift only the pink hue of this pastel cloud slightly warmer, to soft raspberry-rose between magenta pink and red. Preserve its airy pastel brightness, ivory highlights, smooth shading, exact shape, curls, star details, framing and transparent background. Pink midtones blend smoothly into delicate rose-red shadows. No orange, charcoal, vivid neon, strong outlines or added glow. Keep the overall lightness and saturation unchanged.

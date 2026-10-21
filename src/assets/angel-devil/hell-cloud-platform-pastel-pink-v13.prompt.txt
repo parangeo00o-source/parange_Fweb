@@ -1,0 +1,7 @@
+Tool: built-in image_gen
+Use case: precise-object-edit (pink colorway)
+Input: cloud-platform-retro-3d-blended-v6.png
+Output: hell-cloud-platform-pastel-pink-v13.png
+
+Prompt:
+Recolor this ivory mint-blue cloud sprite into its soft pastel pink counterpart. Change ONLY hue: preserve exactly the existing lightness, saturation balance, ivory highlight coverage, smooth shading, restrained retro 3D facets, silhouette, curls, star decorations, framing and transparent background. Keep the large ivory-white top surfaces nearly white with a very faint blush. Replace mint-aqua midtones with comparably light blush pink, blue shadows with soft rose-pink shadows of comparable brightness, and teal star marks with muted pink star marks. The result should look like the very same airy light cloud, simply in a pink colorway. No dark plum or charcoal, no vivid magenta, no neon outline, no added glow, no new objects. One cloud on a transparent background.

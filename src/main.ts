@@ -117,7 +117,7 @@ const dice: Dice[] = Array.from({ length: 48 }, (_, index) => {
     ? graphicSymbols[(index * 5 + 2) % graphicSymbols.length]
     : null
   const isWaterTouchDie = index === 47
-  // G is reserved for the glass-bird camera experience.
+  // G is reserved for the neon flock camera experience.
   const isBirdImpactDie = parangeLetterByDice.get(index) === 'G'
   // The N in the shuffled PARANGE set is the entry to the wink duel. Resolve
   // it from its letter instead of freezing a position in the shuffled grid.
@@ -131,7 +131,7 @@ const dice: Dice[] = Array.from({ length: 48 }, (_, index) => {
   const rubberHumanDestination = { route: '#rubber-human', label: '고무 인간' }
   const shampooDestination = { route: '#shampoo', label: 'Shampoo' }
   const angelDevilDestination = { route: '#angel-devil', label: 'Heaven vs Hell' }
-  const birdImpactDestination = { route: '#bird-impact', label: 'Glass Bird' }
+  const birdImpactDestination = { route: '#bird-impact', label: 'Neon Flock' }
   const resolvedDestination = isBirdImpactDie ? birdImpactDestination : isAngelDevilDie ? angelDevilDestination : isShampooDie ? shampooDestination : isRubberHumanDie ? rubberHumanDestination : destination
   const diceSymbol = isShampooDie ? 'shampoo' : isWaterTouchDie ? 'droplet' : isBalloonDie ? 'balloon' : isLemonadeDie ? 'lemon' : replacement?.type ?? (isTextSlot ? 'letter' : symbol.type)
   const value = replacement?.value ?? parangeLetterByDice.get(index) ?? symbol.value
@@ -201,7 +201,7 @@ const experienceFactoryLoaders: Record<string, ExperienceFactoryLoader> = {
   'PARANGE PLANET': async () => { const { createParangePlanetExperience } = await import('./parange-planet'); return createParangePlanetExperience },
   WaterTouch: async () => { const { createWaterTouchExperience } = await import('./water-touch'); return createWaterTouchExperience },
   Balloon: async () => { const { createBalloonExperience } = await import('./balloon'); return createBalloonExperience },
-  'Glass Bird': async () => { const { createBirdImpactExperience } = await import('./bird-impact'); return createBirdImpactExperience },
+  'Neon Flock': async () => { const { createBirdImpactExperience } = await import('./bird-impact'); return createBirdImpactExperience },
   Bluefish: async () => { const { createBluefishExperience } = await import('./bluefish'); return createBluefishExperience },
   'Elephant Drawing': async () => { const { createElephantDrawingExperience } = await import('./elephant-drawing'); return createElephantDrawingExperience },
   '고무 인간': async () => { const { createRubberHumanExperience } = await import('./rubber-human'); return createRubberHumanExperience },
@@ -773,7 +773,7 @@ const navigateTo = (element: HTMLElement) => {
   }
   // Camera permission is requested from the original N-die interaction so the
   // new face effect opens with the camera already active, not after its roll.
-  if (destination.label === 'Heaven vs Hell' || destination.label === 'Glass Bird') finishNavigation()
+  if (destination.label === 'Heaven vs Hell' || destination.label === 'Neon Flock') finishNavigation()
   else window.setTimeout(finishNavigation, 440)
 }
 

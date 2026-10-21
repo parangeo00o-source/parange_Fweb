@@ -1,0 +1,5 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: hell-cloud-platform-pet-v6.png
+Output: hell-cloud-platform-magenta-v7.png
+
+Use case: precise-object-edit. Edit target: supplied transparent charcoal cloud platform sprite. Recolor ONLY all RED outlines, red star speckles, red edge glow and red accents to saturated retro arcade MAGENTA PINK. Match this palette: main pigment #E52AA5, highlights #FF8AD8, shadows #A81383. Keep the near-black charcoal cloud fill and grey pencil shading completely unchanged. Preserve exact cloud shape, swirl structure, star positions, fine grain, hand-drawn texture, composition, margins, framing, 2:1 landscape aspect ratio and transparent alpha background. No redesign, no extra stars, no new glow, no resizing shapes, no extra objects or text. Return the same full cloud platform, red replaced with hot magenta pink, transparent background.

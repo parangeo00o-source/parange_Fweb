@@ -1,0 +1,8 @@
+Tool: built-in image_gen
+Input: hell-cloud-platform-pink-rose-v15.png
+Output: hell-cloud-platform-soft-magenta-v16.png
+Runtime asset: hell-cloud-platform-soft-magenta-v16.lossless.png
+Packaging: tools/optimize-duel-pngs.mjs; identical decompressed PNG scanlines, original dimensions, alpha and metadata preserved.
+
+Prompt:
+Make a subtle hue adjustment ONLY to this pastel cloud: shift the existing warm pink midtones and rose-red shadows slightly toward cooler magenta pink. Keep the same lightness, saturation level, ivory highlights, smooth gradients, shape, curls, stars, 3D shading, exact framing and transparent background. The result remains airy pale pink with soft rosy shadows, simply a little more magenta rather than coral. Do not make it darker or more vivid. No charcoal, neon, glow, strong outlines, or new objects.

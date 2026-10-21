@@ -1,0 +1,5 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: cloud-platform-pet-v2.png
+Output: cloud-platform-mint-v3.png
+
+Use case: precise-object-edit. Edit target: supplied transparent white cloud platform with blue pencil shading, edges and star flecks. Change ONLY blue/cyan pigment to soft luminous MINT GREEN matching a retro game HUD palette: main mint #64E1B8, medium #53CBA8, light #B4F8D8, pale #E8FFF3, deepest teal #237B70 (for dark iris/shadow details). Natural white-and-mint harmony: keep the original warm-white body/interior pixels WHITE, do not tint everything green; blue areas should become mint with their existing lightness and shading preserved. No remaining sky-blue or royal-blue accents, no lime or yellow cast. Preserve original illustration texture, fine pencil grain, soft thin contours and transparency. Preserve exact cloud silhouette, curls, star placement, positioning, framing, margins, and original landscape aspect ratio. No new objects, glow or decorations. Strict color-only edit, no redesign, no cropping, no text. Return only the same asset with transparent alpha background.

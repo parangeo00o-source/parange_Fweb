@@ -1,0 +1,8 @@
+Tool: built-in image_gen
+Use case: style-transfer
+Edit target: hell-cloud-platform-retro-3d-blended-v10.png
+Shading reference: cloud-platform-retro-3d-blended-v6.png
+Output: hell-cloud-platform-soft-volume-v11.png
+
+Prompt:
+Edit image 1 (dark cloud). Image 2 (ivory cloud) is ONLY a reference for soft volumetric shading. Remove ALL bright neon pink outline bands around the lobes and curls in image 1. Replace that outlined look with softly lit rounded cloud masses, just like image 2: broad gentle highlights on the upper surfaces, smoothly graduated midtones, and soft occlusion in the creases. Keep a dark charcoal body with subtle raspberry-magenta and dusty rose light softly blended ACROSS the surfaces rather than tracing the edges. No luminous contour lines, no hot pink rims, no glossy piping. The cloud must read as one soft substantial volume, with connected rounded lobes, not black stones bordered in neon. Preserve image 1's exact silhouette, wide 2:1 canvas, placement, curls, small pink star decorations and transparent background. Retain restrained retro 3D geometry and full opacity inside the cloud. Output ONLY the edited dark cloud, no other objects, no background or external glow.

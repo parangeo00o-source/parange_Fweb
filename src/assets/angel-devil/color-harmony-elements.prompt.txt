@@ -1,0 +1,13 @@
+Tool: built-in image_gen (transparent_background: true)
+
+Edit target: cloud-platform-mint-v3.png
+Output: cloud-platform-mint-sky-v4.png
+Prompt: Color-only edit of this white cloud platform. Keep white surfaces and mint as the lead accent. Blend LIGHT SKY BLUE #95C9EF into lower scalloped edges, the undersides of curls and shaded pockets, with soft aqua transitions #B4E9E7. Upper lit edges remain mint #70DDBB. Tiny existing stars subtly alternate mint and powder blue. Roughly 55% mint, 35% sky blue and 10% aqua among colored accents. Both mint and blue clearly visible but smoothly mixed within forms. Preserve exact shape, curls, grain, fine pencil drawing, existing stars, composition, margins and 2:1 framing. No new elements or outer glow. Transparent PNG.
+
+Edit target: hell-cloud-platform-magenta-v7.png
+Output: hell-cloud-platform-magenta-crimson-v8.png
+Prompt: Color-only edit of this charcoal cloud platform. Keep the near-black charcoal interior unchanged. Enrich the magenta outlines and stars with crimson red #E94059, rose #F98DBB and burgundy #7E244F. Lead color stays magenta #DF329E; blend crimson along lower curved contour segments and inner swirl folds, rose on lit edges. Existing stars vary subtly magenta, rose and raspberry red. About 50% magenta, 30% crimson and 20% rose/burgundy within accents. Natural layered hue variation, not uniform pink, not all-red. Preserve exact cloud shape, curls, pencil grain, stars, margins and 2:1 framing. No added glow, objects or background. Transparent PNG.
+
+Edit target: angel-feather-mint-v2.png
+Output: angel-feather-mint-sky-v3.png
+Prompt: Color-only edit: keep this white feather and its mint green upper contours; blend light sky blue #95C9EF into the lower feather edges and fine shadow strokes, with pale aqua transitions. White remains white. Both mint and light blue should be delicately visible. Preserve the same shape, angle, details, framing, margins and 3:2 aspect ratio. Clean transparent background. Flat illustration cutout, NO glow, NO haze, NO shadow, no new objects.

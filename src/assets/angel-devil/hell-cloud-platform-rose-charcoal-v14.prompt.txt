@@ -1,0 +1,12 @@
+Tool: built-in image_gen
+Use case: precise-object-edit (color harmony)
+Initial target: hell-cloud-platform-pastel-pink-v13.png
+Color range reference: cloud-platform-retro-3d-blended-v6.png
+Output: hell-cloud-platform-rose-charcoal-v14.png
+
+Initial prompt:
+Edit image 1 (pastel pink cloud). Image 2 (mint-blue cloud) is ONLY the reference for the amount of hue variation and airy tonal balance. Preserve image 1's approved LIGHT pastel overall tone, broad ivory highlights, exact silhouette, curls, stars, framing, transparent background and retro 3D volume. Enrich its single-pink shading into a naturally blended magenta-pink, rose-red and charcoal-tinted palette. Ivory-blush light flows continuously through soft pastel magenta midtones and restrained warm rose-red reflected color into pale smoky rose-grey shadows with only a small hint of charcoal in deepest creases. Charcoal is a subtle neutral undertone, never black areas. Red is a soft rose/crimson tint, never bright red patches. Keep overall brightness and softness close to image 1 and comparable color range to image 2. The hue changes must be gradual within each rounded surface, following the same lighting; never assign different colors to separate lobes or polygons. Keep the light surfaces predominant. Harmonious softly varied rose-magenta star marks. No neon, bright outlines, added glow, dark overall cloud, oversaturation or color-block patches. Output only one edited pink cloud.
+
+Refinement input: generated exec-405399d8-569c-45b3-a338-3b14de52aa89.png
+Refinement prompt:
+Edit image 1 only. Preserve its light ivory upper surfaces and overall pastel brightness. Enrich the lower-surface shading with a clearly visible but soft continuous color progression: cool muted magenta pink into warm dusty rose-red, then into light smoky charcoal-rose grey at the underside and recessed curls. Use image 2 only to match how visibly its mint transitions into blue while remaining a light cloud. Match that degree of hue variation. The darkest grey should be a medium soft warm grey, never black. The cloud should remain mostly ivory and pastel pink, with naturally blended reddish and smoky neutral shadow nuances. Keep gradients smooth, no separately colored polygons or lobes, no vivid red, no outlines. Keep exact silhouette, stars, layout and transparency. Remove any stray pixels outside the silhouette. Output one cloud.

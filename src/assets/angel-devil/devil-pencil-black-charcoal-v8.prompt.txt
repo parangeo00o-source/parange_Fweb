@@ -1,0 +1,10 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: devil-pencil-soft-lines-v7.png
+Output: devil-pencil-black-charcoal-v8.png
+
+Use case: precise-object-edit.
+Edit target: the supplied transparent devil sprite. Change ONLY the color value of charcoal body regions.
+Darken the entire charcoal-gray body toward a richer near-black graphite, about 25–30% darker than the input: main body midtones approximately #252529 to #36363a, soft shaded areas #19191d, restrained pencil highlights #525255. Apply consistently across head, torso, fists, legs, feet, charcoal wing frame and tail stem. Preserve visible delicate pencil grain and dimensional shading; do not crush everything into solid black.
+CRITICAL: preserve the newly softened, thin, gently broken colored-pencil contours. Do NOT reintroduce thick black ink outlines or hard white metallic rim highlights. This is a tonal adjustment, not a redesign.
+Keep exact pose, silhouette, anatomy, left-facing orientation, framing, margins, canvas dimensions and transparent alpha. Keep the red horns, star markings, wing membrane and red tail tip unchanged. Keep eye shapes and gaze exactly unchanged, RED irises and tiny catchlights unchanged, smoky GRAY sclera unchanged (do not darken or whiten sclera).
+Return only this full-body transparent character, with no weapon, no new objects, no background, no added glow or text.

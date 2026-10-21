@@ -1,0 +1,60 @@
+{
+  "scope": "Additional angel/devil optimization; approved raspberry artwork and all game timing preserved",
+  "changes": [
+    "Sparse joint traversal in the original accumulation order",
+    "Reusable skin templates with independently owned mutable buffers",
+    "Static HUD color-stop arrays",
+    "Lazy fallback canvas creation and backing-store release",
+    "Cancelled and generation-guarded deferred visual preparation"
+  ],
+  "jointVisitsPerDeformation": {
+    "before": 8712,
+    "angelAfter": 2432,
+    "devilAfter": 2558
+  },
+  "validation": {
+    "pixelCases": 32,
+    "allPixelIdentical": true,
+    "pixelReport": "/var/folders/1_/3f_r6y197637tbz4f74gx27r0000gn/T/parange-duel-perf-qYpdCM",
+    "fallback": {
+      "gpuCanvasCount": 1,
+      "comparisons": [
+        {
+          "side": "angel",
+          "name": "rest",
+          "identical": true
+        },
+        {
+          "side": "angel",
+          "name": "punch",
+          "identical": true
+        },
+        {
+          "side": "angel",
+          "name": "kick",
+          "identical": true
+        },
+        {
+          "side": "devil",
+          "name": "rest",
+          "identical": true
+        },
+        {
+          "side": "devil",
+          "name": "punch",
+          "identical": true
+        },
+        {
+          "side": "devil",
+          "name": "kick",
+          "identical": true
+        }
+      ],
+      "fallbackReleased": true
+    },
+    "integrationPassed": true,
+    "buildPassed": true,
+    "denseVsSparseVertices": "Float32-exact through full punch and kick sweeps"
+  },
+  "limits": "Controlled camera/landmarks. No physical device FPS, power or temperature measurement."
+}

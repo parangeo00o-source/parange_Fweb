@@ -1,0 +1,22 @@
+Tool: built-in image_gen (transparent image edits)
+Use case: style-transfer / surface color shading correction
+
+Input: angel-retro-3d-v8.png
+Output: angel-retro-3d-blended-v9.png
+Prompt: Edit target: the attached transparent game sprite. Change ONLY its surface color shading. Keep the exact silhouette, geometry, pose, placement, framing, details and transparent background. Keep retro 3D volume, but replace patchy flat-colored polygon bands with continuous, smooth Gouraud shading and consistent lighting. Neighboring facets should differ subtly in brightness, never look like differently colored paint patches. No new objects, no added glow, no blur of edges. Preserve ivory body and all star marks. Use a unified pale aqua material whose mint tint gently drifts through aqua into delicate sky-blue shadow, smoothly interpolated across surfaces. Reduce the abrupt saturated blue shadow stripes. All star marks share a harmonious mint-aqua family with subtle variation. Preserve both fists and the eyes exactly.
+
+Input: devil-retro-3d-v11.png
+Output: devil-retro-3d-blended-v12.png
+Prompt: Edit target: the attached transparent game sprite. Change ONLY its surface color shading. Keep the exact silhouette, geometry, pose, placement, framing, details and transparent background. Keep retro 3D volume, but replace patchy flat-colored polygon bands with continuous, smooth Gouraud shading and consistent lighting. Neighboring facets should differ subtly in brightness, never look like differently colored paint patches. No new objects, no added glow, no blur of edges. Preserve near-black charcoal body and grey eye whites. Horns, wing membranes, tail tip and irises use one coherent rich raspberry-magenta material, smoothly shaded into rose-crimson in shadow and pink in light. No separate vivid red versus pink polygons. All star marks share a harmonious raspberry-magenta family instead of alternating red and pink spots. Keep both fists and eye alignment exactly.
+
+Input: cloud-platform-retro-3d-v5.png
+Output: cloud-platform-retro-3d-blended-v6.png
+Prompt: Edit target: the attached transparent game sprite. Change ONLY its surface color shading. Keep the exact silhouette, geometry, pose, placement, framing, details and transparent background. Keep retro 3D volume, but replace patchy flat-colored polygon bands with continuous, smooth Gouraud shading and consistent lighting. Neighboring facets should differ subtly in brightness, never look like differently colored paint patches. No new objects, no added glow, no blur of edges. Keep ivory cloud with its small star decorations. Its color should blend seamlessly from ivory into pale mint-aqua and gentle sky-blue shadows following rounded cloud volumes. Remove strongly saturated blue stripes and different colored triangular patches; smoothly lit low-poly geometry with restrained hue shifts. Star marks in harmonious mint-aqua.
+
+Input: hell-cloud-platform-retro-3d-v9.png
+Output: hell-cloud-platform-retro-3d-blended-v10.png
+Prompt: Edit target: the attached transparent game sprite. Change ONLY its surface color shading. Keep the exact silhouette, geometry, pose, placement, framing, details and transparent background. Keep retro 3D volume, but replace patchy flat-colored polygon bands with continuous, smooth Gouraud shading and consistent lighting. Neighboring facets should differ subtly in brightness, never look like differently colored paint patches. No new objects, no added glow, no blur of edges. Keep near-black charcoal cloud and small star decorations. Blend raspberry-magenta rim lighting smoothly into dark rose-charcoal volumes. Remove abrupt separate red and pink rim bands. Use a coherent raspberry-magenta family with gentle rose shifts rather than alternately colored polygon patches. Preserve cloud shape and all curls.
+
+Input: angel-feather-retro-3d-v4.png
+Output: angel-feather-retro-3d-blended-v5.png
+Prompt: Edit only the shading of this transparent 3D feather. Replace patchy polygon colors with smooth Gouraud shading: ivory, pale mint-aqua and soft sky-blue shadows blend continuously over its surface, without separate green and blue stripes. Keep the exact shape, diagonal orientation, framing and crisp edges. Keep retro 3D volume. Transparent background. No glow.

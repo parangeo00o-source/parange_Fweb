@@ -1,0 +1,11 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: devil-pencil-gray-sclera-v6.png
+Style reference: angel-classic-v5.png
+Output: devil-pencil-soft-lines-v7.png
+
+Use case: precise-object-edit.
+Asset type: transparent full-body game character sprite, edited in place for an existing skeletal animation rig.
+Input 1 is the edit target: the charcoal/red devil. Input 2 is a STYLE REFERENCE ONLY: the white/blue angel. Return ONLY the edited devil, never the angel.
+Primary change: soften the devil's overly thick pure-black ink outlines to match the angel's delicate colored-pencil contour treatment. Replace the hard black outer contour and heavy internal separation lines around fists, feet, head, horns, bat wing and tail with thinner, softer, gently broken graphite/charcoal colored-pencil edges. Reduce outline thickness and black contrast by approximately 50–60 percent. Edges should merge naturally into shaded volumes, as in the angel's blue pencil edges. Use charcoal-gray or muted burgundy pencil linework matched to local colors, not heavy black cartoon ink. Keep the charcoal body dark; do not whiten the body. Soften harsh metallic white rim highlights into subtle graphite pencil shading; keep readable form, crisp silhouette and fine hand-drawn grain, NOT a blurry sprite.
+STRICT INVARIANTS: identical silhouette, exact full-body pose, left-facing orientation, location and size of head, leading fist at image-left, guarding fist, feet, horn tips, wing and tail. Preserve framing, margins, square canvas and transparency so normalized skinning coordinates still align. Preserve red horns, red bat-wing membrane, red arrow tail, red star markings, charcoal body palette. Preserve BOTH eye shapes, their exact coherent gaze and iris placement, red irises with tiny catchlights and smoky gray sclera; do not brighten eye whites or change expression.
+No new objects, weapons, halo, text, background, ground shadow or surrounding glow. Actual transparent alpha. Output one full-body devil sprite with only softer, thinner, lower-contrast pencil linework and integrated shading.

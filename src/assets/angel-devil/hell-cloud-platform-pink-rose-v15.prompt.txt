@@ -1,0 +1,7 @@
+Tool: built-in image_gen
+Use case: precise-object-edit (shadow color only)
+Input: hell-cloud-platform-rose-charcoal-v14.png
+Output: hell-cloud-platform-pink-rose-v15.png
+
+Prompt:
+Edit only the shadow colors of this pastel pink cloud sprite. Remove the charcoal-grey cast from its undersides and creases, replacing those smoky grey shadows with softly shaded rose-red and muted raspberry-pink. Keep the approved light ivory-blush highlights and light pink midtones unchanged. Preserve overall pastel brightness and gentle contrast; slightly lift the deepest shadows so it feels fresh and warm rather than dark or muddy. Blend pink into rose-red continuously following the rounded surfaces. Preserve exact silhouette, curls, star decorations, restrained retro 3D facets, framing and transparent background. No grey or charcoal shading, no dark burgundy, no saturated neon, no strong outlines, no glow, no separate color patches. One cloud only.

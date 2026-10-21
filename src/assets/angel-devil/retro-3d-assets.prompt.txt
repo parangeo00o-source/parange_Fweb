@@ -1,0 +1,28 @@
+Tool: built-in image_gen (transparent_background: true)
+Style: pre-rendered low-poly 3D arcade sprites; existing animation and gameplay retained.
+
+Source: angel-classic-mint-sky-v7.png
+Output: angel-retro-3d-v8.png
+Final prompt: Convert this exact right-facing chibi angel into a low-poly 3D game model render. Keep recognizable spiky head, hollow halo ring, wings, fists, large eyes, star decals and current fighting stance. Dominant ivory white; mint lit edges, light sky-blue shaded facets, aqua transitions. Deep teal eyes with mint highlights. Halo is a thin beveled 3D torus, feathers are simple chunky tapered polygon forms, fists and shoes have volume. Retain EXACT image-space pose and proportions, head center, hands, feet, wings, framing and portrait aspect ratio. This sprite is animated by an existing rig: front hand must stay centered at normalized (0.85,0.666), other hand around (0.58,0.70); don't move them. No weapons.
+
+STYLE TRANSFER to a late-1990s/early-2000s low-poly 3D arcade rhythm-game render, like the early polygonal dancers in a DDR console game. Clearly volumetric 3D mesh with broad polygonal planes, low polygon count, simple vertex-lit shading, low-resolution painted texture decals, matte surfaces, discrete angular silhouette edges, restrained specular on beveled edges. Key light from upper left, 3-4 simple light/shadow value bands. NOT pencil, NOT hand-drawn, NOT crayon, NOT stipple, NOT flat 2D illustration, NOT modern glossy toy/Pixar, NOT crystal triangulation everywhere. Remove all pencil/grain texture and fuzzy outlines. Keep a clean game-ready transparent alpha cutout, no background, no floor, no ground shadow, no halo/bloom beyond existing halo geometry, no text.
+
+Source: devil-pencil-magenta-crimson-v10.png
+Output: devil-retro-3d-v11.png
+Final prompt: Edit image 1: remove the white companion completely. Keep ONLY the charcoal-and-pink low-poly mascot. Use image 2 solely as the required layout: place the remaining dark mascot in precisely the same pose, size, silhouette and position as image 2, with the same hand/foot positions and square framing. Keep the 3D flat polygon shading of image 1, charcoal body, pink/red horns, wing, tail and stars, grey eye whites. Single complete isolated dark mascot on transparent alpha; no other character, no halo, no background or extra objects.
+
+Source: cloud-platform-mint-sky-v4.png
+Output: cloud-platform-retro-3d-v5.png
+Final prompt: Convert this exact wide cloud platform into a low-poly 3D game prop. Keep the same clustered cloud silhouette, overlapping lobes, curled ends, flat platform-like top, scattered small star decals and 2:1 composition. Clouds become chunky low-poly rounded volumes with visible broad shaded planes and shallow geometric curl grooves. Ivory white upper surfaces, mint rim faces, sky-blue undersides, aqua transitions. Low-angle elevated three-quarter view consistent with original, no pedestal. Preserve original dimensions relative to transparent canvas, margins and framing.
+
+STYLE TRANSFER to a late-1990s/early-2000s low-poly 3D arcade rhythm-game render, like the early polygonal dancers in a DDR console game. Clearly volumetric 3D mesh with broad polygonal planes, low polygon count, simple vertex-lit shading, low-resolution painted texture decals, matte surfaces, discrete angular silhouette edges, restrained specular on beveled edges. Key light from upper left, 3-4 simple light/shadow value bands. NOT pencil, NOT hand-drawn, NOT crayon, NOT stipple, NOT flat 2D illustration, NOT modern glossy toy/Pixar, NOT crystal triangulation everywhere. Remove all pencil/grain texture and fuzzy outlines. Keep a clean game-ready transparent alpha cutout, no background, no floor, no ground shadow, no halo/bloom beyond existing halo geometry, no text.
+
+Source: hell-cloud-platform-magenta-crimson-v8.png
+Output: hell-cloud-platform-retro-3d-v9.png
+Final prompt: Convert this exact wide dark cloud platform into a low-poly 3D game prop paired with a white mint cloud. Keep identical cloud silhouette, lobe positions, overlapping geometry, curled ends, flat platform-like top and existing star speckles as small painted texture decals. Chunky near-black charcoal polygonal volumes with broad dark graphite lit planes, magenta bevels blended with crimson accents and rose edge highlights. No fuzzy drawing texture. Low-angle elevated three-quarter view consistent with source. Preserve margins and 2:1 composition, no pedestal.
+
+STYLE TRANSFER to a late-1990s/early-2000s low-poly 3D arcade rhythm-game render, like the early polygonal dancers in a DDR console game. Clearly volumetric 3D mesh with broad polygonal planes, low polygon count, simple vertex-lit shading, low-resolution painted texture decals, matte surfaces, discrete angular silhouette edges, restrained specular on beveled edges. Key light from upper left, 3-4 simple light/shadow value bands. NOT pencil, NOT hand-drawn, NOT crayon, NOT stipple, NOT flat 2D illustration, NOT modern glossy toy/Pixar, NOT crystal triangulation everywhere. Remove all pencil/grain texture and fuzzy outlines. Keep a clean game-ready transparent alpha cutout, no background, no floor, no ground shadow, no halo/bloom beyond existing halo geometry, no text.
+
+Source: angel-feather-mint-sky-v3.png
+Output: angel-feather-retro-3d-v4.png
+Final prompt: Change the texture of this feather from a pencil drawing to a flat-shaded polygonal 3D render. Keep everything else identical, including the clean transparent background, shape, framing and mint, white, sky-blue colors. No glow.

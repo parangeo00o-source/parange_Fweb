@@ -1,0 +1,27 @@
+{
+  "scope": "G die: replace glass impact with neon polka-dot bird flock",
+  "browser": {
+    "passed": true,
+    "output": "/var/folders/1_/3f_r6y197637tbz4f74gx27r0000gn/T/parange-flock-HVlLzT",
+    "camera": "synthetic",
+    "checks": [
+      "G route",
+      "head gesture",
+      "idle unchanged",
+      "no held repeats",
+      "rearm",
+      "offscreen cleanup",
+      "mobile/landscape",
+      "legacy assets absent",
+      "hidden pause",
+      "track cleanup",
+      "late permission cancellation",
+      "reopen"
+    ]
+  },
+  "buildPassed": true,
+  "motionChecksPassed": true,
+  "artwork": "src/assets/bird-impact/neon-polka-flock-atlas-v1.png",
+  "generation": "built-in image_gen",
+  "limits": "Gesture and lifecycle integration tested with synthetic camera and landmarks; real-camera sensitivity not measured."
+}

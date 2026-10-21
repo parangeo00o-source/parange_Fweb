@@ -1,591 +1,279 @@
 import { requestCamera } from './analytics'
-import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
+import { FaceLandmarker, FilesetResolver, HandLandmarker, PoseLandmarker } from '@mediapipe/tasks-vision'
+import type { NormalizedLandmark } from '@mediapipe/tasks-vision'
 import { revealOnFirstVideoFrame } from './camera-page'
-import impactFrontalUrl from './assets/bird-impact/wing-impact-frontal-v1.png'
-import impactVUpUrl from './assets/bird-impact/wing-impact-v-up-v1.png'
-import impactDiagonalUrl from './assets/bird-impact/wing-impact-diagonal-v1.png'
-import impactRightUrl from './assets/bird-impact/wing-impact-right-v1.png'
-import impactCrescentUrl from './assets/bird-impact/wing-impact-crescent-v1.png'
-import impactFoldedUrl from './assets/bird-impact/wing-impact-folded-v1.png'
-import impactLegacyMainUrl from './assets/bird-impact/glass-bird-impact-photographic-v8.png'
-import impactLegacyLeftUrl from './assets/bird-impact/glass-bird-impact-variant-left-v1.png'
-import impactLegacyRightUrl from './assets/bird-impact/glass-bird-impact-variant-right-v1.png'
+import { createBirdFlock } from './bird-flock'
+import type { BirdFingerTarget } from './bird-flock'
+import { createBirdDizzy } from './bird-dizzy'
+import { createBirdImpactGraphic } from './bird-impact-graphic'
+import { isBirdCallingFinger, isBirdVictoryHand, createBirdVictoryGesture } from './bird-finger'
+import { createBirdArmTracker } from './bird-arm'
 
 type Point = { x: number; y: number }
-type GlassShard = {
-  points: Point[]
-  center: Point
-  velocityX: number
-  velocityY: number
-  rotation: number
-  tiltX: number
-  tiltY: number
-  delay: number
-  depth: number
-}
-type InteractionPhase = 'waiting' | 'calibrating' | 'ready' | 'armed' | 'broken'
+const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
 
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
-const distance = (first: Point, second: Point) => Math.hypot(first.x - second.x, first.y - second.y)
-
+/** G: two-hand V fireworks and a colourful flock called to extended index fingers. */
 export const createBirdImpactExperience = () => {
   const screen = document.createElement('section')
   screen.className = 'bird-impact-screen'
   screen.setAttribute('aria-hidden', 'true')
   screen.innerHTML = `
     <video class="bird-impact-camera" autoplay muted playsinline></video>
-    <canvas class="bird-impact-canvas" aria-label="새가 부딪힌 듯한 유리 균열 효과"></canvas>
+    <canvas class="bird-impact-canvas" aria-label="검지 위로 모이는 새 무리, 양손 브이로 터뜨리는 폭죽과 헤롱 별 효과"></canvas>
+    <button class="bird-impact-retry" type="button" hidden>카메라 다시 켜기</button>
     <button class="bird-impact-close" type="button" aria-label="주사위 화면으로 돌아가기"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="m16 16 16 16M32 16 16 32"/></svg></button>
   `
   document.body.append(screen)
-
-  const video = screen.querySelector<HTMLVideoElement>('.bird-impact-camera')!
-  const canvas = screen.querySelector<HTMLCanvasElement>('.bird-impact-canvas')!
+  const video = screen.querySelector<HTMLVideoElement>('video')!
+  const canvas = screen.querySelector<HTMLCanvasElement>('canvas')!
   const context = canvas.getContext('2d', { alpha: false, desynchronized: true })!
-  const fragmentSurface = document.createElement('canvas')
-  const fragmentContext = fragmentSurface.getContext('2d', { alpha: false, desynchronized: true })!
   const closeButton = screen.querySelector<HTMLButtonElement>('.bird-impact-close')!
-  const impactTextures = [
-    impactLegacyMainUrl,
-    impactLegacyLeftUrl,
-    impactLegacyRightUrl,
-    impactFrontalUrl,
-    impactVUpUrl,
-    impactDiagonalUrl,
-    impactRightUrl,
-    impactCrescentUrl,
-    impactFoldedUrl,
-  ].map((source) => {
-    const image = new Image()
-    image.decoding = 'async'
-    image.src = source
-    return image
-  })
-
-  let stream: MediaStream | null = null
-  let outputStream: MediaStream | null = null
+  const retryButton = screen.querySelector<HTMLButtonElement>('.bird-impact-retry')!
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+  const victory = createBirdVictoryGesture(), flock = createBirdFlock()
+  const dizzy = createBirdDizzy()
+  const graphic = createBirdImpactGraphic()
+  let headSpan = .2
+  let impactAnchor: Point = { x: .5, y: .3 }
+  let stream: MediaStream | null = null, outputStream: MediaStream | null = null
   let faceLandmarker: FaceLandmarker | null = null
-  let open = false
-  let tracking = false
-  let animation = 0
-  let width = 1
-  let height = 1
-  let pixelRatio = 1
-  let phase: InteractionPhase = 'waiting'
-  let calibrationStartedAt = 0
-  let lastInferenceAt = 0
-  let lastVideoTime = -1
-  let lastFaceAt = 0
-  let baselineSize = 0
-  let retreatSize = 0
-  let previousSize = 0
-  let previousSizeAt = 0
-  let impactAt = 0
-  let dizzyOrigin: Point = { x: 0, y: 0 }
-  let dizzyFaceSize = 0
-  let glassShards: GlassShard[] = []
-  let activeTextureIndex = 0
-  let previousTextureIndex = -1
-  let fragmentTextureIndex = -1
-  let clearTimer: number | null = null
+  let handLandmarker: HandLandmarker | null = null
+  let poseLandmarker: PoseLandmarker | null = null
+  let lastPoseAt = -Infinity, lastPoseVideoTime = -1, pose: NormalizedLandmark[] = []
+  let needsArmTracking = false, poseInterval = 140
+  const armTracker = createBirdArmTracker()
+  let lastHandInferenceAt = -Infinity, lastHandVideoTime = -1
+  const fingers = new Map<string, { since: number; seen: number; anchor: BirdFingerTarget }>()
+  const resetFinger = () => {
+    lastHandInferenceAt = -Infinity; lastHandVideoTime = -1
+    fingers.clear(); victory.reset()
+    pose = []; lastPoseAt = -Infinity; lastPoseVideoTime = -1
+    needsArmTracking = false; poseInterval = 140; armTracker.reset()
+  }
+  let open = false, tracking = false, starting = false, generation = 0
+  let animation = 0, width = 1, height = 1, pixelRatio = 1, needsResize = true
+  let lastRenderAt = -Infinity, lastInferenceAt = -Infinity, lastVideoTime = -1
 
   const resize = () => {
-    width = Math.max(1, window.innerWidth)
-    height = Math.max(1, window.innerHeight)
-    pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5)
-    canvas.width = Math.round(width * pixelRatio)
-    canvas.height = Math.round(height * pixelRatio)
-    canvas.style.width = `${width}px`
-    canvas.style.height = `${height}px`
-    fragmentTextureIndex = -1
+    const ratio = Math.min(window.devicePixelRatio || 1, 1.5)
+    if (!needsResize && ratio === pixelRatio) return
+    needsResize = false
+    width = Math.max(1, window.innerWidth); height = Math.max(1, window.innerHeight); pixelRatio = ratio
+    const w = Math.round(width * ratio), h = Math.round(height * ratio)
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h }
   }
-
-  const prepareFragmentTexture = (texture: HTMLImageElement) => {
-    if (!texture.complete || !texture.naturalWidth) return false
-    if (fragmentTextureIndex === activeTextureIndex && fragmentSurface.width === canvas.width && fragmentSurface.height === canvas.height) return true
-    fragmentSurface.width = canvas.width
-    fragmentSurface.height = canvas.height
-    fragmentContext.setTransform(1, 0, 0, 1, 0, 0)
-    fragmentContext.clearRect(0, 0, fragmentSurface.width, fragmentSurface.height)
-    fragmentContext.drawImage(texture, 0, 0, fragmentSurface.width, fragmentSurface.height)
-    fragmentTextureIndex = activeTextureIndex
-    return true
-  }
-
   const cover = () => {
-    const sourceWidth = video.videoWidth || 1280
-    const sourceHeight = video.videoHeight || 720
+    const sourceWidth = video.videoWidth || 1280, sourceHeight = video.videoHeight || 720
     const scale = Math.max(width / sourceWidth, height / sourceHeight)
-    const drawWidth = sourceWidth * scale
-    const drawHeight = sourceHeight * scale
+    const drawWidth = sourceWidth * scale, drawHeight = sourceHeight * scale
     return { drawWidth, drawHeight, left: (width - drawWidth) / 2, top: (height - drawHeight) / 2 }
   }
-
-  const pointFor = (landmark: { x: number; y: number }): Point => {
-    const view = cover()
-    return { x: width - (view.left + landmark.x * view.drawWidth), y: view.top + landmark.y * view.drawHeight }
+  const triggerImpact = (origin: Point, now: number) => {
+    const graphicEndsAt = graphic.burst(origin, now, width, height, headSpan)
+    dizzy.hideUntil(graphicEndsAt)
+    flock.release(now); fingers.clear()
+    needsArmTracking = false; pose = []; armTracker.reset()
   }
-
-  const resetInteraction = (preserveCalibration = false) => {
-    phase = tracking && preserveCalibration && baselineSize ? 'ready' : 'waiting'
-    calibrationStartedAt = 0
-    lastFaceAt = 0
-    if (!preserveCalibration) baselineSize = 0
-    retreatSize = preserveCalibration ? baselineSize : 0
-    previousSize = preserveCalibration ? baselineSize : 0
-    previousSizeAt = 0
-    impactAt = 0
-    if (!preserveCalibration) {
-      dizzyOrigin = { x: 0, y: 0 }
-      dizzyFaceSize = 0
-    }
-    glassShards = []
+  const inferPose = (now: number) => {
+    if (!tracking || !needsArmTracking || !poseLandmarker || video.readyState < 2 || now - lastPoseAt < poseInterval || video.currentTime === lastPoseVideoTime) return false
+    const next = poseLandmarker.detectForVideo(video, now).landmarks[0] ?? []
+    const visible = [13, 14, 15, 16].filter(i => next[i] && next[i].visibility > .55)
+    const stable = visible.length >= 2 && visible.every(i => pose[i]
+      && Math.hypot((next[i].x - pose[i].x) * video.videoWidth / video.videoHeight, next[i].y - pose[i].y) < .008)
+    poseInterval = stable ? 200 : visible.length ? 115 : 160
+    pose = next; lastPoseAt = now; lastPoseVideoTime = video.currentTime
+    return true
   }
-
-  const createGlassShards = (origin: Point): GlassShard[] => {
-    const columns = 8
-    const rows = 5
-    const cellWidth = width / columns
-    const cellHeight = height / rows
-    const vertices: Point[][] = Array.from({ length: rows + 1 }, (_, row) =>
-      Array.from({ length: columns + 1 }, (_, column) => {
-        const edge = row === 0 || row === rows || column === 0 || column === columns
-        return {
-          x: column * cellWidth + (edge ? 0 : (Math.random() - .5) * cellWidth * .44),
-          y: row * cellHeight + (edge ? 0 : (Math.random() - .5) * cellHeight * .44),
-        }
-      }),
-    )
-
-    const createShard = (points: Point[]): GlassShard => {
-      const center = points.reduce((total, point) => ({ x: total.x + point.x / points.length, y: total.y + point.y / points.length }), { x: 0, y: 0 })
-      const side = (center.x - origin.x) / Math.max(width, 1)
-      const heightBias = 1 - center.y / Math.max(height, 1)
-      return {
-        points,
-        center,
-        velocityX: side * (280 + Math.random() * 360) + (Math.random() - .5) * 130,
-        velocityY: 260 + Math.random() * 260 + heightBias * 150,
-        rotation: (Math.random() - .5) * (1.05 + Math.abs(side) * 1.5),
-        tiltX: (Math.random() - .5) * (1.8 + Math.abs(side) * .8),
-        tiltY: (Math.random() - .5) * (2.2 + Math.abs(side) * .8),
-        delay: Math.random() * 150,
-        depth: .45 + Math.random() * .75,
-      }
-    }
-
-    return Array.from({ length: rows * columns }, (_, index) => {
-      const row = Math.floor(index / columns)
-      const column = index % columns
-      const topLeft = vertices[row][column]
-      const topRight = vertices[row][column + 1]
-      const bottomRight = vertices[row + 1][column + 1]
-      const bottomLeft = vertices[row + 1][column]
-      return Math.random() > .5
-        ? [createShard([topLeft, topRight, bottomRight]), createShard([topLeft, bottomRight, bottomLeft])]
-        : [createShard([topLeft, topRight, bottomLeft]), createShard([topRight, bottomRight, bottomLeft])]
-    }).flat()
-  }
-
-  const selectImpactTexture = () => {
-    const candidates = impactTextures.map((_, index) => index).filter((index) => index !== previousTextureIndex)
-    activeTextureIndex = candidates[Math.floor(Math.random() * candidates.length)]
-    previousTextureIndex = activeTextureIndex
-  }
-
-  const tracePolygon = (drawingContext: CanvasRenderingContext2D, points: Point[]) => {
-    drawingContext.beginPath()
-    drawingContext.moveTo(points[0].x, points[0].y)
-    points.slice(1).forEach((point) => drawingContext.lineTo(point.x, point.y))
-    drawingContext.closePath()
-  }
-
-  const projectShard = (shard: GlassShard, local: number, movement: number, offsetX: number, offsetY: number) => {
-    const rotateZ = shard.rotation * movement
-    const rotateX = shard.tiltX * movement
-    const rotateY = shard.tiltY * movement
-    const cosX = Math.cos(rotateX)
-    const sinX = Math.sin(rotateX)
-    const cosY = Math.cos(rotateY)
-    const sinY = Math.sin(rotateY)
-    const cosZ = Math.cos(rotateZ)
-    const sinZ = Math.sin(rotateZ)
-    const focalLength = Math.max(width, height) * 1.2
-    const points = shard.points.map((point) => {
-      const x = point.x - shard.center.x
-      const y = point.y - shard.center.y
-      const xAfterY = x * cosY
-      const zAfterY = -x * sinY
-      const yAfterX = y * cosX - zAfterY * sinX
-      const zAfterX = y * sinX + zAfterY * cosX + local * shard.depth * 80
-      const xAfterZ = xAfterY * cosZ - yAfterX * sinZ
-      const yAfterZ = xAfterY * sinZ + yAfterX * cosZ
-      const perspective = focalLength / Math.max(focalLength + zAfterX, focalLength * .35)
-      return {
-        x: shard.center.x + offsetX + xAfterZ * perspective,
-        y: shard.center.y + offsetY + yAfterZ * perspective,
+  const inferHand = (now: number) => {
+    if (!tracking || !handLandmarker || video.readyState < 2 || now - lastHandInferenceAt < 80 || video.currentTime === lastHandVideoTime) return
+    lastHandInferenceAt = now; lastHandVideoTime = video.currentTime
+    const result = handLandmarker.detectForVideo(video, now), view = cover()
+    const bothV = result.landmarks.length === 2 && result.landmarks.every(hand => isBirdVictoryHand(hand, video.videoWidth / video.videoHeight))
+    if (victory.sample(bothV, now)) triggerImpact({ x: impactAnchor.x * width, y: impactAnchor.y * height }, now)
+    if (graphic.active(now)) { flock.release(now); fingers.clear(); return }
+    const needsArm = result.landmarks.some(hand => isBirdCallingFinger(hand, video.videoWidth / video.videoHeight)
+      && Math.abs((hand[8].x - hand[5].x) * view.drawWidth) > Math.abs((hand[8].y - hand[5].y) * view.drawHeight))
+    needsArmTracking = needsArm
+    if (!needsArm) { pose = []; armTracker.reset() }
+    const matchedWrists = new Set<number>()
+    result.landmarks.forEach((hand, index) => {
+      if (!isBirdCallingFinger(hand, video.videoWidth / video.videoHeight)) return
+      const key = result.handedness[index]?.[0]?.categoryName ?? `hand-${index}`
+      const tip = hand[8], base = hand[5], previous = fingers.get(key)
+      const dx = -(tip.x - base.x) * view.drawWidth, dy = (tip.y - base.y) * view.drawHeight
+      // Hysteresis prevents rapid pose changes near the diagonal threshold.
+      const horizontal = Math.abs(dx) > Math.abs(dy) * (previous?.anchor.horizontal ? 1.05 : 1.4)
+      const palm = { x: (hand[0].x + hand[5].x + hand[17].x) / 3, y: (hand[0].y + hand[5].y + hand[17].y) / 3 }
+      const perchPath = [8, 7, 6, 5, 0].map(i => ({
+        x: 1 - (view.left + hand[i].x * view.drawWidth) / width,
+        y: (view.top + hand[i].y * view.drawHeight) / height,
+      }))
+      const elbow = horizontal ? armTracker.sample(key, hand, pose, video.videoWidth / video.videoHeight, now, lastPoseAt, matchedWrists) : null
+      if (elbow) perchPath.push({
+        x: 1 - (view.left + elbow.x * view.drawWidth) / width,
+        y: (view.top + elbow.y * view.drawHeight) / height,
+      })
+      const target = { key, x: clamp(1 - (view.left + tip.x * view.drawWidth) / width, 0, 1), y: clamp((view.top + tip.y * view.drawHeight) / height, 0, 1), horizontal, direction: Math.sign(dx),
+        perchPath,
+        palmX: clamp(1 - (view.left + palm.x * view.drawWidth) / width, 0, 1), palmY: clamp((view.top + palm.y * view.drawHeight) / height, 0, 1),
+        span: Math.hypot((hand[5].x - hand[17].x) * view.drawWidth, (hand[5].y - hand[17].y) * view.drawHeight) / Math.min(width, height) }
+      if (!previous) fingers.set(key, { since: now, seen: now, anchor: target })
+      else {
+        previous.seen = now
+        previous.anchor.x += (target.x - previous.anchor.x) * .45
+        previous.anchor.y += (target.y - previous.anchor.y) * .45
+        previous.anchor.palmX = (previous.anchor.palmX ?? target.palmX) * .55 + target.palmX * .45
+        previous.anchor.palmY = (previous.anchor.palmY ?? target.palmY) * .55 + target.palmY * .45
+        previous.anchor.span = (previous.anchor.span ?? target.span) * .55 + target.span * .45
+        previous.anchor.perchPath = target.perchPath.map((point, i) => i >= 5 ? point : ({
+          x: (previous.anchor.perchPath?.[i]?.x ?? point.x) * .55 + point.x * .45,
+          y: (previous.anchor.perchPath?.[i]?.y ?? point.y) * .55 + point.y * .45,
+        }))
+        previous.anchor.horizontal = horizontal; previous.anchor.direction = target.direction
       }
     })
-    const lighting = clamp(.48 + Math.sin(rotateY) * .25 - Math.sin(rotateX) * .18, .12, .88)
-    return { points, lighting }
+    for (const [key, finger] of fingers) if (now - finger.seen > 260) fingers.delete(key)
+    const anchors = [...fingers.values()].filter(finger => now - finger.since >= 80).map(finger => ({ ...finger.anchor }))
+    if (anchors.length) flock.gather(now, anchors)
+    else flock.release(now)
   }
-
-  const affineTransform = (source: Point[], destination: Point[]) => {
-    const sourceX1 = source[1].x - source[0].x
-    const sourceY1 = source[1].y - source[0].y
-    const sourceX2 = source[2].x - source[0].x
-    const sourceY2 = source[2].y - source[0].y
-    const destinationX1 = destination[1].x - destination[0].x
-    const destinationY1 = destination[1].y - destination[0].y
-    const destinationX2 = destination[2].x - destination[0].x
-    const destinationY2 = destination[2].y - destination[0].y
-    const determinant = sourceX1 * sourceY2 - sourceX2 * sourceY1
-    if (Math.abs(determinant) < .001) return null
-    const a = (destinationX1 * sourceY2 - destinationX2 * sourceY1) / determinant
-    const b = (destinationY1 * sourceY2 - destinationY2 * sourceY1) / determinant
-    const c = (sourceX1 * destinationX2 - sourceX2 * destinationX1) / determinant
-    const d = (sourceX1 * destinationY2 - sourceX2 * destinationY1) / determinant
-    return { a, b, c, d, e: destination[0].x - a * source[0].x - c * source[0].y, f: destination[0].y - b * source[0].x - d * source[0].y }
-  }
-
-  const triggerImpact = (origin: Point = { x: width / 2, y: height / 2 }, faceSize = Math.min(width, height) * .16) => {
-    if (phase === 'broken') return
-    impactAt = performance.now()
-    dizzyOrigin = { x: origin.x, y: Math.max(62, origin.y - faceSize * 1.05) }
-    dizzyFaceSize = faceSize
-    selectImpactTexture()
-    glassShards = createGlassShards(origin)
-    phase = 'broken'
-    screen.classList.add('is-broken')
-    if (clearTimer !== null) window.clearTimeout(clearTimer)
-    clearTimer = window.setTimeout(() => {
-      clearTimer = null
-      screen.classList.remove('is-broken')
-      resetInteraction(true)
-    }, 5_150)
-  }
-
   const inferFace = (now: number) => {
-    const inferenceInterval = phase === 'broken' ? 72 : 48
-    if (!tracking || !faceLandmarker || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || now - lastInferenceAt < inferenceInterval || video.currentTime === lastVideoTime) return
-    lastInferenceAt = now
-    lastVideoTime = video.currentTime
+    if (!tracking || !faceLandmarker || video.readyState < 2 || now - lastInferenceAt < 48 || video.currentTime === lastVideoTime) return
+    lastInferenceAt = now; lastVideoTime = video.currentTime
     const face = faceLandmarker.detectForVideo(video, now).faceLandmarks[0]
-    if (!face?.[33] || !face[263]) {
-      if (phase === 'armed' && now - lastFaceAt > 520) {
-        phase = 'ready'
-      }
-      return
-    }
-    lastFaceAt = now
-    const leftTemple = pointFor(face[33])
-    const rightTemple = pointFor(face[263])
-    const center = pointFor(face[1] ?? face[33])
-    const forehead = pointFor(face[10] ?? face[1] ?? face[33])
-    const size = distance(leftTemple, rightTemple)
-    if (phase === 'broken') {
-      // Keep the halo locked to the person's crown even while the impact
-      // animation is playing and the rest of interaction tracking is paused.
-      dizzyOrigin = { x: forehead.x, y: Math.max(48, forehead.y - size * .4) }
-      dizzyFaceSize = size
-      return
-    }
-    if (!baselineSize) {
-      baselineSize = size
-      retreatSize = size
-      previousSize = size
-      previousSizeAt = now
-      calibrationStartedAt = now
-      phase = 'calibrating'
-      return
-    }
-    if (phase === 'calibrating') {
-      baselineSize += (size - baselineSize) * .12
-      retreatSize = Math.min(retreatSize || size, size)
-      if (now - calibrationStartedAt > 720) {
-        phase = 'ready'
-      }
-    } else if (phase === 'ready') {
-      retreatSize = Math.min(retreatSize || size, size)
-      if (size <= baselineSize * 1.12) {
-        phase = 'armed'
-        retreatSize = Math.min(retreatSize, size)
-        calibrationStartedAt = now
-      }
-    } else if (phase === 'armed') {
-      retreatSize = Math.min(retreatSize, size)
-      const elapsed = Math.max(now - previousSizeAt, 1)
-      const speed = (size - previousSize) / elapsed
-      const forwardRatio = size / Math.max(retreatSize, 1)
-      const centered = Math.abs(center.x - width / 2) < width * .32 && Math.abs(center.y - height / 2) < height * .31
-      if (centered && forwardRatio > 1.17 && speed > .095) triggerImpact(center, size)
-      else if (now - calibrationStartedAt > 12_000) {
-        phase = 'ready'
-        baselineSize = size
-        retreatSize = size
-      }
-    }
-    previousSize = size
-    previousSizeAt = now
-  }
-
-  const drawCamera = () => {
-    context.fillStyle = '#182226'
-    context.fillRect(0, 0, width, height)
-    if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return
+    if (!face?.[33] || !face[263] || !face[1]) return
     const view = cover()
-    context.save()
-    context.translate(width, 0)
-    context.scale(-1, 1)
-    context.drawImage(video, view.left, view.top, view.drawWidth, view.drawHeight)
-    context.restore()
+    const pointFor = (p: Point) => ({ x: width - (view.left + p.x * view.drawWidth), y: view.top + p.y * view.drawHeight })
+    const left = pointFor(face[33]), right = pointFor(face[263])
+    const crown = pointFor(face[10] ?? face[1])
+    const size = Math.hypot(left.x - right.x, left.y - right.y)
+    headSpan = size / Math.min(width, height)
+    impactAnchor = { x: crown.x / width, y: (crown.y - size * .15) / height }
+    graphic.follow({ ...impactAnchor, span: headSpan })
+    const haloAnchor = { x: crown.x / width, y: (crown.y - size * .28) / height, span: headSpan }
+    dizzy.show(now, haloAnchor)
+    dizzy.follow(haloAnchor)
   }
-
-  const drawDizzy = (now: number) => {
-    if (!impactAt) return
-    const elapsed = now - impactAt
-    // The dizzy moment begins as the falling glass clears the face area.
-    const entrance = clamp((elapsed - 2_720) / 220, 0, 1)
-    const exit = clamp((5_150 - elapsed) / 600, 0, 1)
-    const visibility = entrance * exit
-    if (!visibility) return
-    const center = { x: dizzyOrigin.x, y: clamp(dizzyOrigin.y, 52, height * .36) }
-    const spin = (elapsed - 2_720) * .0052
-    const haloWidth = clamp(dizzyFaceSize * .74, 58, Math.min(width, height) * .3)
-    const haloHeight = haloWidth * .22
-    context.save()
-    context.globalCompositeOperation = 'lighter'
-    context.globalAlpha = visibility
-    context.translate(center.x, center.y)
-    context.rotate(Math.sin(spin) * .12)
-    context.strokeStyle = 'rgba(255, 255, 255, .88)'
-    context.lineWidth = 3.4
-    context.shadowColor = 'rgba(255, 255, 255, .5)'
-    context.shadowBlur = 9
-    context.beginPath()
-    context.ellipse(0, 0, haloWidth, haloHeight, 0, 0, Math.PI * 2)
-    context.stroke()
-    context.strokeStyle = 'rgba(255, 255, 255, .96)'
-    context.lineWidth = 1
-    context.shadowBlur = 0
-    context.beginPath()
-    context.ellipse(0, 0, haloWidth * .77, haloHeight * .56, 0, 0, Math.PI * 2)
-    context.stroke()
-
-    const starColors = ['rgba(255, 255, 255, .98)', 'rgba(255, 255, 255, .98)', 'rgba(255, 255, 255, .98)']
-    for (let index = 0; index < 3; index += 1) {
-      const angle = spin * 1.75 + index * (Math.PI * 2 / 3)
-      const x = Math.cos(angle) * haloWidth
-      const y = Math.sin(angle) * haloHeight * 1.9
-      context.save()
-      context.translate(x, y)
-      context.rotate(angle - Math.PI / 2)
-      context.fillStyle = starColors[index]
-      context.shadowColor = starColors[index]
-      context.shadowBlur = 8
-      context.beginPath()
-      for (let point = 0; point < 10; point += 1) {
-        const radius = point % 2 === 0 ? 7.2 : 3.6
-        const pointAngle = -Math.PI / 2 + point * Math.PI / 5
-        const starX = Math.cos(pointAngle) * radius
-        const starY = Math.sin(pointAngle) * radius
-        if (point === 0) context.moveTo(starX, starY)
-        else context.lineTo(starX, starY)
-      }
-      context.closePath()
-      context.fill()
-      context.shadowBlur = 0
-      context.fillStyle = 'rgba(255, 255, 245, .8)'
-      context.beginPath()
-      context.arc(-1.5, .2, .75, 0, Math.PI * 2)
-      context.arc(1.5, .2, .75, 0, Math.PI * 2)
-      context.fill()
-      context.restore()
-    }
-    context.restore()
-  }
-
-  const drawGlass = (now: number) => {
-    if (!impactAt) return
-    const impactTexture = impactTextures[activeTextureIndex]
-    const elapsed = now - impactAt
-    const flash = clamp(1 - elapsed / 145, 0, 1)
-    if (flash) {
-      context.fillStyle = `rgba(238, 255, 255, ${flash * .44})`
-      context.fillRect(0, 0, width, height)
-    }
-    const textureProgress = clamp((elapsed - 42) / 460, 0, 1)
-    const eased = 1 - Math.pow(1 - textureProgress, 3)
-
-    if (impactTexture.complete && impactTexture.naturalWidth) {
-      const hasFragmentTexture = prepareFragmentTexture(impactTexture)
-      const textureSource = hasFragmentTexture ? fragmentSurface : impactTexture
-      const textureWidth = hasFragmentTexture ? fragmentSurface.width : width
-      const textureHeight = hasFragmentTexture ? fragmentSurface.height : height
-      const textureCoordinateScale = hasFragmentTexture ? 1 : pixelRatio
-      context.save()
-      context.globalCompositeOperation = 'lighter'
-      context.globalAlpha = .78 + eased * .22
-
-      if (elapsed < 2_000) {
-        if (hasFragmentTexture) {
-          context.setTransform(1, 0, 0, 1, 0, 0)
-          context.drawImage(fragmentSurface, 0, 0)
-        } else {
-          context.drawImage(impactTexture, 0, 0, width, height)
-        }
-      } else {
-        // After the two-second hold, the photographed texture itself is
-        // clipped into irregular pieces. Each piece keeps its crack detail,
-        // then falls and rotates beyond the lower edge under gravity.
-        const fallElapsed = elapsed - 2_000
-        for (const shard of glassShards) {
-          const local = clamp((fallElapsed - shard.delay) / 1_350, 0, 1)
-          if (local <= 0) {
-            context.save()
-            const points = hasFragmentTexture ? shard.points.map((point) => ({ x: point.x * pixelRatio, y: point.y * pixelRatio })) : shard.points
-            context.setTransform(textureCoordinateScale, 0, 0, textureCoordinateScale, 0, 0)
-            tracePolygon(context, points)
-            context.clip()
-            context.setTransform(textureCoordinateScale, 0, 0, textureCoordinateScale, 0, 0)
-            context.drawImage(textureSource, 0, 0, textureWidth, textureHeight)
-            context.restore()
-            continue
-          }
-          const time = local * 1.45
-          const movement = local * local * (3 - 2 * local)
-          const offsetX = shard.velocityX * time
-          const offsetY = shard.velocityY * time + 620 * time * time
-          const projection = projectShard(shard, local, movement, offsetX, offsetY)
-          const sourcePoints = hasFragmentTexture ? shard.points.map((point) => ({ x: point.x * pixelRatio, y: point.y * pixelRatio })) : shard.points
-          const destinationPoints = hasFragmentTexture ? projection.points.map((point) => ({ x: point.x * pixelRatio, y: point.y * pixelRatio })) : projection.points
-          const transform = affineTransform(sourcePoints, destinationPoints)
-          if (!transform) continue
-          context.save()
-          context.setTransform(textureCoordinateScale, 0, 0, textureCoordinateScale, 0, 0)
-          tracePolygon(context, destinationPoints)
-          context.clip()
-          context.setTransform(
-            transform.a * textureCoordinateScale,
-            transform.b * textureCoordinateScale,
-            transform.c * textureCoordinateScale,
-            transform.d * textureCoordinateScale,
-            transform.e * textureCoordinateScale,
-            transform.f * textureCoordinateScale,
-          )
-          context.drawImage(textureSource, 0, 0, textureWidth, textureHeight)
-
-          // The face, dark side and rim all follow the perspective-projected
-          // triangle. This lets shards tip toward/away from the camera rather
-          // than behaving as flat rotating crops.
-          context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
-          context.globalCompositeOperation = 'source-over'
-          context.globalAlpha = local * (1 - projection.lighting) * (.08 + shard.depth * .09)
-          context.fillStyle = 'rgba(3, 12, 16, .9)'
-          tracePolygon(context, projection.points)
-          context.fill()
-          context.globalAlpha = local * projection.lighting * .11
-          context.fillStyle = 'rgba(230, 249, 252, .9)'
-          tracePolygon(context, projection.points)
-          context.fill()
-          context.globalAlpha = local * (.1 + shard.depth * .12)
-          context.strokeStyle = 'rgba(3, 10, 14, .95)'
-          context.lineJoin = 'round'
-          context.lineWidth = 3 + shard.depth * 2
-          context.shadowColor = 'rgba(0, 0, 0, .5)'
-          context.shadowBlur = 4 + shard.depth * 5
-          context.shadowOffsetX = 2 + shard.depth * 2
-          context.shadowOffsetY = 4 + shard.depth * 3
-          tracePolygon(context, projection.points)
-          context.stroke()
-          context.globalAlpha = local * (.24 + shard.depth * .18)
-          context.strokeStyle = 'rgba(226, 245, 248, .82)'
-          context.lineWidth = .65 + shard.depth * .45
-          context.shadowColor = 'transparent'
-          context.shadowBlur = 0
-          context.shadowOffsetX = 0
-          context.shadowOffsetY = 0
-          tracePolygon(context, projection.points)
-          context.stroke()
-          context.restore()
-        }
-      }
-      context.restore()
-    }
-  }
-
-  const render = (now: number) => {
-    animation = requestAnimationFrame(render)
+  const drawScene = (now: number) => {
+    resize()
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
-    drawCamera()
-    inferFace(now)
-    drawGlass(now)
-    drawDizzy(now)
+    if (video.readyState >= 2) {
+      const view = cover()
+      context.save(); context.translate(width, 0); context.scale(-1, 1)
+      context.drawImage(video, view.left, view.top, view.drawWidth, view.drawHeight); context.restore()
+    } else {
+      context.fillStyle = '#182226'; context.fillRect(0, 0, width, height)
+    }
+    // Back to front: camera → flock → fireworks / persistent head halo.
+    flock.draw(context, now, width, height, reducedMotion.matches)
+    graphic.draw(context, now, width, height, reducedMotion.matches)
+    dizzy.draw(context, now, width, height, reducedMotion.matches)
   }
-
+  const render = (now: number) => {
+    animation = 0
+    if (!open || document.hidden) return
+    const interval = (flock.active(now) || dizzy.active(now) || graphic.active(now)) && !reducedMotion.matches ? 1000 / 60 : 1000 / 30
+    if (now - lastRenderAt >= interval - 1) {
+      resize()
+      // Run at most one ML inference per animation frame; the art still renders at 60 fps.
+      if (tracking && video.readyState >= 2 && now - lastHandInferenceAt >= 80 && video.currentTime !== lastHandVideoTime) inferHand(now)
+      else if (!inferPose(now)) inferFace(now)
+      drawScene(now); lastRenderAt = now
+    }
+    animation = requestAnimationFrame(render)
+  }
+  const releaseCamera = () => {
+    tracking = false
+    faceLandmarker?.close(); faceLandmarker = null
+    handLandmarker?.close(); handLandmarker = null; resetFinger()
+    poseLandmarker?.close(); poseLandmarker = null
+    stream?.getTracks().forEach(track => track.stop()); stream = null
+    outputStream?.getTracks().forEach(track => track.stop()); outputStream = null
+    video.srcObject = null
+  }
   const startCamera = async () => {
-    if (tracking) return
-    if (!navigator.mediaDevices?.getUserMedia) return
+    if (!open || tracking || starting) return
+    starting = true; retryButton.hidden = true
+    const current = generation, isCurrent = () => open && generation === current
+    let camera: MediaStream | null = null, model: FaceLandmarker | null = null, handModel: HandLandmarker | null = null, poseModel: PoseLandmarker | null = null
     try {
-      stream = await requestCamera({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
-      video.srcObject = stream
-      await video.play()
+      // Request permission from the navigation gesture. Prepare the artwork
+      // while the video starts, never during an individual wingbeat.
+      camera = await requestCamera({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } }, audio: false })
+      if (!isCurrent()) { camera.getTracks().forEach(track => track.stop()); return }
+      stream = camera; video.srcObject = camera
+      if (document.hidden) camera.getVideoTracks().forEach(track => { track.enabled = false })
+      await Promise.all([video.play(), flock.prepare(), graphic.prepare()])
+      if (!isCurrent()) return
       revealOnFirstVideoFrame(screen, video)
       const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm')
-      faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-        baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task' },
-        runningMode: 'VIDEO',
-        numFaces: 1,
-      })
-      tracking = true
+      if (!isCurrent()) return
+      const options = { runningMode: 'VIDEO' as const, numFaces: 1 }
+      const modelAssetPath = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task'
+      try {
+        model = await FaceLandmarker.createFromOptions(vision, { ...options, baseOptions: { modelAssetPath, delegate: 'GPU' } })
+      } catch {
+        if (!isCurrent()) return
+        model = await FaceLandmarker.createFromOptions(vision, { ...options, baseOptions: { modelAssetPath, delegate: 'CPU' } })
+      }
+      if (!isCurrent()) { model.close(); return }
+      const handModelPath = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task'
+      try {
+        handModel = await HandLandmarker.createFromOptions(vision, { runningMode: 'VIDEO', numHands: 2, baseOptions: { modelAssetPath: handModelPath, delegate: 'GPU' } })
+      } catch {
+        if (!isCurrent()) { model.close(); return }
+        handModel = await HandLandmarker.createFromOptions(vision, { runningMode: 'VIDEO', numHands: 2, baseOptions: { modelAssetPath: handModelPath, delegate: 'CPU' } })
+      }
+      if (!isCurrent()) { model.close(); handModel.close(); return }
+      const poseModelPath = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'
+      try {
+        poseModel = await PoseLandmarker.createFromOptions(vision, { runningMode: 'VIDEO', numPoses: 1, outputSegmentationMasks: false, baseOptions: { modelAssetPath: poseModelPath, delegate: 'GPU' } })
+      } catch {
+        if (!isCurrent()) { model.close(); handModel.close(); return }
+        poseModel = await PoseLandmarker.createFromOptions(vision, { runningMode: 'VIDEO', numPoses: 1, outputSegmentationMasks: false, baseOptions: { modelAssetPath: poseModelPath, delegate: 'CPU' } })
+      }
+      if (!isCurrent()) { model.close(); handModel.close(); poseModel.close(); return }
+      faceLandmarker = model; handLandmarker = handModel; poseLandmarker = poseModel; tracking = true; resetFinger()
+      lastVideoTime = -1; lastInferenceAt = -Infinity
       screen.classList.add('is-tracking')
-      resetInteraction()
     } catch (error) {
-      console.error('Bird Impact camera:', error)
-      screen.classList.remove('is-camera-pending')
-      stream?.getTracks().forEach((track) => track.stop())
-      stream = null
-      video.srcObject = null
-    }
+      model?.close(); handModel?.close(); poseModel?.close()
+      camera?.getTracks().forEach(track => track.stop())
+      if (!isCurrent()) return
+      console.error('Bird flock camera:', error)
+      releaseCamera()
+      screen.classList.remove('is-camera-pending', 'is-tracking')
+      retryButton.hidden = false
+    } finally { if (isCurrent()) starting = false }
   }
-
-  screen.addEventListener('pointerup', (event) => {
-    if (event.target instanceof Element && event.target.closest('.bird-impact-close')) return
-    void startCamera()
-  })
   closeButton.addEventListener('click', () => history.back())
-  window.addEventListener('resize', resize, { passive: true })
-
+  retryButton.addEventListener('click', () => { void startCamera() })
+  window.addEventListener('resize', () => { needsResize = true }, { passive: true })
+  document.addEventListener('visibilitychange', () => {
+    if (!open) return
+    if (document.hidden) {
+      cancelAnimationFrame(animation); animation = 0
+      stream?.getVideoTracks().forEach(track => { track.enabled = false })
+    } else {
+      stream?.getVideoTracks().forEach(track => { track.enabled = true })
+      flock.reset(); dizzy.reset(); graphic.reset(); resetFinger(); lastVideoTime = -1; lastRenderAt = -Infinity
+      if (!animation) animation = requestAnimationFrame(render)
+    }
+  })
   return {
     open: () => {
-      open = true
-      resize()
-      resetInteraction()
-      screen.classList.add('is-open')
-      screen.classList.add('is-camera-pending')
-      screen.setAttribute('aria-hidden', 'false')
-      animation = requestAnimationFrame(render)
-      // G-die navigation opens synchronously from a user action, so this can
-      // request permission without leaving a camera icon over the live image.
-      void startCamera()
-      closeButton.focus()
+      if (open) return
+      open = true; generation++; starting = false; needsResize = true
+      flock.reset(); dizzy.reset(); graphic.reset(); resetFinger(); headSpan = .2; impactAnchor = { x: .5, y: .3 }; resize(); lastRenderAt = -Infinity
+      screen.classList.add('is-open', 'is-camera-pending'); screen.setAttribute('aria-hidden', 'false')
+      if (!document.hidden) animation = requestAnimationFrame(render)
+      void startCamera(); closeButton.focus()
     },
     close: () => {
-      open = false
-      cancelAnimationFrame(animation)
-      if (clearTimer !== null) window.clearTimeout(clearTimer)
-      clearTimer = null
-      screen.classList.remove('is-open', 'is-tracking', 'is-broken')
-      screen.setAttribute('aria-hidden', 'true')
-      tracking = false
-      faceLandmarker?.close()
-      faceLandmarker = null
-      stream?.getTracks().forEach((track) => track.stop())
-      stream = null
-      outputStream?.getTracks().forEach((track) => track.stop())
-      outputStream = null
-      video.srcObject = null
-      resetInteraction()
+      open = false; generation++; starting = false
+      cancelAnimationFrame(animation); animation = 0
+      releaseCamera(); flock.dispose(); dizzy.dispose(); graphic.dispose()
+      screen.classList.remove('is-open', 'is-tracking', 'is-camera-pending'); screen.setAttribute('aria-hidden', 'true')
     },
     getRecordingStream: () => {
       if (!open || !tracking || !canvas.captureStream) return null

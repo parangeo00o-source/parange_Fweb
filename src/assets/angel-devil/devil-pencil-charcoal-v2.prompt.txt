@@ -1,0 +1,11 @@
+Tool: built-in image_gen (transparent_background: true)
+Edit target: devil-pencil-v1.png
+Palette reference: devil-tail-charcoal-v2.png
+Output: devil-pencil-charcoal-v2.png
+
+Use case: precise-object-edit.
+Asset: transparent game sprite, color-only revision.
+Image 1 is the EDIT TARGET, the newly designed pencil devil. Image 2 is ONLY a color palette reference, the old charcoal devil.
+Change ONLY the colors of image 1 to be closer to image 2. Preserve image 1's exact character design, outline, silhouette, proportions, face and eye shapes, pose facing left, star motifs, horns, bat wing, fists, feet, curved spade tail, placement, framing and fine soft colored-pencil texture. Do not copy the cat anatomy, fur, trident or rough sculpted surface from image 2.
+Recolor all plum/purple/lilac body and wing framework to deep neutral charcoal black with soft graphite-gray pencil highlights. Remove the purple and pink cast from the body. Keep sufficient charcoal midtones and subtle gray edge shading for the body to read clearly at small display sizes. Recolor pink/coral horns, wing membrane, tail tip and small star accents to rich crimson / dark scarlet red, with restrained red highlights rather than pastel pink. Recolor the eye interiors to icy pale blue / cyan as in image 2 while preserving their EXACT elongated shapes, dark upper contours and small white catchlights from image 1.
+Overall palette: charcoal-black, graphite gray, crimson red, tiny icy-blue eyes. The same lovely hand-drawn fantasy spirit as image 1, only its palette changed. No new objects, no added texture types, no redesign, no background, no drop shadow. Preserve true transparent alpha and the original clear margin around the whole sprite. Output only the recolored image 1 character.
