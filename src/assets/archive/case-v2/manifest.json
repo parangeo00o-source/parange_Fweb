@@ -1,0 +1,7 @@
+{
+  "tool": "Built-in image_gen",
+  "asset": "alpine-panorama.jpg",
+  "original": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-b71dcb12-8e96-4ff2-b734-a576aa42b4c8.png",
+  "prompt": "Use case: photorealistic-natural. Asset type: full-bleed photographic texture for the INSIDE of a 3D suitcase lid. Generate a pristine Alpine winter panorama like a vintage miniature railway suitcase scenic backdrop: saturated clear azure blue sky in upper 42%, distant jagged snow-covered Alps spanning the middle, small dark evergreen trees on mountain flanks, broad smooth white snowfield in bottom 25%. Real landscape photography, crisp detailed snow ridges, natural bright winter sunlight and cool blue shadows. Landscape 6:5 aspect ratio. Straight level horizon, front-facing scenic photograph. Only landscape, edge-to-edge. No suitcase, frame, train, text, people, watermark or graphics. Colors rich natural blue and snowy white, not pastel or illustration.",
+  "note": "Metal bas-relief concepts were rejected by the user. Cover uses native restrained Three.js geometry; no generated relief image is shipped."
+}

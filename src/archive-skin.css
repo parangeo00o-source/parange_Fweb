@@ -1,0 +1,65 @@
+/* Material/graphic layer only. The 5 × 5 cabinet's projection and physical
+   walls stay in archive.css; no filters or opacity flatten that 3D scene. */
+.archive-screen { --ar-blue: #506878; --ar-ink: #3d5357; --ar-muted: #657773; background: #e1e9e5; }
+.ar-atmosphere { background: linear-gradient(90deg, #daebe5 0%, #e4ece7 48%, #e1e1e2 48%, #eaeceb 100%); }
+.ar-atmosphere::before { content: ''; position: absolute; inset: 28px 28px 30px 36px; border: 1px solid #94b5aa88; border-radius: 44px; box-shadow: inset 1px 1px 3px #ffffffdd, 1px 1px 3px #698a7f44; background: linear-gradient(90deg, transparent 0 47%, #9cb7b055 47% calc(47% + 1px), transparent calc(47% + 1px)), linear-gradient(transparent 0 76%, #aac6bc66 76% calc(76% + 1px), transparent calc(76% + 1px)); }
+.ar-atmosphere::after { opacity: .2; }
+.ar-fluid { position: absolute; display: block; box-shadow: inset 0 0 9px 3px #f6ddec, inset 0 0 36px #dcf3ed; }
+.ar-fluid-one { width: 60vw; height: 59vh; left: 13%; top: 22%; border-radius: 42% 58% 31% 64% / 56% 38% 64% 40%; transform: rotate(-16deg); background: radial-gradient(ellipse at 64% 56%, #655c6577 0 4%, #c9a6a866 12%, #91a8b7bb 36%, #a1c4c477 65%, #d5e8e266); }
+.ar-fluid-two { width: 25vw; height: 25vh; right: 7%; top: 2%; border-radius: 70% 34% 58% 40%; transform: rotate(25deg); background: radial-gradient(ellipse at 60% 65%, #dfbfcb88, #9bb6c077 52%, #d8eee566); }
+.ar-glass-orb { position: absolute; display: block; border: 1px solid #ffffffcc; border-radius: 50%; background: radial-gradient(circle at 48% 50%, #45515c66 0 3%, #dba2a799 7%, #9bb6cbaa 20%, #c7dfd955 45%, #edf7ef55 62%, #ffffffaa 70%, #d6dbe344 74%); box-shadow: inset 1px 2px 8px #fff, 0 1px 8px #7c96972a; }
+.ar-glass-orb-one { width: 160px; height: 160px; left: 3%; top: 38%; }
+.ar-glass-orb-two { width: 100px; height: 100px; right: 5%; top: 23%; }
+.ar-glass-orb-three { width: 220px; height: 65px; right: 18%; bottom: 6%; }
+.ar-shell { position: relative; }
+.ar-top { position: relative; border-bottom: 0; }
+.ar-top::after, .ar-index-heading::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, #8fb7ac55, #a6c8bd, #dec2cc 36%, #424649 48%, #e8eeee 64%, #84a7b4, #e7bdd1); box-shadow: 0 1px #ffffff88; }
+.ar-wordmark { padding: 9px 27px; font-size: 22px; font-weight: 400; letter-spacing: -1.3px; border: 1px solid #ffffff99; border-radius: 48% 40% 49% 35% / 45% 57% 42% 58%; background: linear-gradient(140deg, #f4ffff33, #a6bdcb55 48%, #e0c7d044); box-shadow: inset 1px 1px 3px #fff, inset -1px -1px 4px #728d9a55, 0 2px 2px #64838a22; }
+.ar-heading { padding-top: 32px; }
+.ar-heading h1 { font-size: clamp(44px, 5.4vw, 74px); font-weight: 300; letter-spacing: -.065em; color: #566a73; text-shadow: 0 1px #ffffffbb; }
+.ar-heading h1 em { font: inherit; }
+.ar-heading h1 sup { color: #b48c9e; font-size: 23px; }
+.ar-kicker, .ar-micro, .ar-toolbar { font-family: 'Helvetica Neue', Arial, sans-serif; }
+.ar-kicker { letter-spacing: .12em; }
+.ar-led { width: 9px; height: 9px; background: radial-gradient(circle, #3d4645 0 12%, #dba5ab 25%, #9ab7c1 56%, #cce3d5 80%); box-shadow: 0 0 4px 3px #94b6bb66; }
+.ar-intro { padding-left: 76px; }
+.ar-intro p { font-size: 12px; font-weight: 300; letter-spacing: .04em; }
+.ar-orbit { display: block; width: 56px; height: 56px; left: 0; top: -2px; border: 1px solid #fff9; border-radius: 50%; background: radial-gradient(circle, #333f48 0 4%, #cf9eab 9%, #97b1c3 24%, #d2e1dd55 51%, #eff5ecaa 67%, #ffffffdd 70%, transparent 73%); box-shadow: inset 1px 1px 5px #fff, 0 1px 3px #8ba2a744; }
+.ar-toolbar b { border-color: #aac5ba; border-radius: 15px; background: linear-gradient(#f4faf455, #b6c7cf55); box-shadow: inset 0 1px 2px white, 0 1px 2px #7e929a44; }
+.ar-cabinet { background: radial-gradient(ellipse at 48% 45%, #a7b2bf, #b7cbc8 62%, #d2ddd6); box-shadow: 0 40px 45px -20px #53657677, 0 80px 80px -40px #9b7b8a66; }
+.ar-cabinet-top { border-color: #a6b8bb; border-bottom-color: #f5e4ef; background: linear-gradient(110deg, #dce7e1aa, #b9c7d9cc 33%, #d6bdcfbb 60%, #ddece5cc); color: #55766d; box-shadow: inset 0 1px 3px #fff; }
+.ar-screw { width: 9px; height: 9px; border: 0; background: radial-gradient(circle, #3e4246 0 12%, #d5a2a8 26%, #9bb6c2 54%, #d8e7dc 78%); box-shadow: 0 0 4px #9eb7c3; }.ar-screw::after { display: none; }
+.ar-cell { background: linear-gradient(135deg, #9eafbb9c, #c9ded388 55%, #c3bdc9aa); box-shadow: inset 10px 18px 19px #536b7d55, inset -2px -2px 3px #eae6e788; }
+.ar-cell:nth-child(3n) { background: linear-gradient(145deg, #9aa9bcaa, #cac9d1aa 60%, #e7cbd488); }
+.ar-cell:nth-child(4n) { background: radial-gradient(ellipse at 60% 64%, #d7c3cb66, #aec2c5aa 60%, #b5cfc288); }
+.ar-wall-row { background: linear-gradient(#7f96acbb, #adc0c8e8 48%, #d1dbd5e8 82%, #e5cbdc); border-bottom-color: #f7ecf2; }
+.ar-wall-column { background: linear-gradient(90deg, #738b9bcc, #acb9c9dd 45%, #c8dcd5e8 82%, #ebd5e2); }
+.ar-rim-row { background: linear-gradient(#fff4fc, #d6b9d1 30%, #97b8b2 60%, #e6f3e7); box-shadow: 0 1px 2px #7c999b88; }
+.ar-rim-column { background: linear-gradient(90deg, #96b1ac, #edf7f1 35%, #e9bdd9 66%, #b5c8ce); }
+.ar-outer-side { background: linear-gradient(90deg, #cbdad8dd, #a3afc7ee 45%, #c2abc2dd 75%, #8299ae); border-color: #98a9b8; }
+.ar-cabinet-front { background: linear-gradient(120deg, #b1c6c9ee, #c3d2d4ee 30%, #b5b7c9ee 60%, #d4bfcedd 85%, #cfdfd6); border-color: #9baeb6; border-top-color: #f1d6e8; border-bottom-color: #98afb7; box-shadow: 0 6px 8px #56677c66, inset 0 3px 3px #f5eef2bb; }
+.ar-cabinet-front::before { border-color: #9aafa9; border-radius: 16px; box-shadow: inset 0 1px 2px #ffffffbb, 0 1px 2px #eec4dd88; }
+.ar-joint { position: absolute; left: calc(var(--joint-x) * 20%); top: calc(var(--joint-y) * 20%); width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%) translateZ(calc(var(--depth) + 2px)); background: radial-gradient(circle, #414046 0 9%, #d7a8af 19%, #92adb9 43%, #c3d9cd 66%, #ebdfec 85%); box-shadow: 0 0 5px #d9b6ceaa; pointer-events: none; }
+.ar-plate { border-radius: 20px; border-color: #c2c4cd; background: linear-gradient(130deg, #eff6f2aa, #afbeca88 55%, #edd9e788); box-shadow: inset 0 1px 3px #fff, inset 0 -1px 2px #92a8b6, 0 1px 2px #647d8c44; }
+.ar-handle { border-color: #a9b9c8; box-shadow: inset 1px -2px 2px #ffecfc, 1px 5px 5px #5c718377; }
+.ar-handle::before, .ar-handle::after { border-color: #b7c2c6; background: radial-gradient(circle, #46474c 0 7%, #cfa2b1 18%, #a7bdc7 40%, #dfebe1 75%); }
+/* A white edge with a soft sky-blue halo, kept on the paper plane so the
+   drawer walls still occlude it. Box shadows preserve the shared 3D scene. */
+.ar-card { border-color: #f7fdff; background: #e9eeeb; box-shadow: 0 0 2px 1px #ffffffdc, 0 0 8px 2px #d9f1ffb3, 0 0 18px 3px #a8caff66, 1px 3px 2px #4a5e7455; }
+.ar-card:hover, .ar-card:focus-visible, .ar-card.is-highlighted { box-shadow: 0 0 3px 1px #fff, 0 0 11px 3px #e1f5ffdd, 0 0 24px 5px #a8caff88, 2px 8px 6px #4a5e7444; }
+.ar-card-meta { background: #edf2eb; color: #465b60; }
+.ar-caption { font: 300 13px/1.4 'Helvetica Neue', Arial, sans-serif; letter-spacing: .025em; color: #647978; }
+.ar-pagination button { border-color: #a5bbb5; background: radial-gradient(ellipse at 40% 35%, #edf4eeaa, #adbdc766 65%, #dcc1d488); box-shadow: inset 0 1px 2px #fff, inset 0 -1px 2px #9aa7b6, 0 1px 2px #70838733; }
+.ar-index-heading { position: relative; border: 0; padding-bottom: 14px; }
+.ar-directory { padding: 12px 18px; margin-top: 12px; border: 1px solid #aec4ba88; border-radius: 25px; background: linear-gradient(110deg, #e8f2eb88, #c8d4db66 50%, #e9dce588); box-shadow: inset 1px 1px 3px #fff9, 0 1px 3px #8fa5ab33; }
+.ar-index-item { border-bottom-color: #9ab7b744; }.ar-index-item:hover, .ar-index-item.is-highlighted { color: #3e637b; border-bottom-color: #bb8ca5; }
+.ar-footer { border-top-color: #adc5bb; }
+@media (max-width: 900px) { .ar-intro { padding-left: 0; }.ar-orbit { display: none; } }
+@media (max-width: 620px) {
+ .ar-atmosphere::before { inset: 12px 7px 12px; border-radius: 30px; }
+ .ar-fluid-one { width: 90vw; height: 47vh; left: 0; top: 25%; }.ar-fluid-two { width: 60vw; height: 28vh; right: -10%; }
+ .ar-glass-orb-one { width: 80px; height: 80px; left: -30px; }.ar-glass-orb-two { width: 55px; height: 55px; right: -15px; }.ar-glass-orb-three { width: 100px; height: 35px; }
+ .ar-wordmark { font-size: 19px; padding: 7px 14px; }.ar-heading h1 { font-size: clamp(36px, 9vw, 54px); }.ar-heading h1 sup { font-size: 18px; }
+ .ar-joint { width: 8px; height: 8px; }.ar-caption { font-size: 10px; }
+ .ar-directory { padding: 10px 12px; border-radius: 18px; gap: 0 12px; }
+}

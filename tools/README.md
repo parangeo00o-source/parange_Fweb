@@ -581,3 +581,170 @@ tagline, enlarged logo, smaller slogan and tab/meeting separation in all three
 editions at desktop, 390/320 px mobile and landscape widths. Dialogue content
 remains Korean per the earlier request; saved custom names are not translated.
 Shared visual overrides live in `planet-shared-ui.css` after mode-specific CSS.
+
+### R / project archive
+
+The R die now opens `#archive`; existing `#guestbook` links open the same archive.
+`src/archive-projects.ts` owns the Instagram profile and ordered card records.
+Add or edit each project title and `instagramUrl` using an individual Instagram
+`/p/`, `/reel/` or `/tv/` share URL. Use `preview: true` only for unconnected studies.
+The archive contains 29 owner-provided posts. Consecutive records with the same
+`group` stay together within a drawer; drawers retain the original 5 × 5 layout and hold at most 25 cards.
+Carousel `img_index` values are preserved; share-tracking parameters are removed.
+Unconnected cards clearly report their preview state. Connected cards and their
+project-index entries open that exact post in a new tab. No access token or
+Instagram scraping is used; there is no automatic feed synchronization.
+
+`src/archive-cassette-art.ts` defines 29 stable cassette editions with distinct
+reference-led labels, type layouts, shell colors and clear/opaque finishes.
+`src/archive-art.ts` supplies matching canvas previews for accessible native links
+and the non-WebGL fallback. Historical print-v4/v5 files are retained on disk but
+are no longer requested by the archive. Project order and Instagram URLs are unchanged.
+
+`src/archive-cassette.ts` constructs actual cassette geometry: molded front/back
+shells with reel and capstan apertures, internal tape packs, six-tooth reel hubs,
+metal screws, seam lips, label cutouts and the lower head bridge. Paper labels
+are separate textures; the physical reels remain visible through their windows.
+Geometry is merged by material per cassette to limit draw calls. Label textures
+are cached across pagination. Identical cassette geometry is shared across editions,
+with three tape-pack variants; old per-edition materials and glow planes are disposed.
+Shared geometry is released with the renderer. Unchanged shadows are reused for
+camera-only and webcam-only frames; movement, hover, page changes and context
+restoration invalidate the shadow map. Resolution, materials and triangle detail
+are unchanged.
+
+`src/archive-product.ts` renders the original 5 × 5 silver cassette case carried
+by a white/cyan robot dog. Native Instagram links are projected onto cassette
+faces and retain keyboard/new-tab behavior. Hover/focus lifts a cassette; the
+immersive view hides surrounding text and UI. Rendering stops when idle/hidden.
+
+`src/archive-robot-dog.ts` constructs a continuous sculpted head/snouted shell,
+paw-shaped green optical lenses, cupped upright ears, concealed shoulder
+mechanisms, solid moulded limbs and large round paws. The restored robot dog
+proportions pair with gently tapered mouse ears attached lower on the upper
+sides of the head. Their rounded tips lean outward. Concave ivory inner faces
+and thick convex cyan backs meet along one continuous moulded rim. A short rounded club tail mounts on
+the rear shell, and the silver lower body follows a curved chest/waist/joint boundary without
+an overlapping belly mesh. Both body panels meet on the same ellipsoid. Rounded sockets seat the neck inside head and torso.
+A continuous local muzzle profile shapes the nose bridge, rounded muzzle and
+lower jaw; the nose, optical inserts and case grip share that surface.
+The face has no visible mouth marking; an invisible attachment registers the case handle.
+Optical bezels and lenses conform to the head surface; servo caps use flat
+seats, inset gaskets and domed covers. Limbs sit inside the joint housings
+rather than crossing the exposed cap faces. Ivory and pale cyan clear-coated
+plastic preserves the toy robot finish. The dog walks in only after
+the shared “COME OUT” button at the bottom center is pressed. All control labels are English. An arrow-oriented cheese wedge, with a light bevel and gold underside, is
+the desktop cursor across the archive; there is no separate summon button. The robot
+then sits with the case handle held at its mouth. Mouth and handle coordinates
+remain aligned during walking and sitting. The case is scaled to 40% of its
+original dimensions, with its wide aspect ratio retained. Selecting the case first eases from the stage into the fullscreen overview over 850 ms, preserving the on-screen framing at the viewport change. Closing eases back into the responsive stage before restoring the controls. Reduced motion skips these transitions. The case then runs a 5.2-second sequence: lower it upright, tip it onto
+the floor with its lowest corner supported, pause, open the lid, pause again,
+and move in for a front-facing cassette close-up. Closing reverses the sequence.
+After arrival the camera moves to a straight-on view of the seated dog.
+The lid's silver finish and hardware come from `src/archive-case-lid.ts`.
+Its cover has a saturated cyan-blue tubular bow, a wrapped centre knot, two
+curved tails and four over/under X stitches. The stitches pass through actual
+apertures in the outer veneer with recessed chrome eyelets. All ribbon geometry
+belongs to the lid pivot and follows its opening motion. Its inner metal liner now carries a fitted black monitor frame and cyan CRT glass; no mountain image
+is loaded. `src/archive-monitor.ts` supplies a locally rendered, mirrored webcam
+preview with aspect-preserving crop, cyan luminance treatment, subtle scanlines
+and curved glass reflections. Clicking the monitor surface starts video and eases into a front-facing monitor close-up. There is no separate camera-enable tab. Escape stops the camera and returns to the cassette close-up.
+Closing, exiting, hiding the page or losing WebGL stops the camera tracks; late
+permission responses are also stopped. No recording or image upload is used. The superseded insect-car model is retained but no longer imported.
+
+The bottom action reads COME OUT before summoning, ARRIVING… during walking
+and sitting (disabled), then OPEN CASE after arrival. The old lower archive label
+and RESET VIEW button are removed, along with the lower-left collection caption. Cassette links are inert while
+closed or moving. Leaving the page cancels rendering; re-entry returns to the
+summon button. Reduced motion skips the walk/sit and opening animations.
+The full-width canvas and vertical shadow overscan avoid an internal entrance
+crop. In the immersive viewer, the canvas occupies the complete viewport with
+no feather mask. The first view fits the whole dog and case. After the lid opens, the second
+zoom fits the cassette tray, with room for simple triangular drawer arrows at its sides; the dog stays fully opaque and remains in the scene
+throughout the inspection view, including when it is outside the camera framing.
+The transparent viewer keeps the original blue home gradient visible.
+Drag to rotate; arrow keys rotate, Home resets, and Escape closes the case before
+leaving the archive. Header/catalog elements are hidden and inert while viewing.
+Cassette edges have a bright core and wider soft blue-white glow, intensified on
+hover/focus. A yellow tooltip with black text identifies the active cassette;
+native title tooltips are removed from the 3D links to prevent duplicate labels.
+
+`tools/check-archive-dog.mjs` checks the summon/walk/sit sequence, mouth-handle
+alignment across 25 poses, original dog head proportions, paw grounding, open-case
+clearance, physical case selection, render suspension and navigation during entry.
+`tools/check-archive-monitor.mjs` uses a synthetic webcam to check live display,
+video-only capture, immersive pagination, mobile layout, camera cleanup, denied
+permission and late permission responses. Home pagination remains available for
+the project index, including before robot arrival. The same drawer actions become
+two simple triangles beside the case in the cassette close-up; they hide during
+transitions and monitor inspection, and return home when the case closes. The
+page count remains on the home page only.
+`tools/check-archive-transition.mjs` samples camera movement through entry and exit,
+checks that the stage framing returns without a jump, and covers mobile
+interruption and reduced motion.
+`tools/check-archive-opening.mjs` checks the front-facing seated view, staged
+set-down/open/pause/zoom timing, unchanged background, cassette close-up,
+mobile targets and reverse closing.
+`tools/check-archive-viewer.mjs` checks 360°/underside cassette containment, desktop/mobile
+fullscreen layouts, UI hiding/restoration, absence of the mountain asset,
+pagination and native Instagram links.
+Run with `PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tools/check-archive-dog.mjs`
+(and the corresponding viewer filename). The previous beetle test is a historical
+check for the retired model, not an active archive acceptance test.
+
+`src/archive-product.css` styles the canvas, projected links and controls.
+`src/archive.css` and `src/archive-skin.css` retain the CSS cabinet as a fallback for
+unavailable/lost WebGL. `src/archive-pop.css` supplies the charcoal–blue–light-grey
+gradient, centered pale-blue wordmark, colorful beveled geometric controls, black
+catalog frame and white poster footer. The gradient and controls are native CSS,
+so they remain sharp when enlarged. INDEX scrolls within the archive without changing routes. COME OUT starts
+the robot entrance once, and resets when the archive is reopened. The superseded sky stylesheet and generated cloud asset
+remain on disk but are no longer imported or requested.
+`src/archive-type.css` restores PARANGE and its subtitle at the top center.
+BACK TO PLAY, the shared COME OUT/OPEN CASE action, INDEX and the profile link
+form the bottom dock with a shared monospaced font, including on mobile.
+The smaller title sits slightly lower. Buttons use continuous molded edges and
+soft contact shadows; the INDEX triangle has a joined SVG face and sidewall. The closed model is framed
+within the space above a reserved bottom control strip.
+The redundant new-tab instruction is removed while native links stay unchanged.
+It applies the later typography reference: uppercase PARANGE,
+off-white Archivo 700/800 headings and IBM Plex Mono 500/600 information labels.
+Font files, source URLs and OFL licenses are self-hosted in
+`src/assets/archive/fonts/`; no runtime font CDN is needed.
+`archive-case-dimensions.ts` is the shared footprint for both case halves.
+The retired guestbook modules,
+assets and database records are retained, but the R experience no longer imports
+or requests them. The archive only loads after navigation.
+
+`node tools/check-archive.mjs` uses the existing `PLAYWRIGHT_MODULE` / `REVIEW_URL`
+convention. It checks R and legacy navigation, keyboard/back/forward behaviour,
+four viewport sizes, WebGL rendering, cover click and keyboard open/close,
+closed-case link protection, 25 compartments, projected click targets,
+rotation/reset, hover/focus, render suspension, unavailable-WebGL fallback,
+all 29 owner post mappings, project grouping, preserved
+carousel slides, absence of guestbook requests, URL validation and escaping,
+post links opening in new tabs, and drawer pagination.
+Post fixtures exist only in the test browser; Instagram requests are intercepted.
+
+### Cassette close-up fidelity
+
+Archive labels are drawn at 2048 × 1290 with maximum supported anisotropic
+filtering. The archive canvas recalculates density for browser zoom, display DPR
+changes and mobile pinch zoom, using 2–4× sampling within an 18 MP / 8192 px
+budget. Shared linear roughness/bump maps distinguish polished translucent
+plastic from textured opaque ABS. Tape packs have volume, non-overlapping fill
+levels and fine layers; reel hubs have cut-out vents and integrated spindle teeth.
+Reference typography, SEIKO's outlined script lockup, AGFA's spiral mark, AXIA's
+circuit lines and writing-label details are authored on the native label canvas.
+These remain code-built interpretations of the supplied references.
+
+Run `node tools/check-archive-resolution.mjs` (same `PLAYWRIGHT_MODULE` override
+as above) for DPR changes, pinch zoom and buffer limits, and `check-archive.mjs`
+for the case and all 29 Instagram destinations.
+
+`tools/check-archive-performance.mjs` records native draw calls, geometry buffer
+bytes, CPU submission time, desktop/mobile captures and idle render suspension.
+Set `ARCHIVE_PERF_BASELINE` to an earlier report.json to compare images and
+confirm unchanged density/shadow resolution. Image comparisons allow only
+one channel level at at most 0.001% of pixels for GPU rounding between runs.
+This is not a physical device temperature or end-to-end FPS measurement.

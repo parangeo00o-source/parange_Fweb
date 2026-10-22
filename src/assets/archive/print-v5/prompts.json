@@ -1,0 +1,180 @@
+{
+  "mode": "built-in imagegen",
+  "references": "Three user-supplied reference images; reference 3 is the principal style direction.",
+  "artworks": [
+    {
+      "id": "01",
+      "reference": 3,
+      "file": "print-01.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A large organic liquid-metal lowercase 'p' on the left, rose-edge frosted lens on right, hairline mint coordinate cross spanning the composition. Small exact text 'parange F.web'. Large clean negative space."
+    },
+    {
+      "id": "02",
+      "reference": 1,
+      "file": "print-02.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A smoky periwinkle translucent invitation, one oversized embossed geometric flower medallion on right, very large narrow serif 'DOSAN' on left. Quiet blind-embossed finish and a thin silver band."
+    },
+    {
+      "id": "03",
+      "reference": 3,
+      "file": "print-03.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A pale mint perforated checklist postcard. Three enormous glass checkmarks step diagonally down the page, a small coral circle at the end. Condensed dark gray title 'BUCKET LIST' at upper left. Sparse diagram-like layout."
+    },
+    {
+      "id": "04",
+      "reference": 2,
+      "file": "print-04.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A transparent mint CD jewel sleeve, off-center luminous circular disc on the left, emerald monospaced 'PLAY / LIST' typography in a neat column at right. Distinct physical packaging folds, no dirt or fake Japanese text."
+    },
+    {
+      "id": "05",
+      "reference": 3,
+      "file": "print-05.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A white and pale pink wish-list graphic with one clear inflated five-point star and a tall blue outlined 'WISH' word tucked under it. Tiny mint index marks, lots of white space. Soft blurred aura."
+    },
+    {
+      "id": "06",
+      "reference": 1,
+      "file": "print-06.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: Blue-gray blind embossed plus signs: one giant raised rounded plus at center, three little ones bottom left. Oversized recessed 'PLUS' lettering across top. Entire surface monochrome periwinkle, subtle angled lighting."
+    },
+    {
+      "id": "07",
+      "reference": 3,
+      "file": "print-07.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: An asymmetrical wayfinding print, one long chrome blue arrow curves into a mint oval. 'DIRECTION / 01' in small clean dark gray type bottom left. A pink edge and one ink-blue focal point. Light gray ground."
+    },
+    {
+      "id": "08",
+      "reference": 3,
+      "file": "print-08.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A split-layout editorial postcard: two pearly organic half-rings facing each other, one blue and one dusty pink. Bold stretched 'FIFTY / FIFTY' lettering occupies bottom third on white. No microtext."
+    },
+    {
+      "id": "09",
+      "reference": 3,
+      "file": "print-09.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: Huge blind-embossed closed eyelid contour on milky mint, one pink halo behind it. Small widely spaced type 'CLOSE YOUR EYES' lower left, large slender '01' upper right. Extremely spacious."
+    },
+    {
+      "id": "10",
+      "reference": 2,
+      "file": "print-10.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A translucent frosted-blue photographic film sleeve. Three narrow horizontal blue abstract sky contact strips across left two-thirds. Right side pale green vertical type 'CLOSE / 02'. Minimal archival print."
+    },
+    {
+      "id": "11",
+      "reference": 3,
+      "file": "print-11.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: White paper with three stacked elliptical apertures: blue, mint and pink glows, small dark central pupils. Green hairline edge and gray 'EYES 03' at lower right. Deliberate stillness."
+    },
+    {
+      "id": "12",
+      "reference": 3,
+      "file": "print-12.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A cyanotype-style water ripple print with a single large silver fish silhouette floating across lower half. Top half sparse italic 'waters of march' in dark blue on white. Soft mint reflection, no frame."
+    },
+    {
+      "id": "13",
+      "reference": 3,
+      "file": "print-13.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A scientific cell-like glass membrane in a large cropped oval, smoky blue center, coral nucleus, mint edge. Hairline cross only at upper left. Small gray 'parange / cell' on spacious right. Match reference's soft blur."
+    },
+    {
+      "id": "14",
+      "reference": 1,
+      "file": "print-14.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A translucent blue resin rectangular frame seen straight on, empty frosted center with narrow italic 'jellyframe'. Pink edge highlights, tiny round metallic fasteners. Off-white background, physical tactility."
+    },
+    {
+      "id": "15",
+      "reference": 3,
+      "file": "print-15.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A circular compass diagram on left in fine green lines; on right enormous narrow serif '02' cut from translucent pale-blue foil. Sparse black-gray coordinates, no additional decoration. Mint ground."
+    },
+    {
+      "id": "16",
+      "reference": 1,
+      "file": "print-16.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A vertical stack of three blue-gray translucent tabs like a 1990s plastic organizer. Large rotated '03' printed under the surface, thin white stripes and a solitary coral dot. Flat graphic front view."
+    },
+    {
+      "id": "17",
+      "reference": 3,
+      "file": "print-17.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: One oversized blue waveform folded into a chrome lightning bolt on pale gray. Condensed strong 'IMPULSE' across bottom, tiny 'Xdinary Heroes' at top. Sharp editorial contrast, restrained mint and pink."
+    },
+    {
+      "id": "18",
+      "reference": 2,
+      "file": "print-18.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A green single-ink packaging print on translucent milky paper, a big open circular N-shaped loop at left, elegant spaced 'NUFLAAT' at right. Delicate crease and subtle halftone, no invented copy."
+    },
+    {
+      "id": "19",
+      "reference": 3,
+      "file": "print-19.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A single silver-blue fluid ribbon shaped into a kiss/lip outline, tiny coral glow in the middle. Right aligned tall type 'KISS OF LIFE' and small 'IDENTITY'. Lots of pale mint space."
+    },
+    {
+      "id": "20",
+      "reference": 3,
+      "file": "print-20.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A pale blue solar eclipse orb with a pink outer corona dominating the right, narrow lines crossing upper left. Large italic 'Dream / the end' on left, small 'PARANGE' below. Dreamy soft-focus printed finish."
+    },
+    {
+      "id": "21",
+      "reference": 3,
+      "file": "print-21.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A chunky blind-embossed heart with three alternating pale pink/mint strata as a graphic cross-section, one thin silver spoon silhouette. Small green 'hearttiramisu' along bottom. White space, understated kitsch."
+    },
+    {
+      "id": "22",
+      "reference": 1,
+      "file": "print-22.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A blue-gray sketchbook cover graphic: a giant transparent resin droplet in upper left, faint handwritten looping lines underneath, a single horizontal dark blue stripe. Exact title 'personal / work' small at lower right."
+    },
+    {
+      "id": "23",
+      "reference": 3,
+      "file": "print-23.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: An enormous pale-blue question mark shaped from liquid chrome, pink reflection at base, white ground. Bold tiny label 'NMIXX / SEE THAT?' at upper left. One green circular punctuation mark at right."
+    },
+    {
+      "id": "24",
+      "reference": 2,
+      "file": "print-24.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: Two overlapping round translucent green viewfinder windows, blue abstract grainy photographs of clouds inside. 'SEE THAT? / 01' clean small dark green typography below. Mostly milky white packaging."
+    },
+    {
+      "id": "25",
+      "reference": 3,
+      "file": "print-25.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A large cropped mint outline eye on white, pupil is a chrome pink sphere, blue thin typographic '02' crossing lower right. Small 'NMIXX' top left. Sparse editorial poster, distinctly different from other eye designs."
+    },
+    {
+      "id": "26",
+      "reference": 3,
+      "file": "print-26.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A green-blue wireframe orbital track running diagonally with one glossy metallic capsule, oversized compressed '127' in translucent pale blue at right. Tiny 'THE MOMENTUM' baseline. Silver-gray background."
+    },
+    {
+      "id": "27",
+      "reference": 3,
+      "file": "print-27.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: Five irregular blue translucent sound columns forming a minimalist skyline, one coral solar disc at top left. 'PENTAPORT / 2025' bold green typography bottom right. Mint ground, lowfi printed grain."
+    },
+    {
+      "id": "28",
+      "reference": 2,
+      "file": "print-28.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A milky frosted sleeve with a blue-green sculptural O ring lying visually flat at center. Small split type 'oiad' and '01' in opposite corners, fine green border open at one edge. Gentle organic plastic wrinkles."
+    },
+    {
+      "id": "29",
+      "reference": 1,
+      "file": "print-29.jpg",
+      "prompt": "Use case: stylized-concept. Create ONE finished LANDSCAPE 3:2 portfolio postcard graphic, full bleed flat artwork only, no surrounding scene, no collage of multiple cards. Input is a style/material reference. Vintage-futurist early-2000s editorial print, subtle physical grain, clean art direction with strong negative space. Closely follow the supplied reference's smoky blue, pale mint, silver gray, milky white, subtle pink/coral edge reflections and soft translucent material. This is a collectible graphic cover, not an app screen. Main visual must have a distinct silhouette, not a generic gradient. Typography upright in landscape composition. No external brand logos, fake data, excessive captions, random symbols, tiny labels, thick decorative frames or yellowed grunge. Design: A dusty slate blue print with one massive rounded transparent capsule horizontally across upper half, chrome edge and mint interior. Elegant huge outline 'oiad 02' across bottom half. Sparse, tactile, calm."
+    }
+  ]
+}

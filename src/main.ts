@@ -94,11 +94,11 @@ const dice: Dice[] = Array.from({ length: 48 }, (_, index) => {
   // existing drawing-board destination.
   const isToothGemDie = index === 4
   const isElephantDrawingDie = parangeLetterByDice.get(index) === 'A' && !isToothGemDie
-  const isGuestbookDie = parangeLetterByDice.get(index) === 'R'
+  const isArchiveDie = parangeLetterByDice.get(index) === 'R'
   const destination = isToothGemDie
     ? { route: '#tooth-gem', label: 'Tooth Gem' }
-    : isGuestbookDie
-    ? { route: '#guestbook', label: 'Guestbook' }
+    : isArchiveDie
+    ? { route: '#archive', label: 'Archive' }
     : isElephantDrawingDie
     ? { route: '#elephant-drawing', label: 'Elephant Drawing' }
     : index === 47
@@ -192,10 +192,9 @@ type ExperienceFactoryLoader = () => Promise<ExperienceFactory>
 // planet) a WebGL renderer. A destination is therefore instantiated only
 // after its die is activated.
 const experienceFactoryLoaders: Record<string, ExperienceFactoryLoader> = {
-  Guestbook: async () => {
-    const { createGuestbookExperience, warmGuestbook } = await import('./guestbook')
-    warmGuestbook()
-    return () => createGuestbookExperience(() => closeColorScreen(true))
+  Archive: async () => {
+    const { createArchiveExperience } = await import('./archive')
+    return () => createArchiveExperience(() => closeColorScreen(true))
   },
   Lemonade: async () => { const { createLemonadeExperience } = await import('./lemonade'); return createLemonadeExperience },
   'PARANGE PLANET': async () => { const { createParangePlanetExperience } = await import('./parange-planet'); return createParangePlanetExperience },
@@ -683,7 +682,7 @@ const openColorScreen = (destination: Pick<Dice, 'label' | 'color'>) => {
       if (!colorScreenOpen || request !== experienceRequest) return
       activeExperience = loadedExperience
       loadedExperience.open()
-      if (destination.label !== 'Guestbook') pageReady(destination.label)
+      if (destination.label !== 'Archive') pageReady(destination.label)
     }).catch((error: unknown) => {
       if (request === experienceRequest) {
         trackEvent('page_load_error', { reason: 'load_failed' })
@@ -707,7 +706,7 @@ const openColorScreen = (destination: Pick<Dice, 'label' | 'color'>) => {
 
 const closeColorScreen = (restoreHistory = false) => {
   if (!colorScreenOpen) return
-  const wasGuestbook = document.querySelector<HTMLElement>('.guestbook-screen')?.hidden === false
+  const wasArchive = document.querySelector<HTMLElement>('.archive-screen')?.hidden === false
   experienceRequest += 1
   activeExperience?.close()
   activeExperience = null
@@ -718,16 +717,16 @@ const closeColorScreen = (restoreHistory = false) => {
   pageReady('Home')
   document.title = 'Dice Field'
   document.querySelector<HTMLElement>('.stage')!.inert = false
-  if (wasGuestbook) document.querySelector<HTMLElement>('.dice[data-route="#guestbook"]')?.focus()
+  if (wasArchive) document.querySelector<HTMLElement>('.dice[data-route="#archive"]')?.focus()
   if (restoreHistory && (history.state?.guestbook || history.state?.diceId)) history.back()
-  else if (restoreHistory && location.hash === '#guestbook') history.replaceState(null, '', location.pathname + location.search)
+  else if (restoreHistory && ['#archive', '#guestbook'].includes(location.hash)) history.replaceState(null, '', location.pathname + location.search)
 }
 
-const openGuestbook = () => {
+const openArchive = () => {
   closeColorScreen()
   document.querySelector<HTMLElement>('.stage')!.inert = true
-  document.title = 'Guestbook · Little hellos | Dice Field'
-  openColorScreen({ label: 'Guestbook', color: '#f6f3e9' })
+  document.title = 'Selected works · Parange'
+  openColorScreen({ label: 'Archive', color: '#e8f0ef' })
 }
 
 colorScreenClose.addEventListener('click', () => closeColorScreen(true))
@@ -735,10 +734,10 @@ window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') closeColorScreen(true)
 })
 window.addEventListener('popstate', () => {
-  if (location.hash === '#guestbook') openGuestbook()
+  if (['#archive', '#guestbook'].includes(location.hash)) openArchive()
   else closeColorScreen()
 })
-if (location.hash === '#guestbook') openGuestbook()
+if (['#archive', '#guestbook'].includes(location.hash)) openArchive()
 else { startPage('Home', 'initial'); pageReady('Home') }
 
 const navigateTo = (element: HTMLElement) => {
@@ -763,7 +762,7 @@ const navigateTo = (element: HTMLElement) => {
     history.pushState({ diceId: destination.id }, '', destination.route)
     window.dispatchEvent(new CustomEvent('dice:navigate', { detail: destination }))
     document.title = `${destination.label} | Dice Field`
-    if (destination.label === 'Guestbook') openGuestbook()
+    if (destination.label === 'Archive') openArchive()
     else openColorScreen(destination)
     state.clickStartedAt = null
     state.clickScale = 1

@@ -4,7 +4,7 @@
 const MEASUREMENT_ID = 'G-PPPHDDBFC3'
 
 const pages: Record<string, string> = {
-  Home: 'home', Guestbook: 'guestbook', Lemonade: 'lemonade',
+  Home: 'home', Archive: 'archive', Guestbook: 'guestbook', Lemonade: 'lemonade',
   'PARANGE PLANET': 'parange_planet', WaterTouch: 'water_touch', Balloon: 'balloon',
   'Glass Bird': 'glass_bird', Bluefish: 'bluefish', 'Elephant Drawing': 'elephant_drawing',
   '고무 인간': 'rubber_human', Shampoo: 'shampoo', 'Tooth Gem': 'tooth_gem',

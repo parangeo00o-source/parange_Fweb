@@ -1,0 +1,34 @@
+/* WebGL product scene; the CSS cabinet remains available if WebGL is unavailable. */
+.ar-cabinet-wrap.ar-product-host { width: 100%; height: clamp(360px, calc(100svh - 375px), 1000px); margin: 18px auto 12px; padding: 0; aspect-ratio: auto; perspective: none; }
+.ar-product-canvas { position: absolute; inset: 0; width: 100%; max-width: 100vw; height: 100%; display: none; touch-action: pan-y; cursor: grab; }
+.ar-product-canvas:active { cursor: grabbing; }
+.ar-product-ready .ar-product-canvas { display: block; }
+.ar-vehicle-preparing .ar-cabinet { visibility: hidden; }
+.ar-product-controls .ar-case-toggle:disabled { cursor: wait; opacity: .65; }
+.ar-product-ready .ar-cabinet { position: absolute; inset: 0; aspect-ratio: auto; transform: none; background: none; box-shadow: none; pointer-events: none; overflow: clip; }
+.ar-product-ready .ar-cabinet > :not(.ar-card-stage) { display: none; }
+.ar-product-ready .ar-card-stage, .ar-product-ready .ar-grid { inset: 0; display: block; transform: none; transform-style: flat; }
+.ar-product-ready .ar-slot { position: static; transform-style: flat; }
+.ar-product-ready .ar-card, .ar-product-ready .ar-card:hover, .ar-product-ready .ar-card:focus-visible, .ar-product-ready .ar-card.is-highlighted { position: absolute; bottom: auto; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; transform: none; transition: none; outline: none; }
+.ar-product-loading .ar-card { pointer-events: none; }
+.ar-product-ready .ar-card-art { opacity: 0; pointer-events: none; }
+.ar-product-ready .ar-card-meta { display: none; }
+.ar-product-label { position: absolute; z-index: 3; transform: translateX(-50%); padding: 5px 9px; max-width: 230px; border: 1px solid #f9fdff; background: #edf3f2ed; color: #314760; box-shadow: 0 0 9px #d4edffb3; border-radius: 2px; font: 9px/1.25 'Helvetica Neue', Arial, sans-serif; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; pointer-events: none; }
+.ar-product-label[hidden] { display: none; }
+.ar-product-controls { position: absolute; left: 6%; right: 6%; bottom: 0; display: none; justify-content: space-between; align-items: center; gap: 8px; color: #60727d; font: 8px/1.4 'Courier New', monospace; letter-spacing: .1em; }
+.ar-product-host .ar-product-controls { display: flex; }
+.ar-product-controls .ar-case-toggle { padding: 8px 0; border: 0; border-bottom: 1px solid #8c9fb377; background: transparent; font-size: 8px; letter-spacing: .08em; }
+@media (max-width: 620px) {
+ .ar-cabinet-wrap.ar-product-host { width: calc(100% + 20px); height: clamp(350px, calc(100svh - 350px), 650px); margin: 6px -10px 12px; aspect-ratio: auto; }
+ .ar-product-controls { left: 5%; right: 5%; font-size: 6px; letter-spacing: 0; }
+ .ar-product-controls .ar-case-toggle { font-size: 7px; }
+ .ar-product-label { max-width: 150px; padding: 4px 6px; font-size: 8px; }
+}
+
+.ar-product-ready.ar-case-locked .ar-card-stage { display: none; visibility: hidden; }
+.ar-product-controls .ar-case-toggle { padding: 10px 18px; border: 1px solid #8c9fb3; border-radius: 3px; background: #e7eef1df; color: #344e77; box-shadow: inset 0 1px #fff, 0 2px 5px #4a5e7420; font-weight: 600; }
+.ar-product-controls .ar-case-toggle:hover { background: #f2f6f8; border-color: #5f7fa6; }
+@media (max-width: 620px) { .ar-product-controls .ar-case-toggle { padding: 9px 12px; } }
+
+/* Keep the model passive until the shared bottom action summons it. */
+.ar-awaiting-summon .ar-product-canvas { pointer-events: none; }

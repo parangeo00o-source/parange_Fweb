@@ -1,0 +1,135 @@
+{
+  "method": "built-in image_gen color-only edits",
+  "entries": [
+    {
+      "id": "03",
+      "source": "03",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep the large painted blue embossed text panel on white paper. Recolor the paint to muted slate/periwinkle blue, the white to milky white with the faintest mint cast. Preserve existing glossy paint shading and engraved letters.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-03.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-ded072a4-e8cb-4dc5-8e9a-2049a2ad8b48.png",
+      "file": "print-03.jpg",
+      "width": 768,
+      "height": 960
+    },
+    {
+      "id": "07",
+      "source": "07",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep the square two-panel vintage airline ticket with globe, handwriting, tiny text and form fields exactly. Recolor blue panels dusty blue-gray; cream paper cool milky white; dark text charcoal. Preserve aged printed paper, not glass.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-07.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-66ec9edf-f983-48ad-bce2-ca7bdf60d6f1.png",
+      "file": "print-07.jpg",
+      "width": 960,
+      "height": 960
+    },
+    {
+      "id": "08",
+      "source": "10",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep the sparse cafe stationery, poodle, dachshund, rotated small type and ample white space exactly. Recolor blue ink dusty slate blue and green ink muted sage, white paper cool off-white.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-10.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-ff62d1b5-1032-4cc1-9b7d-e88591547292.png",
+      "file": "print-08.jpg",
+      "width": 720,
+      "height": 960
+    },
+    {
+      "id": "09",
+      "source": "11",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep the graph paper, outlined PARANGE typography, 24/7, dot diagram, object photo inserts and all placement exactly. Grid pale mint-gray, outlines slate-blue, photos softly cool blue/sage while retaining visible photo details.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-11.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-fe4800ff-0d51-48b1-bf42-870defffff63.png",
+      "file": "print-09.jpg",
+      "width": 720,
+      "height": 960
+    },
+    {
+      "id": "12",
+      "source": "06",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep every cut-out letter tile, its angle, overlapping paper edges and diagonal collage exactly. Recolor the background dusty gray-blue, the tiles muted periwinkle/slate blue, lettering milky white. Preserve matte printed texture.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-06.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-7a07c379-4b02-4a5a-bbf0-a518b6305856.png",
+      "file": "print-12.jpg",
+      "width": 768,
+      "height": 960
+    },
+    {
+      "id": "15",
+      "source": "08",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep the typographic poster with Parange, ARCHIVE, MAKE PLAY REPEAT, smiley, music symbol and concentric rings exactly. Recolor saturated cyan ink muted medium slate blue on milky-white paper with faint mint cast. Preserve all letter shapes and layout.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-08.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-60b2c837-19b8-463e-bb5a-c6f17dacbf55.png",
+      "file": "print-15.jpg",
+      "width": 768,
+      "height": 960
+    },
+    {
+      "id": "17",
+      "source": "12",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep the two-half typographic specimen with large outlined Parange Studio letters, upper white field and lower blue sky/cloud field exactly. Recolor blue into muted slate/periwinkle blue, cloud and paper milky white. Retain original typographic outlines and print grain.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-12.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-14275035-6aec-4db8-9acc-09d29f9570bf.png",
+      "file": "print-17.jpg",
+      "width": 720,
+      "height": 960
+    },
+    {
+      "id": "19",
+      "source": "09",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep the four dark rectangular panels, four cyanotype fish silhouettes/photos, gray paper and border text exactly. Recolor paper cool pale mint-gray, dark panels blue-gray charcoal, cyan photos muted mist blue/sage. Maintain clear tonal contrast and original photo detail.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-09.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-f488dc2c-e599-413a-bdfd-9cf9f8e1031d.png",
+      "file": "print-19.jpg",
+      "width": 768,
+      "height": 960
+    },
+    {
+      "id": "20",
+      "source": "04",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep the landscape card with the large angular P graphic, stripes and sparse small monospaced text exactly. Recolor navy graphic muted steel/periwinkle blue, cream paper milky mint white, text cool charcoal.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-04.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-51e63810-bcb6-47de-82f0-0bc9f4ee4f88.png",
+      "file": "print-20.jpg",
+      "width": 960,
+      "height": 640
+    },
+    {
+      "id": "27",
+      "source": "01",
+      "prompt": "Use case: style-transfer (COLOR-ONLY edit).\nAsset type: existing portfolio print card.\nInput image 1 is the EDIT TARGET. Input image 2 is ONLY a COLOR PALETTE reference, never a composition or material reference.\nPrimary request: Recolor image 1 to harmonize with the soft vintage futuristic palette of image 2, keeping image 1's design intact.\nKeep the linked paper people in an ellipse and parange effect typography exactly. Recolor saturated blue background dusty blue-gray and white figures/type cool ivory. Preserve flat printed ink and texture.\nPalette: smoky muted blue-gray/periwinkle, milky white, pale mint, restrained blush pink only where an existing accent permits. Keep text legible and intentional midtone contrast.\nStrict invariants: Preserve image 1's exact composition, original aspect ratio, all typography/wording, illustrations, photographs, shapes, spacing, margins, print grain and paper texture. Output the complete flat artwork edge to edge, no surrounding scene.\nChange COLORS ONLY. Do not add liquid shapes, orbs, bubbles, flowers, resin/chrome materials, new objects, new lettering, borders, embellishments, gradients or glows. Do not copy image 2's design. Do not flatten the existing texture or wash out the lettering.",
+      "referenced_image_paths": [
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v4/print-01.jpg",
+        "/Users/choiyoonji/Desktop/parange_Fweb/src/assets/archive/print-v5/print-02.jpg"
+      ],
+      "generatedSource": "/Users/choiyoonji/.codex/generated_images/01a16243-dedf-7503-a673-6564ef16974d/exec-add39e07-f372-4746-a544-1a95752f199a.png",
+      "file": "print-27.jpg",
+      "width": 800,
+      "height": 960
+    }
+  ]
+}
