@@ -26,6 +26,33 @@ export function createCassetteSurfaceMaps(make:TextureFactory) {
 }
 type CassetteSurfaces = ReturnType<typeof createCassetteSurfaceMaps>
 
+/** Index only bit-identical vertices: preserve every position, normal and UV. */
+export function indexCassetteGeometry(geometry:THREE.BufferGeometry){
+  if(geometry.index)return geometry
+  const attributes=Object.entries(geometry.attributes) as [string,THREE.BufferAttribute][]
+  if(attributes.some(([,a])=>!(a.array instanceof Float32Array)))return geometry
+  const sources=attributes.map(([,a])=>({size:a.itemSize,bits:new Uint32Array(a.array.buffer,a.array.byteOffset,a.array.length)}))
+  const buckets=new Map<number,number[]>(),unique:number[]=[],indices:number[]=[]
+  for(let vertex=0;vertex<geometry.attributes.position.count;vertex++){
+    let hash=2166136261
+    for(const {size,bits} of sources)for(let c=0;c<size;c++)hash=Math.imul(hash^bits[vertex*size+c],16777619)
+    const candidates=buckets.get(hash)||[]
+    let index=candidates.find(index=>sources.every(({size,bits})=>{
+      for(let c=0;c<size;c++)if(bits[vertex*size+c]!==bits[unique[index]*size+c])return false
+      return true
+    }))
+    if(index===undefined){index=unique.length;unique.push(vertex);candidates.push(index);buckets.set(hash,candidates)}
+    indices.push(index)
+  }
+  for(const [name,attribute] of attributes){
+    const array=new Float32Array(unique.length*attribute.itemSize)
+    unique.forEach((vertex,index)=>array.set(attribute.array.subarray(vertex*attribute.itemSize,(vertex+1)*attribute.itemSize),index*attribute.itemSize))
+    geometry.setAttribute(name,new THREE.BufferAttribute(array,attribute.itemSize,attribute.normalized))
+  }
+  geometry.setIndex(indices)
+  return geometry
+}
+
 /** Molded cassette shell, actual reels and hardware; only the paper label is printed. */
 export function createCassette(index:number, label:THREE.Texture, track:(g:THREE.BufferGeometry,m:THREE.Material)=>void, surfaces?:CassetteSurfaces, geometryCache?:Map<string,THREE.BufferGeometry>) {
   const d=cassetteEdition(index), group=new THREE.Group()
@@ -115,7 +142,7 @@ export function createCassette(index:number, label:THREE.Texture, track:(g:THREE
     const slot=Object.entries(slots).find(([,material])=>material===m)![0],key=geometryKey(slot)
     let geometry=geometryCache?.get(key)
     if(geometry)merged.dispose()
-    else{geometry=merged;geometryCache?.set(key,geometry)}
+    else{geometry=indexCassetteGeometry(merged);geometryCache?.set(key,geometry)}
     attach(geometry,m)
   }
   return finish()

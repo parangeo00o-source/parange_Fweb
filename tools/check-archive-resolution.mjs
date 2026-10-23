@@ -4,6 +4,19 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true })
 try {
   const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 1440, height: 1100 }, reducedMotion: 'reduce' })
   const page = await context.newPage(), errors = []
+  await page.addInitScript(() => {
+    window.__archiveBufferWrites = 0
+    for (const name of ['width', 'height']) {
+      const descriptor = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, name)
+      Object.defineProperty(HTMLCanvasElement.prototype, name, {
+        ...descriptor,
+        set(value) {
+          if (this.classList.contains('ar-product-canvas')) window.__archiveBufferWrites++
+          descriptor.set.call(this, value)
+        },
+      })
+    }
+  })
   page.on('pageerror', error => errors.push(error.message))
   await page.goto((process.env.REVIEW_URL || 'https://localhost:5173') + '/#archive')
   await page.waitForFunction(() => document.querySelector('.ar-product-ready')?.getAttribute('aria-busy') === 'false')
@@ -11,6 +24,17 @@ try {
   const initial = await buffer()
   assert.equal(initial.label, '2048×1290')
   assert.ok(initial.scale >= 2)
+  const unchangedWrites = await page.evaluate(async () => {
+    const before = window.__archiveBufferWrites
+    for (let i = 0; i < 24; i++) {
+      window.dispatchEvent(new Event('resize'))
+      window.visualViewport?.dispatchEvent(new Event('resize'))
+    }
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    return window.__archiveBufferWrites - before
+  })
+  assert.equal(unchangedWrites, 0, 'Repeated zoom/resize notifications must not reallocate an unchanged buffer')
+  const writesBeforeRetina = await page.evaluate(() => window.__archiveBufferWrites)
   const cdp = await context.newCDPSession(page)
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 3, mobile: false })
   // CDP changes DPR without the native window event emitted by browser zoom.
@@ -18,6 +42,7 @@ try {
   await page.waitForFunction(() => Number(document.querySelector('.ar-product-ready canvas')?.dataset.renderScale) >= 3)
   const retina = await buffer()
   assert.ok(retina.width > initial.width)
+  assert.equal(await page.evaluate(() => window.__archiveBufferWrites) - writesBeforeRetina, 2, 'DPR changes resize width and height only once')
   await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 2 })
   await page.waitForFunction(() => Number(document.querySelector('.ar-product-ready canvas')?.dataset.renderScale) > 3)
   const zoom = await buffer()

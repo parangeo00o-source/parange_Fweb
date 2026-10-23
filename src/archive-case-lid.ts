@@ -68,14 +68,16 @@ export function createArchiveCaseLid(model: THREE.Group, metal: THREE.Material, 
   const blue = new THREE.MeshPhysicalMaterial({ color: '#008dcc', roughness: .3, metalness: 0, clearcoat: .45, clearcoatRoughness: .23, specularIntensity: .35, envMapIntensity: .4 })
   const endBlue = new THREE.MeshPhysicalMaterial({ color: '#008dbd', roughness: .3, metalness: .18, clearcoat: .65 })
   const V = (x:number,y:number,z:number) => new THREE.Vector3(x,y,z)
-  function cord(points: THREE.Vector3[], radius: number, name: string, closed = false) {
-    const curve = new THREE.CatmullRomCurve3(points, closed, 'centripetal')
-    const item = part(new THREE.TubeGeometry(curve, Math.max(64, points.length * 18), radius, 16, closed), blue, 0, 0, 0, ribbon)
+  function cordCurve(curve: THREE.Curve<THREE.Vector3>, segments: number, radius: number, name: string, closed = false) {
+    const item = part(new THREE.TubeGeometry(curve, segments, radius, 16, closed), blue, 0, 0, 0, ribbon)
     item.name = name
-    if (!closed) for (const p of [points[0], points[points.length - 1]]) {
+    if (!closed) for (const p of [curve.getPoint(0), curve.getPoint(1)]) {
       part(new THREE.SphereGeometry(radius, 24, 16), blue, p.x, p.y, p.z, ribbon)
     }
     return curve
+  }
+  function cord(points: THREE.Vector3[], radius: number, name: string, closed = false) {
+    return cordCurve(new THREE.CatmullRomCurve3(points, closed, 'centripetal'), Math.max(64, points.length * 18), radius, name, closed)
   }
   for (const [x,z] of apertures) {
     const recess = part(new THREE.CylinderGeometry(.24,.24,.025,32), dark, x,.905,z,ribbon)
@@ -83,20 +85,27 @@ export function createArchiveCaseLid(model: THREE.Group, metal: THREE.Material, 
     const rim = part(new THREE.TorusGeometry(.265,.035,12,40), chrome,x,.967,z,ribbon)
     rim.rotation.x = Math.PI/2; rim.name = 'case-lacing-eyelet'
   }
-  // Two generous asymmetric loops. The returning strands rise above the
-  // outgoing strands; the centre binding wraps around both instead of flattening.
-  cord([V(-.2,1.24,8.55),V(-2,1.27,9.05),V(-3.5,1.3,10.02),V(-4.55,1.27,9.6),V(-4.65,1.25,8.58),V(-3.85,1.28,7.98),V(-2.4,1.35,8.1),V(-.15,1.65,8.7)],.19,'case-bow-left')
-  cord([V(.15,1.25,8.55),V(2.05,1.3,9.15),V(3.55,1.32,10.04),V(4.55,1.28,9.55),V(4.6,1.25,8.5),V(3.75,1.27,7.95),V(2.25,1.38,8.12),V(.2,1.65,8.7)],.19,'case-bow-right')
+  // A slightly narrower bow with tangent-matched Bezier arcs: the outer
+  // turns flow smoothly into the returning strands without pinched corners.
+  for (const side of [-1, 1]) {
+    const p = (x:number,y:number,z:number) => V(side*x,y,z)
+    const tip = p(3.8,1.28,side<0?9.55:9.6)
+    const incoming = p(2.75,1.3,side<0?10.65:10.7)
+    const curve = new THREE.CurvePath<THREE.Vector3>()
+    curve.add(new THREE.CubicBezierCurve3(p(.18,1.24,8.55),p(1.25,1.27,9.05),incoming,tip))
+    curve.add(new THREE.CubicBezierCurve3(tip,tip.clone().multiplyScalar(2).sub(incoming),p(3.5,1.35,7.3),p(.18,1.65,8.7)))
+    cordCurve(curve,144,.19,side<0?'case-bow-left':'case-bow-right')
+  }
   cord(Array.from({length:28},(_,i)=>{
     const a=i/28*Math.PI*2
     return V(Math.sin(a)*.06,1.48+Math.cos(a)*.41,8.6+Math.sin(a)*.4)
   }),.2,'case-bow-knot',true)
   const tails = [
-    [V(-.25,1.26,8.4),V(-1.8,1.27,7.55),V(-2.9,1.24,6.15),V(-3.25,1.21,4.65),V(-3.05,1.2,3.65)],
-    [V(.3,1.27,8.4),V(1.85,1.28,7.9),V(2.9,1.25,7.15),V(3.35,1.22,6.05),V(3.15,1.2,5.12)],
+    new THREE.CubicBezierCurve3(V(-.25,1.26,8.4),V(-1.45,1.28,7.55),V(-3.35,1.24,5.6),V(-2.7,1.2,3.65)),
+    new THREE.CubicBezierCurve3(V(.3,1.27,8.4),V(2,1.29,7.95),V(3.65,1.22,6.55),V(2.78,1.2,5.12)),
   ]
-  for (const [i,points] of tails.entries()) {
-    const curve=cord(points,.18,`case-bow-tail-${i}`)
+  for (const [i,path] of tails.entries()) {
+    const curve=cordCurve(path,90,.18,`case-bow-tail-${i}`)
     const tip=curve.getPoint(1), tangent=curve.getTangent(1)
     const sleeve=part(new THREE.CylinderGeometry(.184,.184,.24,24),endBlue,tip.x,tip.y,tip.z,ribbon)
     sleeve.quaternion.setFromUnitVectors(V(0,1,0),tangent)

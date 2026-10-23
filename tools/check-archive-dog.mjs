@@ -23,8 +23,9 @@ try{
  await page.waitForFunction(()=>document.querySelector('.ar-product-canvas').dataset.arrival==='arrived')
  assert.equal(await page.locator('.ar-product-canvas').getAttribute('data-pose'),'sitting')
  await page.screenshot({path:join(output,'sitting.png')})
+ assert.equal(await page.locator('.ar-product-canvas').getAttribute('data-eye-expression'),'loading')
  const frames=await page.locator('.ar-product-canvas').getAttribute('data-frames')
- await page.waitForTimeout(200);assert.equal(await page.locator('.ar-product-canvas').getAttribute('data-frames'),frames)
+ await page.waitForTimeout(200);assert.ok(Number(await page.locator('.ar-product-canvas').getAttribute('data-frames'))>Number(frames))
  const host=await page.locator('.ar-cabinet-wrap').boundingBox(),hit=JSON.parse(await page.locator('.ar-product-canvas').getAttribute('data-case-center'))
  await page.mouse.click(host.x+hit.x,host.y+hit.y)
  await page.waitForFunction(()=>document.querySelector('.ar-cabinet-wrap').dataset.caseState==='open')
@@ -55,7 +56,7 @@ try{
    for(let i=0;i<=24;i++){
      pet.setProgress(i/24);for(const p of pet.bounds())finite&&=Number.isFinite(p.x+p.y+p.z)
      const robot=model.getObjectByName('robot-dog');solid&&=robot.visible
-     robot.traverse(o=>{if(o.isMesh)for(const m of [o.material].flat())solid&&=m.opacity===1&&!m.transparent})
+     robot.traverse(o=>{if(o.isMesh&&o.name!=='dog-eye-led')for(const m of [o.material].flat())solid&&=m.opacity===1&&!m.transparent})
    }
    const caseBox=new THREE.Box3().setFromObject(cargo),dogBox=new THREE.Box3().setFromObject(model.getObjectByName('robot-dog'))
    const separated=caseBox.max.x<dogBox.min.x+3 // open case lies in front of the forepaws

@@ -21,9 +21,6 @@ export function createArchiveExperience(onBack: () => void) {
   screen.innerHTML = `
     <div class="ar-atmosphere" aria-hidden="true"></div>
     <div class="ar-shell">
-      <header class="ar-top">
-        <span class="ar-wordmark">PARANGE<sub>R</sub><small>objects, graphics &amp; things.</small></span>
-      </header>
       <div class="ar-cabinet-wrap">
       <div class="ar-cabinet">
         <div class="ar-cabinet-top"><i class="ar-screw"></i><span>PARANGE® &nbsp; — &nbsp; ARCHIVE STORAGE SYSTEM</span><i class="ar-screw"></i></div>
@@ -39,7 +36,7 @@ export function createArchiveExperience(onBack: () => void) {
         <button type="button" class="ar-case-toggle" aria-controls="ar-case-card-grid" aria-expanded="false" aria-label="Come out — summon robot" disabled>COME OUT</button>
         <div class="ar-bottom-links">
           <nav class="ar-section-nav" aria-label="Archive sections"><button type="button" data-scroll=".ar-index-heading">INDEX</button></nav>
-          <a class="ar-instagram" href="${instagramProfile}" target="_blank" rel="noopener noreferrer">@parange.oo <span aria-hidden="true">↗</span><span class="ar-sr"> (opens in a new tab)</span></a>
+          <a class="ar-instagram" href="${instagramProfile}" target="_blank" rel="noopener noreferrer"><span class="ar-instagram-label">@parange.oo</span> <span class="ar-instagram-arrow" aria-hidden="true">↗</span><span class="ar-sr"> (opens in a new tab)</span></a>
         </div>
       </div>
       </div>

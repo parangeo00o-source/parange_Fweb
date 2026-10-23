@@ -637,7 +637,7 @@ the shared “COME OUT” button at the bottom center is pressed. All control la
 the desktop cursor across the archive; there is no separate summon button. The robot
 then sits with the case handle held at its mouth. Mouth and handle coordinates
 remain aligned during walking and sitting. The case is scaled to 40% of its
-original dimensions, with its wide aspect ratio retained. Selecting the case first eases from the stage into the fullscreen overview over 850 ms, preserving the on-screen framing at the viewport change. Closing eases back into the responsive stage before restoring the controls. Reduced motion skips these transitions. The case then runs a 5.2-second sequence: lower it upright, tip it onto
+original dimensions, with its wide aspect ratio retained. Selecting the case first eases from the stage into the fullscreen overview over 850 ms, preserving the on-screen framing at the viewport change. Closing eases back into the responsive stage before restoring the controls. Reduced motion skips these transitions. The case then runs a 5.8-second sequence: lower it upright, tip it onto
 the floor with its lowest corner supported, pause, open the lid, pause again,
 and move in for a front-facing cassette close-up. Closing reverses the sequence.
 After arrival the camera moves to a straight-on view of the seated dog.
@@ -748,3 +748,82 @@ Set `ARCHIVE_PERF_BASELINE` to an earlier report.json to compare images and
 confirm unchanged density/shadow resolution. Image comparisons allow only
 one channel level at at most 0.001% of pixels for GPU rounding between runs.
 This is not a physical device temperature or end-to-end FPS measurement.
+
+Archive zoom retains the same pixel density and cassette surfaces. Scene
+matrices are shared by the main and overscan passes; projected
+links use those matrices directly. Framing reuses mesh corners until their pose,
+geometry bounds or scale changes. Camera-only opening/closing phases reuse the
+shadow map. Resize/DPR notifications share one pending drawing-buffer update,
+and unchanged dimensions do not reallocate the canvas. The performance check
+also samples set-down, lid opening, the pause and advancing close-up frames
+against a baseline, with a fixed monitor clock for pixel comparisons. The
+resolution check verifies that repeated resize notifications allocate nothing
+and a DPR change resizes the drawing buffer only once.
+
+The robot enters on one fixed path at constant speed, with its stride tied to
+distance travelled. Its walking head sits lower over a short rounded neck joint;
+both sockets follow the shoulder and jaw throughout sitting. Ivory clear-coated
+plastic, deeper cyan shells, glossy green optics and polished joint trims follow
+the supplied toy-robot material references. The moving leg shells reuse dynamic
+vertex buffers instead of creating vertex arrays and indices every frame.
+
+Cassette geometry indexes only bit-identical position/normal/UV combinations,
+preserving all triangles and surface detail. Hidden shaders, textures and meshes
+are warmed on the actual screen output path before enabling the first action.
+Camera distance interpolates proportionally, and the final close-up ease lasts
+1.536 seconds; the preceding mechanical beats retain their original durations.
+Fullscreen entry preserves the stage's scroll position and restores it before
+measuring the return pose, including when opening from a scrolled archive.
+An active animation clock caps a dropped frame's advance at 50 ms without
+reducing render resolution, and excludes time spent idle or hidden.
+`tools/check-archive-refinement.mjs` checks constant measured arrival speed,
+compact neck geometry, no shader creation during first walking/opening, dropped
+frame handling and bit-exact reconstruction of indexed cassette attributes.
+
+The six green paw lenses retain their original shape and material. Two small
+conformal LED layers share one prewarmed shader: a travelling segmented loading
+ring from arrival until the first bag opening, a star whose interior fills with
+LEDs then briefly switches off on a 1.8-second cycle while open, a heart that
+contracts to 70% and expands to 104% with a double beat every 1.4 seconds while
+closing, and an occasional 1.8-second smile after a
+random 10–26 seconds while open. After closing and returning to the stage, a
+farewell smile lasts 2.2 seconds (including its blink), then loading resumes.
+Reopening cancels this farewell timer. Each expression
+change dims the old LEDs, switches the pattern while dark, then lights the new
+pattern over 350 ms. The heart uses a mirrored dot matrix and a separate UV
+basis aligned with head-up on each curved lens, without changing the optics.
+When only LEDs move, a timer limits rendering to at most 30 fps and sleeps if
+the eyes leave the camera view. Mechanical animation retains its RAF cadence.
+All LED/smile timers are cancelled when hidden or disposed; reduced-motion mode
+uses static patterns without blinking. There are no per-frame texture uploads, extra light
+sources or postprocessing passes. The neck retains its size, aims from torso
+toward head, and seats each socket tangent to its own shell.
+`tools/check-archive-led.mjs` verifies persistent loading, dark switching,
+visible motion in each pattern, original optics, bounded idle cadence,
+background suspension, reduced motion and neck alignment through 33 poses,
+and saves close-up screenshots for the expressions and their motion phases.
+
+The stage header has been removed. The robot is centered above the measured
+bottom dock, at the midpoint between the original and enlarged framing sizes.
+The Instagram tab uses the lighter Archive Mono 500 face and narrower lettering;
+its account spelling and destination remain unchanged. The bow uses slightly
+narrower tangent-matched Bezier loops and smooth tails, retaining cord thickness,
+material, knot, stitches and mesh subdivision counts.
+
+Archive transforms cache the exact authored matrices until position, quaternion,
+scale or pivot changes. Descendant invalidation also covers parent-only world
+updates. Unmodified spherical parts share their original vertex/index buffers;
+deformed feet and joint shells still own separate copies. The LED shader only
+evaluates the currently visible pattern during its binary blink transition.
+The full canvas, including shadow overscan, is observed for viewport visibility:
+offscreen animation requests sleep and resume without skipping mechanical poses.
+Pointer movement no longer raycasts every triangle just to set a cursor that the
+archive stylesheet already overrides; click picking remains enabled.
+
+`PLAYWRIGHT_MODULE=... node tools/check-archive-efficiency.mjs` verifies exact
+parent/child matrix updates, no hover raycasts, persistent visible LED motion,
+offscreen suspension/resume and fullscreen entry/exit. The performance baseline
+comparison requires unchanged rendered triangles, pixel density and shadow maps,
+less matrix composition and no increase in geometry storage or GPU draw calls.
+Capture a fresh baseline before intentional artwork changes such as the bow;
+those changes are expected to differ in a pixel comparison.

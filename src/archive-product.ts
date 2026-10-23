@@ -2,10 +2,12 @@ import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { createArchiveDogCarrier, archiveCaseMotion } from './archive-robot-dog'
+import { createArchiveDogCarrier, archiveCaseMotion, archiveCasePhase, archiveCaseDuration } from './archive-robot-dog'
 import { createCassette, createCassetteSurfaceMaps } from './archive-cassette'
 import { drawCassetteLabel, cassetteTypographyReady } from './archive-cassette-art'
 import { createArchiveMonitor } from './archive-monitor'
+import type { DogExpression } from './archive-dog-led'
+import { cacheArchiveTransforms } from './archive-transforms'
 
 interface Print {
   id: string
@@ -22,7 +24,7 @@ interface Print {
  * for native links, keyboard navigation and screen readers. CSS is the fallback. */
 export function createArchiveProduct(host: HTMLElement) {
   const screen = host.closest<HTMLElement>('.archive-screen')!
-  let focused = false, fitting = false
+  let focused = false, fitting = false, stageScrollTop = 0
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' })
   renderer.setPixelRatio(1)
   renderer.transmissionResolutionScale = .6
@@ -37,6 +39,9 @@ export function createArchiveProduct(host: HTMLElement) {
   canvas.setAttribute('aria-hidden', 'true')
   host.prepend(canvas)
   const scene = new THREE.Scene()
+  // Update the scene once before projections; the main and overscan passes
+  // share those exact matrices instead of rebuilding the hierarchy per pass.
+  scene.matrixWorldAutoUpdate = false
   const camera = new THREE.PerspectiveCamera(34, 1, .1, 400)
   const controls = new OrbitControls(camera, canvas)
   controls.enablePan = false
@@ -73,10 +78,15 @@ export function createArchiveProduct(host: HTMLElement) {
   const travel = new THREE.Group(); travel.name = 'dog-arrival'; travel.visible = false
   travel.add(model); scene.add(travel)
   let summoned = false, arrived = false, assetsReady = false, entranceStart: number | undefined
+  let entranceDistance = 0, motionTime = 0, lastDrawTime: number | undefined
+  const entranceDirection = new THREE.Vector3()
   canvas.dataset.vehicle = 'robot-dog-carrier'; canvas.dataset.arrival = 'waiting'
-  let frame = 0, visible = false, disposed = false, active = '', generation = 0
+  let frame = 0, visible = false, inViewport = true, disposed = false, active = '', generation = 0
   let prints: Print[] = []
   let width = 0, height = 0, renderWidth = 0, renderHeight = 0, canvasOffset = 0, canvasPad = 0
+  let stageDockHeight = 0
+  let resolutionDirty = true
+  const rendererSize = new THREE.Vector2()
   let lidProgress = 0, lidTarget = 0, frontBlend = 0
   let inspection: 'tapes' | 'monitor' = 'tapes'
   type ViewPose = { center: THREE.Vector3; rotation: THREE.Quaternion; distance: number; viewport: { fullWidth: number; fullHeight: number; offsetX: number; offsetY: number; width: number; height: number } }
@@ -85,6 +95,37 @@ export function createArchiveProduct(host: HTMLElement) {
   const cardGrid = host.querySelector<HTMLElement>('.ar-grid')!
   cardGrid.id = 'ar-case-card-grid'
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+  let caseExpression: DogExpression = 'loading', smiling = false, smileTimer: number | undefined, eyesTimer: number | undefined
+  function stopEyesTimer() { window.clearTimeout(eyesTimer);eyesTimer=undefined }
+  function stopSmile() {
+    window.clearTimeout(smileTimer); smileTimer=undefined; smiling=false
+  }
+  function canSmile() { return visible && inViewport && !disposed && !document.hidden && arrived && caseExpression!=='loading' && !lidAnimation && !viewAnimation }
+  function scheduleSmile() {
+    if(smileTimer!==undefined || !canSmile())return
+    // Sleep between occasional expressions; never keep an idle render loop.
+    smileTimer=window.setTimeout(()=>{
+      smileTimer=undefined
+      if(!canSmile())return
+      smiling=true;request()
+      smileTimer=window.setTimeout(()=>{smileTimer=undefined;smiling=false;request()},1800)
+    },10000+Math.random()*16000)
+  }
+  function caseEyes() { stopSmile();caseExpression=lidTarget?'star':'heart' }
+  function closedCaseEyes() {
+    if(!visible||disposed||caseExpression!=='heart'||lidTarget||lidProgress>0||lidAnimation||viewAnimation)return
+    // Show the farewell smile once the return to the stage has finished, so
+    // it remains visible for a moment before resuming the loading pattern.
+    stopSmile();caseExpression='loading';smiling=true
+    smileTimer=window.setTimeout(()=>{smileTimer=undefined;smiling=false;request()},2200)
+  }
+  function expressionsVisibilityChanged() {
+    stopSmile();stopEyesTimer();lastDrawTime=undefined
+    if(document.hidden){cancelAnimationFrame(frame);frame=0}else request()
+  }
+  function expressionPreferencesChanged() { stopSmile();stopEyesTimer();request() }
+  document.addEventListener('visibilitychange',expressionsVisibilityChanged)
+  reduced.addEventListener('change',expressionPreferencesChanged)
   const cassetteGeometryCache = new Map<string,THREE.BufferGeometry>()
   const textures = new Map<string, THREE.Texture>()
   const ownedTextures: THREE.Texture[] = []
@@ -139,6 +180,9 @@ export function createArchiveProduct(host: HTMLElement) {
   const lid = createArchiveDogCarrier(model, cargo, texture, (geometry, material) => {
     geometries.add(geometry); materials.add(material)
   })
+  const eyeLights:THREE.Mesh[]=[]
+  model.traverse(object=>{if(object instanceof THREE.Mesh&&object.name==='dog-eye-led')eyeLights.push(object)})
+  const eyeFrustum=new THREE.Frustum(),eyeProjection=new THREE.Matrix4()
   const monitor = createArchiveMonitor(lid.pivot,host,texture,(g,m)=>{geometries.add(g);materials.add(m)},request)
   const pagination = screen.querySelector<HTMLElement>('.ar-pagination')!
   const paginationHome = pagination.parentElement!
@@ -150,11 +194,11 @@ export function createArchiveProduct(host: HTMLElement) {
   const pointer = new THREE.Vector2()
   let pointerDown: { x: number; y: number } | undefined
   function hitsLid(event: PointerEvent) {
+    if (!arrived) return false
     const rect = canvas.getBoundingClientRect()
     pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1)
     raycaster.setFromCamera(pointer, camera)
     const first = raycaster.intersectObjects(model.children, true).find(hit => hit.object.visible)
-    if (!arrived) return false
     let object: THREE.Object3D | null = first?.object ?? null
     while (object) { if (object === lid.pivot || (!lidTarget && object === cargo)) return true; object = object.parent }
     return false
@@ -165,9 +209,8 @@ export function createArchiveProduct(host: HTMLElement) {
     pointerDown = undefined
   })
   canvas.addEventListener('pointercancel', () => { pointerDown = undefined })
-  canvas.addEventListener('pointermove', event => {
-    canvas.style.cursor = pointerDown ? 'grabbing' : hitsLid(event) ? 'pointer' : 'grab'
-  })
+  // The archive's cheese cursor applies to the entire canvas. Raycast only on
+  // an actual click, not on every pointer sample over this detailed model.
 
   const label = document.createElement('div')
   label.hidden = true
@@ -202,12 +245,13 @@ export function createArchiveProduct(host: HTMLElement) {
     toggle.disabled = !assetsReady || arriving
     toggle.textContent = focused ? '×' : !summoned ? 'COME OUT' : arriving ? 'ARRIVING…' : 'OPEN CASE'
     controls.enabled = arrived && !viewAnimation && !lidAnimation
+    if(arrived)closedCaseEyes()
   }
   function setInspection(value: 'tapes' | 'monitor') {
     if(!focused || !lidTarget || lidProgress<.999 || (inspection===value && !viewAnimation))return
     const from=cameraPose();active='';label.hidden=true;inspection=value;resetCamera()
     viewAnimation={from,to:cameraPose(),start:0,closing:false,inspection:true}
-    applyViewAnimation(performance.now());syncCase();request()
+    applyViewAnimation(motionTime);syncCase();request()
     toggle.focus({preventScroll:true})
   }
   function cameraPose(): ViewPose {
@@ -228,33 +272,35 @@ export function createArchiveProduct(host: HTMLElement) {
     camera.setViewOffset(lerp(a.fullWidth,b.fullWidth),lerp(a.fullHeight,b.fullHeight),lerp(a.offsetX,b.offsetX),lerp(a.offsetY,b.offsetY),lerp(a.width,b.width),lerp(a.height,b.height))
     controls.target.copy(from.center).lerp(to.center,ease)
     camera.quaternion.copy(from.rotation).slerp(to.rotation,ease)
-    camera.position.copy(controls.target).addScaledVector(new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion),THREE.MathUtils.lerp(from.distance,to.distance,ease))
+    camera.position.copy(controls.target).addScaledVector(new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion),from.distance*Math.pow(to.distance/from.distance,ease))
     controls.update(); camera.updateMatrixWorld(); fitting = false
     canvas.dataset.viewTransition = viewAnimation.closing ? 'zooming-out' : 'zooming-in'
     canvas.dataset.viewProgress = t.toFixed(3)
     return t
   }
   function startLidAnimation() {
-    lidAnimation = { from: lidProgress, to: lidTarget, start: performance.now(), duration: Math.max(500,Math.abs(lidTarget-lidProgress)*5200) }
+    lidAnimation = { from: lidProgress, to: lidTarget, start: motionTime, duration: Math.max(500,Math.abs(lidTarget-lidProgress)*archiveCaseDuration) }
   }
   function returnToStage() {
     const from = cameraPose()
     // Measure the current responsive stage in the same frame, before any paint.
-    focused = false; screen.classList.remove('ar-viewer-active'); resize()
+    focused = false; screen.classList.remove('ar-viewer-active'); screen.scrollTop=stageScrollTop; resize()
     const rect = host.getBoundingClientRect(), stage = cameraPose()
     focused = true; screen.classList.add('ar-viewer-active'); resize()
     viewAnimation = { from, to: fullscreenPose(stage,rect), start: 0, closing: true }
-    applyViewAnimation(performance.now())
+    applyViewAnimation(motionTime)
   }
   function toggleCase() {
     if (!arrived) return
     if(lidTarget && (inspection==='monitor' || viewAnimation?.inspection)){
       const from=cameraPose();lidTarget=0;inspection='tapes';viewAnimation=undefined
+      caseEyes()
       monitor.stop();active='';label.hidden=true;resetCamera()
       viewAnimation={from,to:cameraPose(),start:0,closing:false}
-      applyViewAnimation(performance.now());toggle.focus({preventScroll:true});syncCase();request();return
+      applyViewAnimation(motionTime);toggle.focus({preventScroll:true});syncCase();request();return
     }
     lidTarget = lidTarget ? 0 : 1
+    caseEyes()
     active = ''; label.hidden = true
     if(!lidTarget)monitor.stop()
     if (cardGrid.contains(document.activeElement) || (!lidTarget && host.contains(document.activeElement))) toggle.focus({ preventScroll: true })
@@ -262,23 +308,24 @@ export function createArchiveProduct(host: HTMLElement) {
       const rect = host.getBoundingClientRect(), from = cameraPose()
       setFocus(true)
       viewAnimation = { from: fullscreenPose(from,rect), to: cameraPose(), start: 0, closing: false }
-      applyViewAnimation(performance.now())
+      applyViewAnimation(motionTime)
     } else if (viewAnimation) {
       viewAnimation = undefined
       if (lidTarget) {
         const from = cameraPose(); resetCamera()
         viewAnimation = { from, to: cameraPose(), start: 0, closing: false }
-        applyViewAnimation(performance.now())
+        applyViewAnimation(motionTime)
       } else returnToStage()
     } else startLidAnimation()
     syncCase(); request()
   }
   function setFocus(value:boolean){
     if(focused===value)return
+    if(value)stageScrollTop=screen.scrollTop
     focused=value
     screen.classList.toggle('ar-viewer-active',value)
     if(value){host.append(pagination);pagination.classList.add('ar-viewer-pagination')}
-    else{paginationHome.append(pagination);pagination.classList.remove('ar-viewer-pagination')}
+    else{paginationHome.append(pagination);pagination.classList.remove('ar-viewer-pagination');screen.scrollTop=stageScrollTop}
     for(const sibling of host.parentElement!.children){
       if(sibling===host || !(sibling instanceof HTMLElement))continue
       sibling.inert=value
@@ -316,7 +363,7 @@ export function createArchiveProduct(host: HTMLElement) {
   window.addEventListener('keydown',viewerKeys,true)
   function cassetteBounds(){
     cargo.updateWorldMatrix(true,false)
-    return [-6.4,6.4].flatMap(x=>[.7,2.65].flatMap(y=>[-5.35,5.35].map(z=>cargo.localToWorld(new THREE.Vector3(x,y,z)))))
+    return [-6.4,6.4].flatMap(x=>[.7,2.65].flatMap(y=>[-5.35,5.35].map(z=>new THREE.Vector3(x,y,z).applyMatrix4(cargo.matrixWorld))))
   }
   function fitCamera(direction = camera.position.clone().sub(controls.target).normalize()) {
     if(fitting)return
@@ -326,23 +373,24 @@ export function createArchiveProduct(host: HTMLElement) {
     const inverse=camera.quaternion.clone().invert()
     const tanY=Math.tan(THREE.MathUtils.degToRad(camera.fov/2)),tanX=tanY*camera.aspect
     // Reserve space for the bottom controls and center the dog in the free stage.
-    const topInset=focused?0:Math.max(42,height*.08),bottomInset=focused?0:Math.max(100,height*.14)
-    const verticalSpan=focused?.86:Math.max(.35,1-(topInset+bottomInset)/height)*.94
+    const topInset=focused?0:Math.min(42,Math.max(24,height*.05)),bottomInset=focused?0:stageDockHeight+topInset
+    const verticalSpan=focused?.86:Math.max(.35,1-(topInset+bottomInset)/height)*.88
     const stageOffset=focused?0:(bottomInset-topInset)/height
     const cameraUp=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion)
     function framing(vertices:THREE.Vector3[]){
       const center=new THREE.Box3().setFromPoints(vertices).getCenter(new THREE.Vector3())
+      const p=new THREE.Vector3()
       let distance=0
       for(const point of vertices){
-        const p=point.clone().sub(center).applyQuaternion(inverse)
-        distance=Math.max(distance,p.z+Math.abs(p.x)/(tanX*(focused ? Math.min(.89,Math.max(.5,1-84/width)) : .89)),p.z+Math.abs(p.y)/(tanY*verticalSpan))
+        p.copy(point).sub(center).applyQuaternion(inverse)
+        distance=Math.max(distance,p.z+Math.abs(p.x)/(tanX*(focused ? Math.min(.89,Math.max(.5,1-84/width)) : .92)),p.z+Math.abs(p.y)/(tanY*verticalSpan))
       }
       center.addScaledVector(cameraUp,-stageOffset*tanY*distance)
       return {center,distance}
     }
     const overview=framing(points),closeup=framing(detail)
     const center=overview.center.lerp(closeup.center,zoom)
-    const distance=THREE.MathUtils.lerp(overview.distance,closeup.distance,zoom)
+    const distance=overview.distance*Math.pow(closeup.distance/overview.distance,zoom)
     controls.target.copy(center)
     camera.position.copy(center).addScaledVector(direction,distance)
     canvas.dataset.focus=zoom>.999?(inspection==='monitor'?'monitor-closeup':'cassette-closeup'):focused?'opening-overview':'vehicle'
@@ -350,8 +398,14 @@ export function createArchiveProduct(host: HTMLElement) {
     canvas.dataset.cameraDistance=distance.toFixed(3)
     controls.update();camera.updateMatrixWorld()
     function projectedBounds(vertices:THREE.Vector3[]){
-      const projected=vertices.map(p=>p.clone().project(camera))
-      return JSON.stringify({minX:Math.min(...projected.map(p=>p.x)),maxX:Math.max(...projected.map(p=>p.x)),minY:Math.min(...projected.map(p=>p.y)),maxY:Math.max(...projected.map(p=>p.y))})
+      const p=new THREE.Vector3()
+      let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity
+      for(const vertex of vertices){
+        p.copy(vertex).project(camera)
+        minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x)
+        minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y)
+      }
+      return JSON.stringify({minX,maxX,minY,maxY})
     }
     canvas.dataset.modelBounds=projectedBounds(points)
     canvas.dataset.cassetteBounds=projectedBounds(tapes)
@@ -362,44 +416,51 @@ export function createArchiveProduct(host: HTMLElement) {
   }
   function resetCamera(){
     if(inspection==='monitor' && lidProgress>.999){fitCamera(monitor.direction());return}
-    const turn=THREE.MathUtils.smootherstep(lidProgress,.42,.76)
+    const turn=archiveCaseMotion(lidProgress).turn
     const exterior=new THREE.Vector3(-24,10,28).lerp(new THREE.Vector3(-32,9,0),frontBlend).normalize()
     fitCamera(exterior.lerp(new THREE.Vector3(0,26,28).normalize(),turn).normalize())
   }
   syncCase()
-  function request() { if (visible && !disposed && !frame) frame = requestAnimationFrame(draw) }
+  function request() { if (visible && inViewport && !disposed && !document.hidden && !frame) frame = requestAnimationFrame(draw) }
   function project(point: THREE.Vector3) {
     point.project(camera)
     return { x: (point.x * .5 + .5) * renderWidth - canvasOffset, y: (-point.y * .5 + .5) * renderHeight - canvasPad }
   }
-  function draw() {
+  function draw(now = performance.now()) {
+    stopEyesTimer()
     frame = 0
-    if (!visible || disposed) return
+    if (!visible || !inViewport || disposed || document.hidden) return
+    // Keep a long shader/OS stall from skipping visible animation poses. Normal
+    // frames retain real-time speed; idle time never advances a new transition.
+    if(lastDrawTime!==undefined)motionTime+=Math.min(50,Math.max(0,now-lastDrawTime))
+    lastDrawTime=now
     let moving = false
     if (assetsReady && summoned && !arrived) {
       shadowDirty=true
-      const now = performance.now()
-      entranceStart ??= now
-      const elapsed = now - entranceStart
+      if(entranceStart===undefined){
+        entranceStart=motionTime
+        entranceDistance=Math.max(28,camera.position.distanceTo(controls.target)*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*renderWidth/height+10)
+        entranceDirection.set(1,0,0).applyQuaternion(camera.quaternion);entranceDirection.y=0
+      }
+      const elapsed = motionTime - entranceStart
       const t = reduced.matches ? 1 : THREE.MathUtils.clamp((elapsed - 150) / 5400, 0, 1)
       const rest = reduced.matches ? 1 : THREE.MathUtils.clamp((elapsed - 5550) / 1400, 0, 1)
       travel.visible = reduced.matches || elapsed >= 150
-      // Ease out the last stride, then tuck the hind legs and sit with the handle in the mouth.
-      const progress = t < .82 ? t : .82+.18*(1-Math.pow(1-(t-.82)/.18,2))
-      const entryDistance = Math.max(28, camera.position.distanceTo(controls.target)*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*renderWidth/height+10)
-      const distance = (1-progress)*entryDistance
-      travel.position.set(1,0,0).applyQuaternion(camera.quaternion).multiplyScalar(distance)
-      travel.position.y=0
+      // One fixed path and a linear stride phase: no late acceleration and no
+      // camera-dependent speed changes as the robot reaches its seat.
+      const distance = (1-t)*entranceDistance
+      travel.position.copy(entranceDirection).multiplyScalar(distance)
       key.position.copy(travel.position).add(new THREE.Vector3(-16,32,18))
       key.target.position.copy(travel.position)
       travel.rotation.y = -.7*(1-THREE.MathUtils.smoothstep(t,.78,1))
-      const phase = progress * entryDistance / 3.69 * Math.PI * 2
+      const phase = t * entranceDistance / 3.69 * Math.PI * 2
       lid.walk(phase, Math.min(1,(1-t)*10),rest)
       canvas.dataset.pose = rest === 1 ? 'sitting' : t === 1 ? 'sitting-down' : 'walking'
       canvas.dataset.arrival = rest === 1 ? 'arrived' : t === 1 ? 'settling' : travel.visible ? 'walking' : 'waiting'
       canvas.dataset.arrivalProgress = t.toFixed(3)
       canvas.dataset.restProgress = rest.toFixed(3)
       canvas.dataset.walkPhase = phase.toFixed(3)
+      canvas.dataset.travelDistance = distance.toFixed(4)
       frontBlend=THREE.MathUtils.smootherstep(rest,0,1)
       if(t===1)resetCamera()
       if (rest === 1) {
@@ -408,8 +469,8 @@ export function createArchiveProduct(host: HTMLElement) {
       } else moving = true
     }
     if (viewAnimation) {
-      viewAnimation.start ||= performance.now()
-      if (applyViewAnimation(performance.now()) === 1) {
+      viewAnimation.start ||= motionTime
+      if (applyViewAnimation(motionTime) === 1) {
         const closing = viewAnimation.closing, inspecting=viewAnimation.inspection
         viewAnimation = undefined; canvas.dataset.viewTransition = 'idle'
         if (closing) setFocus(false)
@@ -419,14 +480,20 @@ export function createArchiveProduct(host: HTMLElement) {
       } else moving = true
     }
     if (lidAnimation) {
-      shadowDirty=true
-      const t = reduced.matches ? 1 : Math.min(1, (performance.now() - lidAnimation.start) / lidAnimation.duration)
+      const previousPose = archiveCaseMotion(lidProgress)
+      const t = reduced.matches ? 1 : Math.min(1, (motionTime - lidAnimation.start) / lidAnimation.duration)
       lidProgress = THREE.MathUtils.lerp(lidAnimation.from, lidAnimation.to, t)
-      lid.setProgress(lidProgress)
+      const pose = archiveCaseMotion(lidProgress)
+      // The pauses and final zoom move only the camera. Reuse the unchanged
+      // casing pose and shadow map through those phases, in both directions.
+      if (pose.lower !== previousPose.lower || pose.tip !== previousPose.tip || pose.lid !== previousPose.lid) {
+        lid.setProgress(lidProgress)
+        shadowDirty=true
+      }
       resetCamera()
       if (t === 1) {lidAnimation = undefined;if(!lidTarget){returnToStage();moving=true}}
       else moving = true
-      canvas.dataset.casePhase = lidProgress<.24?'lowering':lidProgress<.42?'placing':lidProgress<.48?'settling':lidProgress<.76?'opening':lidProgress<.82?'open-hold':'zooming'
+      canvas.dataset.casePhase = archiveCasePhase(lidProgress)
       syncCase()
     }
     for (const print of prints) {
@@ -440,8 +507,16 @@ export function createArchiveProduct(host: HTMLElement) {
       if (Math.abs(print.group.position.y - target) > .001) moving = true
       print.glow.uniforms.strength.value = print.id === active ? 1.25 : .8
     }
-    scene.updateMatrixWorld(true)
+    const expression:DogExpression=!summoned?'off':!arrived?'loading':smiling?'smile':caseExpression
+    const animateEyes=expression==='loading'||expression==='star'||expression==='heart'
+    const eyesMoving=lid.updateEyes(expression,now,animateEyes,reduced.matches)
+    canvas.dataset.eyeExpression=expression;canvas.dataset.eyeAnimating=String(eyesMoving)
+    scene.updateMatrixWorld()
     camera.updateMatrixWorld()
+    eyeFrustum.setFromProjectionMatrix(eyeProjection.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse))
+    const eyesInView=travel.visible&&eyeLights.some(eye=>eyeFrustum.intersectsObject(eye))
+    canvas.dataset.eyesInView=String(eyesInView)
+    const stageRect = host.getBoundingClientRect()
     if(monitor.update(performance.now()))moving=true
     monitor.button.hidden=!(focused && lidTarget && lidProgress>.999 && !viewAnimation && monitor.facing(camera))
     if(!monitor.button.hidden){
@@ -452,16 +527,15 @@ export function createArchiveProduct(host: HTMLElement) {
       Object.assign(monitor.button.style,{left:`${minX}px`,top:`${minY}px`,width:`${w}px`,height:`${h}px`,clipPath:`polygon(${corners.map(p=>`${(p.x-minX)/w*100}% ${(p.y-minY)/h*100}%`).join(',')})`})
     }
     if(focused && inspection==='tapes'){
-      const edges=[-6.8,6.8].flatMap(x=>[-5.6,5.6].map(z=>project(cargo.localToWorld(new THREE.Vector3(x,1.7,z)))))
+      const edges=[-6.8,6.8].flatMap(x=>[-5.6,5.6].map(z=>project(new THREE.Vector3(x,1.7,z).applyMatrix4(cargo.matrixWorld))))
       const left=Math.min(...edges.map(p=>p.x)),right=Math.max(...edges.map(p=>p.x))
       const y=THREE.MathUtils.clamp(edges.reduce((n,p)=>n+p.y,0)/edges.length,50,height-50)
       const prev=pagination.querySelector<HTMLElement>('.ar-prev')!,next=pagination.querySelector<HTMLElement>('.ar-next')!
       prev.style.left=`${Math.max(22,left-25)}px`;next.style.left=`${Math.min(width-22,right+25)}px`
       prev.style.top=next.style.top=`${y}px`
     }
-    const caseCenter=project(cargo.localToWorld(new THREE.Vector3(0,2.9,0)))
+    const caseCenter=project(new THREE.Vector3(0,2.9,0).applyMatrix4(cargo.matrixWorld))
     canvas.dataset.caseCenter=JSON.stringify(caseCenter)
-    const stageRect = host.getBoundingClientRect()
     canvas.dataset.caseScreenCenter=JSON.stringify({x:caseCenter.x+stageRect.x,y:caseCenter.y+stageRect.y})
     for (const print of prints) {
       if (!arrived || lidProgress < .999) continue
@@ -470,20 +544,20 @@ export function createArchiveProduct(host: HTMLElement) {
       // Keep the native hit target at the resting face so a small cassette
       // cannot oscillate between hover and leave while its mesh lifts.
       const liftOffset = new THREE.Vector3(0, print.group.position.y-print.baseY, 0).applyMatrix3(new THREE.Matrix3().setFromMatrix4(cargo.matrixWorld))
-      const center = print.group.localToWorld(new THREE.Vector3(0, 0, .18)).sub(liftOffset)
+      const center = new THREE.Vector3(0, 0, .18).applyMatrix4(print.group.matrixWorld).sub(liftOffset)
       const normal=new THREE.Vector3(0,0,1).transformDirection(print.group.matrixWorld)
       const facing=normal.dot(camera.position.clone().sub(center))>0
       print.anchor.style.visibility=facing?'visible':'hidden'
       if(!facing)continue
       const up = new THREE.Vector3(0, 1, 0).transformDirection(print.group.matrixWorld)
-      const wall = cargo.localToWorld(new THREE.Vector3(0,1.45,print.frontZ))
+      const wall = new THREE.Vector3(0,1.45,print.frontZ).applyMatrix4(cargo.matrixWorld)
       const wallTop = wall.y
       const frontZ = wall.z
       const c = camera.position
       const a = up.y * (c.z - frontZ) + (wallTop - c.y) * up.z
       const b = center.y * (c.z - frontZ) + (wallTop - c.y) * center.z + c.y * frontZ - wallTop * c.z
       const low = THREE.MathUtils.clamp(-b / a + .035, -print.height / 2, print.height / 2 - .1)
-      const corners = [[-print.width / 2, print.height / 2], [print.width / 2, print.height / 2], [print.width / 2, low], [-print.width / 2, low]].map(([x, y]) => project(print.group.localToWorld(new THREE.Vector3(x, y, .18)).sub(liftOffset)))
+      const corners = [[-print.width / 2, print.height / 2], [print.width / 2, print.height / 2], [print.width / 2, low], [-print.width / 2, low]].map(([x, y]) => project(new THREE.Vector3(x, y, .18).applyMatrix4(print.group.matrixWorld).sub(liftOffset)))
       const minX = Math.min(...corners.map(p => p.x)), minY = Math.min(...corners.map(p => p.y))
       const w = Math.max(...corners.map(p => p.x)) - minX, h = Math.max(...corners.map(p => p.y)) - minY
       Object.assign(print.anchor.style, { left: `${minX}px`, top: `${minY}px`, width: `${w}px`, height: `${h}px`, clipPath: `polygon(${corners.map(p => `${(p.x - minX) / w * 100}% ${(p.y - minY) / h * 100}%`).join(',')})` })
@@ -493,6 +567,7 @@ export function createArchiveProduct(host: HTMLElement) {
       }
     }
     label.hidden = !active || lidProgress < .999 || !lidTarget
+    if (resolutionDirty) { resolutionDirty = false; syncResolution() }
     // Render the product only inside its stage. Reuse that shadow map to draw
     // the receiver in the overscan strips, so shadows continue below the stage
     // without the enlarged canopy covering the navigation or heading.
@@ -515,20 +590,32 @@ export function createArchiveProduct(host: HTMLElement) {
     canvas.dataset.activeCassette = active
     canvas.dataset.frames = String(Number(canvas.dataset.frames || 0) + 1)
     if (moving) request()
+    else {
+      lastDrawTime=undefined;scheduleSmile()
+      // Keep the LED patterns alive after the mechanical action finishes.
+      // Sleep between light-only frames; retain full RAF cadence for movement.
+      if(eyesMoving&&eyesInView)eyesTimer=window.setTimeout(()=>{eyesTimer=undefined;request()},1000/30)
+    }
   }
   function syncResolution() {
     if (!width || !height || disposed) return
     const maxSide = Math.min(8192, renderer.capabilities.maxTextureSize)
     const density = Math.max(2, window.devicePixelRatio * (window.visualViewport?.scale || 1))
     const ratio = Math.min(density, 4, maxSide / Math.max(renderWidth, renderHeight), Math.sqrt(18_000_000 / (renderWidth * renderHeight)))
-    if (Math.abs(renderer.getPixelRatio() - ratio) > .01) renderer.setPixelRatio(ratio)
-    renderer.setSize(renderWidth, renderHeight, false)
+    const currentRatio = renderer.getPixelRatio()
+    const nextRatio = Math.abs(currentRatio - ratio) > .01 ? ratio : currentRatio
+    renderer.getSize(rendererSize)
+    if (rendererSize.x !== renderWidth || rendererSize.y !== renderHeight || nextRatio !== currentRatio) {
+      renderer.setDrawingBufferSize(renderWidth, renderHeight, nextRatio)
+    }
     canvas.dataset.renderScale = ratio.toFixed(2)
-    request()
   }
+  function requestResolution() { resolutionDirty = true; request() }
   function resize() {
     if (!host.clientWidth) return
     width = host.clientWidth; height = host.clientHeight
+    // Measure only on resize, never during the animation's camera fitting loop.
+    if (!focused) stageDockHeight = host.querySelector<HTMLElement>('.ar-bottom-actions')?.offsetHeight ?? 0
     // Extend the actual drawing surface to the page edges, preserving the host's
     // framing with an off-axis projection. No internal rectangle clips the walk.
     const screen = host.closest<HTMLElement>('.archive-screen')!
@@ -544,10 +631,10 @@ export function createArchiveProduct(host: HTMLElement) {
     // hard crop across the canopy or the outer edge of a soft ground shadow.
     canvas.style.maskImage = focused ? 'none' : `linear-gradient(to bottom, transparent ${canvasPad}px, #000 ${canvasPad+42}px, #000 calc(100% - 32px), transparent)`
     canvas.style.left = `${-canvasOffset}px`; canvas.style.width = `${renderWidth}px`
-    syncResolution()
+    requestResolution()
     camera.setViewOffset(width, height, -canvasOffset, -canvasPad, renderWidth, renderHeight)
     camera.updateProjectionMatrix()
-    resetCamera(); if(viewAnimation)applyViewAnimation(performance.now()); request()
+    resetCamera(); if(viewAnimation)applyViewAnimation(motionTime); request()
   }
   // Browser zoom, moving between Retina displays, and mobile pinch zoom can
   // change pixel density without changing the element's CSS dimensions.
@@ -556,14 +643,24 @@ export function createArchiveProduct(host: HTMLElement) {
     densityQuery?.removeEventListener('change', densityChanged)
     densityQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
     densityQuery.addEventListener('change', densityChanged)
-    syncResolution()
+    requestResolution()
   }
   densityChanged()
-  window.visualViewport?.addEventListener('resize', syncResolution)
-  window.addEventListener('resize', syncResolution)
+  window.visualViewport?.addEventListener('resize', requestResolution)
+  window.addEventListener('resize', requestResolution)
   controls.addEventListener('change', () => {if(!fitting)fitCamera();request()})
   const resizeObserver = new ResizeObserver(resize)
   resizeObserver.observe(host)
+  // Include the shadow overscan: suspend only once the whole drawing surface
+  // has left the scroll viewport, and resume at the same mechanical pose.
+  const intersectionObserver = new IntersectionObserver(([entry]) => {
+    if (inViewport === entry.isIntersecting) return
+    inViewport = entry.isIntersecting
+    lastDrawTime = undefined
+    if (inViewport) request()
+    else { cancelAnimationFrame(frame); frame = 0; stopEyesTimer(); stopSmile() }
+  })
+  intersectionObserver.observe(canvas)
   canvas.addEventListener('webglcontextlost', event => {
     event.preventDefault(); monitor.stop();monitor.setAvailable(false);setFocus(false); host.classList.remove('ar-product-ready', 'ar-product-host', 'ar-case-locked'); cardGrid.inert = false; visible = false; label.hidden = true; toggle.disabled = true
     for (const print of prints) for (const key of ['left', 'top', 'width', 'height', 'clip-path', 'visibility']) print.anchor.style.removeProperty(key)
@@ -572,10 +669,13 @@ export function createArchiveProduct(host: HTMLElement) {
 
   async function setCards(anchors: HTMLElement[]) {
     const version = ++generation
+    assetsReady=false
+    canvas.dataset.graphicsReady='false'
     active = ''
     label.hidden = true
     host.classList.add('ar-product-loading')
     host.setAttribute('aria-busy', 'true')
+    syncCase()
     shadowDirty=true
     const sharedGeometries=new Set(cassetteGeometryCache.values())
     for (const print of prints) {
@@ -620,32 +720,61 @@ export function createArchiveProduct(host: HTMLElement) {
     canvas.dataset.labelResolution = '2048×1290'
     canvas.dataset.editions = anchors.map(a => a.dataset.edition).join(',')
     canvas.dataset.compartments = '25'
+    cacheArchiveTransforms(scene)
+    // Prepare hidden cassette shaders, texture uploads and geometry before the
+    // user starts moving the model, instead of on the first visible zoom frame.
+    await renderer.compileAsync(scene,camera)
+    if(version!==generation||disposed)return
+    for(const map of ownedTextures)renderer.initTexture(map)
+    const autoClear=renderer.autoClear,scissorTest=renderer.getScissorTest()
+    const travelVisible=travel.visible,printVisibility=prints.map(print=>print.group.visible)
+    const culled:THREE.Object3D[]=[]
+    try{
+      travel.visible=true;prints.forEach(print=>print.group.visible=true)
+      scene.traverse(object=>{if(object.frustumCulled){culled.push(object);object.frustumCulled=false}})
+      scene.updateMatrixWorld(true)
+      // Use the actual output path: an offscreen target compiles different
+      // tone-mapping programs and leaves the first on-screen frame unprepared.
+      renderer.setScissorTest(false);renderer.autoClear=true
+      renderer.shadowMap.needsUpdate=true
+      renderer.render(scene,camera)
+    }finally{
+      renderer.setScissorTest(scissorTest);renderer.autoClear=autoClear
+      travel.visible=travelVisible;prints.forEach((print,i)=>print.group.visible=printVisibility[i])
+      culled.forEach(object=>object.frustumCulled=true)
+      shadowDirty=true
+    }
     assetsReady = true
+    canvas.dataset.graphicsReady='true'
     host.classList.add('ar-product-ready')
     host.classList.remove('ar-product-loading')
     host.setAttribute('aria-busy', 'false')
     syncCase(); resize(); request()
+    // Replace the warm-up image with the real state before the browser paints.
+    if(visible){cancelAnimationFrame(frame);frame=0;draw()}
   }
   return {
     setCards,
     setActive(id: string) { active = lidProgress > .999 && lidTarget ? id : ''; request() },
     setVisible(value: boolean) {
-      if(!value){monitor.stop();monitor.setAvailable(false);viewAnimation=undefined;canvas.dataset.viewTransition='idle';setFocus(false)}
+      if(!value){stopSmile();stopEyesTimer();monitor.stop();monitor.setAvailable(false);viewAnimation=undefined;canvas.dataset.viewTransition='idle';setFocus(false)}
       if (value && !visible) {
+        stopSmile();stopEyesTimer();caseExpression='loading';lid.updateEyes('off',motionTime,false,true)
         shadowDirty=true
         summoned = false; arrived = false; inspection='tapes'; entranceStart = undefined; travel.visible = false
         lidProgress = lidTarget = frontBlend = 0; lidAnimation = undefined; viewAnimation = undefined; lid.setProgress(0); lid.walk(0,0,0)
         canvas.dataset.arrival = 'waiting'; syncCase()
       }
       visible = value
-      if (value) { resize(); request() } else { cancelAnimationFrame(frame); frame = 0 }
+      if (value) { resize(); request() } else { cancelAnimationFrame(frame); frame = 0; lastDrawTime=undefined }
     },
     dispose() {
+      stopSmile();stopEyesTimer();document.removeEventListener('visibilitychange',expressionsVisibilityChanged);reduced.removeEventListener('change',expressionPreferencesChanged)
       monitor.button.removeEventListener('click',activateMonitor);monitor.dispose();setFocus(false);window.removeEventListener('keydown',viewerKeys,true)
       densityQuery.removeEventListener('change', densityChanged)
-      window.visualViewport?.removeEventListener('resize', syncResolution)
-      window.removeEventListener('resize', syncResolution)
-      disposed = true; generation++; cancelAnimationFrame(frame); resizeObserver.disconnect(); controls.dispose()
+      window.visualViewport?.removeEventListener('resize', requestResolution)
+      window.removeEventListener('resize', requestResolution)
+      disposed = true; generation++; cancelAnimationFrame(frame); resizeObserver.disconnect(); intersectionObserver.disconnect(); controls.dispose()
       for (const geometry of geometries) geometry.dispose()
       for (const material of materials) material.dispose()
       for (const tex of new Set([...ownedTextures, ...textures.values()])) tex.dispose()

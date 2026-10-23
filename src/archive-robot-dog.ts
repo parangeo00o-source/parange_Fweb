@@ -3,34 +3,45 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js'
 import { createArchiveCaseLid } from './archive-case-lid'
 import { caseFootprint } from './archive-case-dimensions'
+import { createDogLED } from './archive-dog-led'
 
 type Track = (g:THREE.BufferGeometry,m:THREE.Material)=>void
 type Surface = (w:number,h:number,draw:(ctx:CanvasRenderingContext2D)=>void)=>THREE.Texture
 const V=(x:number,y:number,z:number)=>new THREE.Vector3(x,y,z)
 const ease=(t:number)=>{t=THREE.MathUtils.clamp(t,0,1);return t*t*t*(t*(t*6-15)+10)}
 
-/** Separate, eased phases: lower upright, set down, open, then inspect tapes. */
+export const archiveCaseDuration = 5800
+/** Preserve the mechanical beats, then give the close-up its own longer ease. */
 export function archiveCaseMotion(progress:number){
- return {lower:ease(progress/.24),tip:ease((progress-.24)/.18),lid:ease((progress-.48)/.28),zoom:ease((progress-.82)/.18)}
+ const time=progress*archiveCaseDuration
+ return {lower:ease(time/1248),tip:ease((time-1248)/936),lid:ease((time-2496)/1456),turn:ease((time-2184)/1768),zoom:ease((time-4264)/(archiveCaseDuration-4264))}
+}
+export function archiveCasePhase(progress:number){
+ const time=progress*archiveCaseDuration
+ return time<1248?'lowering':time<2184?'placing':time<2496?'settling':time<3952?'opening':time<4264?'open-hold':'zooming'
 }
 
 /** Articulated moulded robot, carrying the original metal cassette case. */
 export function createArchiveDogCarrier(model:THREE.Group,cargo:THREE.Group,texture:Surface,track:Track){
- const white=new THREE.MeshPhysicalMaterial({color:'#eeeede',roughness:.22,metalness:0,clearcoat:.65,clearcoatRoughness:.14,specularIntensity:.65})
- const pearl=new THREE.MeshPhysicalMaterial({color:'#e2e5db',roughness:.29,metalness:0,clearcoat:.45,clearcoatRoughness:.2})
- const blue=new THREE.MeshPhysicalMaterial({color:'#67b5ca',roughness:.22,metalness:.025,clearcoat:.85,clearcoatRoughness:.13})
- const blueDark=new THREE.MeshStandardMaterial({color:'#397a91',metalness:.45,roughness:.32})
+ const white=new THREE.MeshPhysicalMaterial({color:'#f3f0e2',roughness:.18,metalness:0,clearcoat:.9,clearcoatRoughness:.10,specularIntensity:.8,ior:1.46})
+ const pearl=new THREE.MeshPhysicalMaterial({color:'#dfe5de',roughness:.25,metalness:0,clearcoat:.65,clearcoatRoughness:.16})
+ const blue=new THREE.MeshPhysicalMaterial({color:'#399dbb',roughness:.18,metalness:.02,clearcoat:1,clearcoatRoughness:.10,specularIntensity:.8})
+ const blueDark=new THREE.MeshStandardMaterial({color:'#24677c',metalness:.5,roughness:.26})
  const rubber=new THREE.MeshStandardMaterial({color:'#3c5158',roughness:.75})
- const seam=new THREE.MeshStandardMaterial({color:'#9faeae',roughness:.54,metalness:.3})
- const robotSilver=new THREE.MeshPhysicalMaterial({color:'#c4cdd0',roughness:.28,metalness:.88,clearcoat:.25})
+ const seam=new THREE.MeshStandardMaterial({color:'#87999d',roughness:.45,metalness:.35})
+ const robotSilver=new THREE.MeshPhysicalMaterial({color:'#bcc9cf',roughness:.21,metalness:.9,clearcoat:.35,clearcoatRoughness:.15})
  const chrome=new THREE.MeshStandardMaterial({color:'#d4e1e3',roughness:.2,metalness:.94})
- const eye=new THREE.MeshPhysicalMaterial({color:'#79d72b',emissive:'#4c970c',emissiveIntensity:.12,roughness:.17,metalness:0,clearcoat:1,clearcoatRoughness:.1,specularIntensity:.55})
+ const eye=new THREE.MeshPhysicalMaterial({color:'#83d822',emissive:'#397600',emissiveIntensity:.08,roughness:.12,metalness:0,clearcoat:1,clearcoatRoughness:.08,specularIntensity:.8})
+ const led=createDogLED()
  const metal=new THREE.MeshPhysicalMaterial({color:'#c5ccce',roughness:.38,metalness:.92,clearcoat:.2})
  const grain=texture(1024,256,ctx=>{ctx.fillStyle='#aaa';ctx.fillRect(0,0,1024,256);let seed=37;for(let i=0;i<4000;i++){seed=(seed*16807)%2147483647;const y=seed%256;ctx.strokeStyle=`rgba(255,255,255,${.02+(seed%9)/100})`;ctx.beginPath();ctx.moveTo(seed%1024,y);ctx.lineTo(seed%1024+20+seed%200,y);ctx.stroke()}})
  grain.colorSpace=THREE.NoColorSpace;grain.wrapS=grain.wrapT=THREE.RepeatWrapping;metal.bumpMap=grain;metal.bumpScale=.018
  function mesh(g:THREE.BufferGeometry,m:THREE.Material,p:THREE.Vector3,parent:THREE.Object3D=model){track(g,m);const o=new THREE.Mesh(g,m);o.position.copy(p);o.castShadow=o.receiveShadow=true;parent.add(o);return o}
  function box(w:number,h:number,d:number,p:THREE.Vector3,m:THREE.Material,r=.1,parent:THREE.Object3D=model){return mesh(new RoundedBoxGeometry(w,h,d,4,r),m,p,parent)}
- function egg(p:THREE.Vector3,s:THREE.Vector3,m:THREE.Material,parent:THREE.Object3D=model){const o=mesh(new THREE.SphereGeometry(1,64,40),m,p,parent);o.scale.copy(s);return o}
+ // Reuse the exact sphere buffers for unmodified shells. Shaped joints and
+ // feet already clone the geometry before changing any vertex or normal.
+ const eggGeometry=new THREE.SphereGeometry(1,64,40)
+ function egg(p:THREE.Vector3,s:THREE.Vector3,m:THREE.Material,parent:THREE.Object3D=model){const o=mesh(eggGeometry,m,p,parent);o.scale.copy(s);return o}
  function tube(points:THREE.Vector3[],r:number,m:THREE.Material,parent:THREE.Object3D=model,closed=false){return mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points,closed),Math.max(48,points.length*4),r,10,closed),m,V(0,0,0),parent)}
  // Original lower case: one rounded annular casting, complete bottom, matched lid.
  const {width,depth,radius}=caseFootprint
@@ -73,10 +84,11 @@ export function createArchiveDogCarrier(model:THREE.Group,cargo:THREE.Group,text
    const y=row*.22,z=col*.22,x=-3*Math.sqrt(1-y*y/4.41-z*z/4)-.009
    egg(V(x,y,z),V(.015,.048,.048),seam,body).name='dog-speaker-perforation'
  }
- // A solid telescoping neck seated inside two rounded sockets.
- const neck=mesh(new THREE.CylinderGeometry(.61,.69,1,64),pearl,V(0,0,0),dog);neck.name='dog-neck-gimbal'
- const collar=egg(V(0,0,0),V(.82,.25,.82),blue,dog);collar.name='dog-collar-socket'
- const neckSeal=egg(V(0,0,0),V(.73,.30,.73),robotSilver,dog);neckSeal.name='dog-neck-upper-socket'
+ // A short ball joint sits inside the shoulder and jaw sockets. Its rounded
+ // ends remain covered as the head follows the walking and sitting posture.
+ const neck=mesh(new THREE.SphereGeometry(1,48,32),pearl,V(0,0,0),dog);neck.name='dog-neck-gimbal'
+ const collar=egg(V(0,0,0),V(.86,.30,.86),blue,dog);collar.name='dog-collar-socket'
+ const neckSeal=egg(V(0,0,0),V(.73,.22,.73),robotSilver,dog);neckSeal.name='dog-neck-upper-socket'
  const head=new THREE.Group();head.name='dog-head';dog.add(head)
  // Local muzzle contour preserves the restored cranium's proportions.
  // A monotone cubic profile defines a bridge, broad rounded muzzle and tucked
@@ -114,7 +126,7 @@ export function createArchiveDogCarrier(model:THREE.Group,cargo:THREE.Group,text
  // A small axis pin, a blue socket and a domed cover form each flush servo cap.
  function cap(parent:THREE.Object3D,r:number,side:number,z:number){
    const base=mesh(new THREE.CylinderGeometry(r,r,.15,64),blue,V(0,0,side*z),parent);base.rotation.x=Math.PI/2
-   const gasket=mesh(new THREE.TorusGeometry(r*.94,r*.055,16,64),blueDark,V(0,0,side*(z+.075)),parent)
+   const gasket=mesh(new THREE.TorusGeometry(r*.94,r*.055,16,64),robotSilver,V(0,0,side*(z+.075)),parent)
    gasket.name='dog-cap-gasket'
    const ring=mesh(new THREE.TorusGeometry(r*.91,r*.075,20,64),blue,V(0,0,side*(z+.11)),parent);ring.name='dog-joint-seal'
    const dome=mesh(new THREE.SphereGeometry(1,64,32,0,Math.PI*2,0,Math.PI/2),white,V(0,0,side*(z+.1)),parent)
@@ -174,6 +186,25 @@ export function createArchiveDogCarrier(model:THREE.Group,cargo:THREE.Group,text
      lensInsert(x,y,rx+.035,ry+.035,a,.035,.09,blueDark)
      lensInsert(x,y,rx,ry,a,.055,.12,eye).name='dog-optical-lens'
    }
+   // Follow the front of the large green lens, leaving the original lens and
+   // both small paw pads untouched. No screen, new light source or bloom pass.
+   const lightGeometry=new THREE.PlaneGeometry(.88,1.06,24,24),lp=lightGeometry.attributes.position
+   const lensCenterX=side>0?-.01:.01
+   const lensPoint=(u:number,v:number)=>V(lensCenterX+u,v-.1,seatDepth(lensCenterX+u,v-.1)+.12+.055*Math.sqrt(Math.max(0,1-(u/.48)**2-(v/.58)**2))+.012)
+   const center=lensPoint(0,0),tangentX=lensPoint(.001,0).sub(lensPoint(-.001,0)).multiplyScalar(500),tangentY=lensPoint(0,.001).sub(lensPoint(0,-.001)).multiplyScalar(500)
+   const normal=tangentX.clone().cross(tangentY).normalize()
+   const upright=V(0,1,0).applyQuaternion(optical.quaternion.clone().invert()).projectOnPlane(normal).normalize()
+   const right=upright.clone().cross(normal).normalize(),heartUV=new Float32Array(lp.count*2)
+   for(let i=0;i<lp.count;i++){
+     const point=lensPoint(lp.getX(i),lp.getY(i)),delta=point.clone().sub(center)
+     lp.setXYZ(i,point.x,point.y,point.z)
+     heartUV[i*2]=.5+delta.dot(right)/(.88*tangentX.length())
+     heartUV[i*2+1]=.5+delta.dot(upright)/(1.06*tangentY.length())
+   }
+   lightGeometry.setAttribute('heartUv',new THREE.BufferAttribute(heartUV,2))
+   lightGeometry.computeVertexNormals()
+   const light=mesh(lightGeometry,led.material,V(0,0,0),optical)
+   light.name='dog-eye-led';light.castShadow=light.receiveShadow=false
    // Upright, outward-leaning ears grow from the upper sides of the head.
    const ear=new THREE.Group();ear.name=`dog-ear-${side}`;ear.position.set(.35,1.92,side*2.98);head.add(ear)
    ear.quaternion.setFromUnitVectors(V(0,0,1),V(-.98,.03,side*.18).normalize())
@@ -237,16 +268,29 @@ export function createArchiveDogCarrier(model:THREE.Group,cargo:THREE.Group,text
  }
  // A swept solid limb blends the elbow into the upper shell while preserving a rounded foot.
  function limb(o:THREE.Mesh,a:THREE.Vector3,knee:THREE.Vector3,b:THREE.Vector3,front:boolean){
-   const curve=new THREE.QuadraticBezierCurve3(a,knee,b),positions:number[]=[],normals:number[]=[],indices:number[]=[]
+   const curve=new THREE.QuadraticBezierCurve3(a,knee,b)
    const steps=24,sides=24
-   for(let i=0;i<=steps;i++){
-     const t=i/steps,p=curve.getPoint(t),tangent=curve.getTangent(t).normalize(),u=V(0,0,1).cross(tangent).normalize(),v=tangent.clone().cross(u).normalize()
-     const r=(front?.84:.88)*(1-.18*t)*Math.max(.025,Math.pow(Math.sin(Math.PI*t),.2))
-     for(let j=0;j<=sides;j++){const theta=j/sides*Math.PI*2,n=u.clone().multiplyScalar(Math.cos(theta)).addScaledVector(v,Math.sin(theta)),q=p.clone().addScaledVector(n,r);positions.push(q.x,q.y,q.z);normals.push(n.x,n.y,n.z);if(i<steps&&j<sides){const z=i*(sides+1)+j;indices.push(z,z+1,z+sides+1,z+1,z+sides+2,z+sides+1)}}
-   }
    const g=o.geometry
-   if(g.getAttribute('position')){g.getAttribute('position').array.set(positions);g.getAttribute('normal').array.set(normals);g.getAttribute('position').needsUpdate=true;g.getAttribute('normal').needsUpdate=true}
-   else{g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));g.setIndex(indices)}
+   if(!g.getAttribute('position')){
+     g.setAttribute('position',new THREE.BufferAttribute(new Float32Array((steps+1)*(sides+1)*3),3).setUsage(THREE.DynamicDrawUsage))
+     g.setAttribute('normal',new THREE.BufferAttribute(new Float32Array((steps+1)*(sides+1)*3),3).setUsage(THREE.DynamicDrawUsage))
+     const indices:number[]=[]
+     for(let i=0;i<steps;i++)for(let j=0;j<sides;j++){const z=i*(sides+1)+j;indices.push(z,z+1,z+sides+1,z+1,z+sides+2,z+sides+1)}
+     g.setIndex(indices)
+   }
+   const positions=g.getAttribute('position'),normals=g.getAttribute('normal')
+   const p=new THREE.Vector3(),tangent=new THREE.Vector3(),u=new THREE.Vector3(),v=new THREE.Vector3(),n=new THREE.Vector3(),q=new THREE.Vector3()
+   for(let i=0;i<=steps;i++){
+     const t=i/steps
+     curve.getPoint(t,p);curve.getTangent(t,tangent).normalize();u.set(0,0,1).cross(tangent).normalize();v.copy(tangent).cross(u).normalize()
+     const r=(front?.84:.88)*(1-.18*t)*Math.max(.025,Math.pow(Math.sin(Math.PI*t),.2))
+     for(let j=0;j<=sides;j++){
+       const theta=j/sides*Math.PI*2,index=i*(sides+1)+j
+       n.copy(u).multiplyScalar(Math.cos(theta)).addScaledVector(v,Math.sin(theta));q.copy(p).addScaledVector(n,r)
+       positions.setXYZ(index,q.x,q.y,q.z);normals.setXYZ(index,n.x,n.y,n.z)
+     }
+   }
+   positions.needsUpdate=true;normals.needsUpdate=true
    g.computeBoundingSphere();g.computeBoundingBox()
  }
  const carryRotation=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(V(0,0,-1),V(-1,0,0),V(0,1,0)))
@@ -275,15 +319,24 @@ export function createArchiveDogCarrier(model:THREE.Group,cargo:THREE.Group,text
  function walk(phase:number,amount:number,rest=sitting){
    sitting=rest;const sit=ease(rest),bob=Math.sin(phase*2)*.065*amount
    body.position.set(THREE.MathUtils.lerp(1,1.55,sit),-2.8+bob,0);body.rotation.z=-sit*.67
-   head.position.set(THREE.MathUtils.lerp(-2.2,-1.4,sit),2.1+bob,0)
+   head.position.set(THREE.MathUtils.lerp(-2.2,-1.4,sit),THREE.MathUtils.lerp(1.3,2.1,sit)+bob,0)
    head.rotation.z=Math.sin(phase+.4)*.018*amount;head.rotation.y=Math.sin(phase*.5)*.02*amount
-   const neckBase=V(-2.5,.5,0).applyEuler(body.rotation).add(body.position)
+   const neckBase=V(-2.45,.9,0).applyEuler(body.rotation).add(body.position)
    const neckTop=V(1.15,-2.45,0).applyEuler(head.rotation).add(head.position)
-   const neckAxis=neckTop.clone().sub(neckBase),neckDirection=neckAxis.clone().normalize()
+   const neckLength=neckTop.distanceTo(neckBase)
+   // Keep the accepted joint dimensions, but aim the joint from the torso
+   // toward the head instead of allowing offset socket anchors to reverse it.
+   const neckDirection=head.position.clone().sub(body.position).normalize()
    neck.position.copy(neckBase).add(neckTop).multiplyScalar(.5)
-   neck.quaternion.setFromUnitVectors(V(0,1,0),neckDirection);neck.scale.set(1,neckAxis.length(),1)
-   collar.position.copy(neckBase);collar.quaternion.copy(neck.quaternion)
-   neckSeal.position.copy(neckTop);neckSeal.quaternion.copy(neck.quaternion)
+   neck.quaternion.setFromUnitVectors(V(0,1,0),neckDirection);neck.scale.set(.63,neckLength*.5+.18,.63)
+   collar.position.copy(neck.position).addScaledVector(neckDirection,-neckLength*.5)
+   neckSeal.position.copy(neck.position).addScaledVector(neckDirection,neckLength*.5)
+   // Socket rims sit tangent to their own shell, rather than sharing one
+   // rigid angle. The rounded ball stays seated while the head bobs and sits.
+   const shoulderNormal=collar.position.clone().sub(body.position).applyQuaternion(body.quaternion.clone().invert()).divide(V(9,4.41,4)).normalize().applyQuaternion(body.quaternion)
+   const jawNormal=neckSeal.position.clone().sub(head.position).applyQuaternion(head.quaternion.clone().invert()).divide(V(3.03**2,2.72**2,2.75**2)).normalize().negate().applyQuaternion(head.quaternion)
+   collar.quaternion.setFromUnitVectors(V(0,1,0),shoulderNormal)
+   neckSeal.quaternion.setFromUnitVectors(V(0,1,0),jawNormal)
    mouth.copy(gripPoint.clone().applyEuler(head.rotation).add(head.position))
    tail.rotation.set(Math.sin(phase*1.1)*.025*amount,Math.sin(phase*1.1)*.10*amount,-.42+sit*.50)
    head.children.filter(o=>o.name.startsWith('dog-ear-')).forEach((o,i)=>{
@@ -303,11 +356,34 @@ export function createArchiveDogCarrier(model:THREE.Group,cargo:THREE.Group,text
    placeBag()
  }
  function setProgress(p:number){opening=p;placeBag()}
+ // Camera zoom does not change the mesh corners. Reuse their transformed
+ // positions until a mesh pose, its geometry bounds, or the model scale changes.
+ // Weak keys let replaced drawer meshes be collected normally.
+ const boundsCache=new WeakMap<THREE.Mesh,{matrix:THREE.Matrix4;box:THREE.Box3;scale:THREE.Vector3;points:THREE.Vector3[]}>()
+ const boundsInverse=new THREE.Matrix4(),boundsMatrix=new THREE.Matrix4()
  function bounds(){
-   model.updateWorldMatrix(true,true);const inverse=model.matrixWorld.clone().invert(),points:THREE.Vector3[]=[]
-   model.traverse(o=>{if(!(o instanceof THREE.Mesh) || o.name==='cassette-hover-glow')return;if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();const b=o.geometry.boundingBox;if(!b)return;const matrix=inverse.clone().multiply(o.matrixWorld);for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z])points.push(V(x,y,z).applyMatrix4(matrix).multiply(model.scale))})
+   model.updateWorldMatrix(true,true)
+   boundsInverse.copy(model.matrixWorld).invert()
+   const points:THREE.Vector3[]=[]
+   model.traverse(o=>{
+     if(!(o instanceof THREE.Mesh) || o.name==='cassette-hover-glow' || o.name==='dog-eye-led')return
+     if(!o.geometry.boundingBox)o.geometry.computeBoundingBox()
+     const b=o.geometry.boundingBox;if(!b)return
+     boundsMatrix.multiplyMatrices(boundsInverse,o.matrixWorld)
+     let cached=boundsCache.get(o)
+     if(!cached){
+       cached={matrix:new THREE.Matrix4(),box:new THREE.Box3(),scale:new THREE.Vector3(),points:Array.from({length:8},()=>new THREE.Vector3())}
+       boundsCache.set(o,cached)
+     }
+     if(!cached.matrix.equals(boundsMatrix)||!cached.box.equals(b)||!cached.scale.equals(model.scale)){
+       let i=0
+       for(const x of [b.min.x,b.max.x])for(const y of [b.min.y,b.max.y])for(const z of [b.min.z,b.max.z])cached.points[i++].set(x,y,z).applyMatrix4(boundsMatrix).multiply(model.scale)
+       cached.matrix.copy(boundsMatrix);cached.box.copy(b);cached.scale.copy(model.scale)
+     }
+     points.push(...cached.points)
+   })
    return points
  }
  walk(0,0,0)
- return {pivot:lid.pivot,setProgress,bounds,walk,cargo}
+ return {pivot:lid.pivot,setProgress,bounds,walk,cargo,updateEyes:led.update}
 }

@@ -1,0 +1,15 @@
+Fixed identity artwork: parange-title.svg / parange-subtitle.svg
+
+Reference: the user-supplied NEW ARCHIVE / Brooklyn,New York / ©2018 print.
+The original font is unknown. Arial Bold was selected by comparing the capital
+A/R/W, lowercase forms, stroke ends and proportions with the reference.
+
+Lettering was outlined from the locally installed Arial Bold for these two
+fixed strings only. No font binary is embedded or redistributed.
+
+Title: PARANGE; tracking -0.012 em.
+Subtitle: Objects, Graphics & Things.; tracking -0.015 em.
+Original glyph kerning retained. A 0.009 em currentColor stroke with round joins
+adds a small ink spread to the print-like edges. No raster blur or texture.
+Both SVGs inherit the header's ivory color. Corresponding text is preserved
+in archive.ts for accessibility, while decorative paths are aria-hidden.

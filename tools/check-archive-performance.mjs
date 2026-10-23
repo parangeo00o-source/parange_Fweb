@@ -12,20 +12,29 @@ try{
  page.on('pageerror',e=>errors.push(e.message))
  await page.route('**/src/archive-product.ts*',async route=>{
   const response=await route.fetch();let source=await response.text()
+  source=source.replace('monitor.update(performance.now())','monitor.update(12345)')
+  source=source.replaceAll('performance.now()', '(reviewClock ?? performance.now())')
   source=source.replace('renderer.setPixelRatio(1)',`renderer.setPixelRatio(1);
+    let reviewClock;
     const metrics={calls:0,triangles:0,matrices:0};
     const gl=renderer.getContext();
     for(const name of ['drawElements','drawArrays']){const original=gl[name];gl[name]=function(...args){metrics.calls++;metrics.triangles+=args[name==='drawElements'?1:2]/3;return original.apply(this,args)}}
     const compose=THREE.Matrix4.prototype.compose;THREE.Matrix4.prototype.compose=function(...args){metrics.matrices++;return compose.apply(this,args)};
   `)
-  source=source.replace('monitor.update(performance.now())','monitor.update(12345)')
-  source=source.replace(/return \{\s+setCards,/,`window.__archiveReview={
+  // Benchmark the requested poses deterministically; spontaneous smiles have
+  // their own lifecycle coverage in check-archive-led.mjs.
+  source=source.replace(/return \{\s+setCards,/,`scheduleSmile=()=>{};stopSmile();window.__archiveReview={
+    zoom(progress){
+      reviewClock=motionTime=10000;lastDrawTime=reviewClock;viewAnimation=undefined;
+      lidAnimation={from:0,to:1,start:reviewClock-progress*archiveCaseDuration,duration:archiveCaseDuration};
+    },
     capture(){draw();cancelAnimationFrame(frame);frame=0;return canvas.toDataURL()},
     render(){draw();cancelAnimationFrame(frame);frame=0},
     measure(){
-      for(let i=0;i<3;i++){draw();cancelAnimationFrame(frame);frame=0}
+      const step=()=>{if(reviewClock!==undefined)reviewClock+=16;draw();cancelAnimationFrame(frame);frame=0};
+      for(let i=0;i<3;i++)step();
       metrics.calls=metrics.triangles=metrics.matrices=0;
-      const start=performance.now();for(let i=0;i<6;i++){draw();cancelAnimationFrame(frame);frame=0}
+      const start=performance.now();for(let i=0;i<6;i++)step();
       const ms=(performance.now()-start)/6;
       const gs=new Set();scene.traverse(o=>{if(o.geometry)gs.add(o.geometry)});
       let bytes=0,vertices=0;for(const g of gs){vertices+=g.attributes.position.count;for(const a of Object.values(g.attributes))bytes+=a.array.byteLength;bytes+=g.index?.array.byteLength||0}
@@ -68,6 +77,12 @@ try{
  await page.setViewportSize({width:390,height:844});await sample('mobile')
  const before=await page.locator('.ar-product-canvas').getAttribute('data-frames');await page.waitForTimeout(300)
  assert.equal(await page.locator('.ar-product-canvas').getAttribute('data-frames'),before,'Idle archive must not keep rendering')
+ await page.setViewportSize({width:1280,height:900})
+ await page.emulateMedia({reducedMotion:'no-preference'})
+ for(const progress of [.3,.6,.79,.9,.95]){
+  await page.evaluate(progress=>window.__archiveReview.zoom(progress),progress)
+  await sample('opening-'+progress)
+ }
  assert.deepEqual(errors,[])
  const comparisons=[]
  if(process.env.ARCHIVE_PERF_BASELINE){
@@ -87,6 +102,11 @@ try{
    },images)
    comparisons.push({label:after.label,...pixels,callsBefore:before.calls,callsAfter:after.calls,bytesBefore:before.bytes,bytesAfter:after.bytes,msBefore:before.ms,msAfter:after.ms})
    assert.equal(after.ratio,before.ratio);assert.deepEqual(after.shadow,before.shadow)
+   assert.ok(after.bytes<=before.bytes,'Shared geometry must not increase storage')
+   assert.ok(after.vertices<=before.vertices,'Shared geometry must not add vertices')
+   assert.equal(after.triangles,before.triangles,'Every rendered triangle must be preserved')
+   assert.ok(after.calls<=before.calls,'Optimization must not add GPU draw calls')
+   assert.ok(after.matrices<before.matrices,'Unchanged transforms must reuse their matrices in every pose')
   }
  }
  const report={output,results,comparisons};await writeFile(join(output,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2))
